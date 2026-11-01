@@ -1,0 +1,40 @@
+@layer base {
+  html {
+    background-color: var(--gb-ground);
+    color: var(--gb-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--gb-ground);
+  }
+
+  ::selection {
+    background-color: var(--gb-amber);
+    color: var(--gb-on-amber);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gb-focus);
+    outline-offset: 2px;
+  }
+
+  /* Every reading is set in the mono family with aligned digits. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

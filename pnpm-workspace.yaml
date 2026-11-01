@@ -1,0 +1,20 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Shared exact versions for tools used by several packages.
+catalog:
+  "@types/node": 22.20.5
+  "@types/react": 19.3.0
+  "@types/react-dom": 19.3.0
+  react: 19.3.1
+  react-dom: 19.3.1
+  typescript: 6.0.3
+  vite: 8.3.5
+  vitest: 5.0.5
+
+# Native build scripts: none needed. next-intl's message extractor (unused here)
+# pulls these optional native helpers; skip their install scripts.
+ignoredBuiltDependencies:
+  - "@parcel/watcher"
+  - "@swc/core"

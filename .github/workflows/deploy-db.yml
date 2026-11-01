@@ -1,0 +1,57 @@
+name: Deploy database
+
+# Applies new migrations in supabase/migrations to the hosted Supabase project
+# whenever they reach main. Needs three repository secrets:
+#   SUPABASE_ACCESS_TOKEN  a personal access token (supabase.com, Account, Access Tokens)
+#   SUPABASE_PROJECT_REF   the project's reference id (Project Settings, General)
+#   SUPABASE_DB_PASSWORD   the project's database password
+# Until they are set, the job is skipped instead of failing.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-db
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - name: Check that the secrets are configured
+        id: secrets
+        run: |
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$SUPABASE_PROJECT_REF" ] && [ -n "$SUPABASE_DB_PASSWORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Supabase secrets are not set; skipping the database deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.secrets.outputs.ready == 'true'
+
+      - uses: supabase/setup-cli@v1
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          version: 2.122.0
+
+      - name: Link the hosted project
+        if: steps.secrets.outputs.ready == 'true'
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+
+      - name: Show the migrations that will be applied
+        if: steps.secrets.outputs.ready == 'true'
+        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --dry-run
+
+      - name: Apply the migrations
+        if: steps.secrets.outputs.ready == 'true'
+        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD"

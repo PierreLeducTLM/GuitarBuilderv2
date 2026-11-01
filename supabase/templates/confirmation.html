@@ -1,0 +1,9 @@
+<!-- Sign-up confirmation email. The link works on any device: /auth/confirm
+     verifies the token hash and signs the user in (see apps/web/src/app/auth/confirm). -->
+<h2>Confirm your email</h2>
+<p>Follow this link to verify your Guitar Builder account and sign in:</p>
+<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email">Confirm my email</a></p>
+<hr />
+<h2>Confirmez votre adresse e-mail</h2>
+<p>Suivez ce lien pour vérifier votre compte Guitar Builder et vous connecter :</p>
+<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email">Confirmer mon adresse e-mail</a></p>

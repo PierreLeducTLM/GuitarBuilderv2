@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@import "@gb/ui/styles.css";
+
+/* App sources are scanned automatically; the UI package declares its own @source. */

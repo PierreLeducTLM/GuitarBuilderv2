@@ -18,7 +18,7 @@ pnpm monorepo: `apps/web` (Next.js App Router, React, TypeScript strict), `packa
 - **English and French.** No user-visible string is hard-coded; every message exists in `en` and `fr`.
 - **Design tokens only.** Colors, type, spacing and radii come from `packages/ui` tokens (Oscilloscope direction, see `openspec/config.yaml`); no raw hex values in app code. Text meets WCAG AA in both themes.
 - **Numbers are exact.** Formulas and constants come from the specs; test them against the specs' worked examples and `docs/reference-data/`.
-- **Secrets stay server-side.** Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` reach the browser.
+- **Secrets stay server-side.** Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (legacy name: `NEXT_PUBLIC_SUPABASE_ANON_KEY`) reach the browser.
 
 ## Commands
 

@@ -1,0 +1,111 @@
+{
+  "app": {
+    "title": "Constructeur de Guitare",
+    "subtitle": "Suivez et analysez vos projets de construction de guitare",
+    "documentTitle": "Application de suivi de construction de guitare",
+    "description": "Construisez, mesurez et harmonisez vos instruments.",
+    "loading": "Chargement...",
+    "homeLink": "Constructeur de Guitare, aller aux constructions"
+  },
+  "nav": {
+    "label": "Sections",
+    "builds": "Constructions",
+    "chat": "Chat",
+    "simulator": "Simulateur",
+    "woodProperties": "Propriétés Bois",
+    "references": "Références",
+    "admin": "Admin",
+    "short": {
+      "builds": "Constructions",
+      "chat": "Chat",
+      "simulator": "Simulateur",
+      "woodProperties": "Bois",
+      "references": "Réfs",
+      "admin": "Admin"
+    },
+    "adminOnly": "Réservé aux administrateurs"
+  },
+  "shell": {
+    "signedInAs": "Connecté en tant que",
+    "signOut": "Déconnexion",
+    "signOutFailed": "Échec de la déconnexion",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "menuTitle": "Menu",
+    "preferences": "Préférences",
+    "skipToContent": "Aller au contenu"
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Mode clair",
+    "system": "Thème du système",
+    "dark": "Mode sombre"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "EN",
+    "fr": "FR",
+    "enName": "Anglais",
+    "frName": "Français"
+  },
+  "sections": {
+    "placeholder": "Cette section est en cours de reconstruction. Ses outils arrivent dans une prochaine version.",
+    "buildDetail": "Construction",
+    "buildId": "Identifiant de la construction"
+  },
+  "auth": {
+    "subtitleSignIn": "Bon retour",
+    "subtitleSignUp": "Créez votre compte",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "emailPlaceholder": "vous@exemple.com",
+    "passwordHint": "Minimum 6 caractères",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "pleaseWait": "Veuillez patienter...",
+    "switchToSignUp": "Pas encore de compte ? S'inscrire",
+    "switchToSignIn": "Déjà un compte ? Se connecter",
+    "note": "En continuant, vous acceptez de suivre vos constructions de guitare en toute sécurité",
+    "signUpSuccess": "Compte créé ! Veuillez vérifier votre e-mail pour activer votre compte.",
+    "errors": {
+      "fillAllFields": "Veuillez remplir tous les champs",
+      "invalidEmail": "Saisissez une adresse e-mail valide",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+      "unexpected": "Une erreur inattendue s'est produite",
+      "confirmationFailed": "Le lien de vérification est invalide ou a expiré. Veuillez vous connecter ou vous inscrire à nouveau.",
+      "service": {
+        "invalid_credentials": "Identifiants de connexion invalides",
+        "email_not_confirmed": "Adresse e-mail non confirmée",
+        "user_already_exists": "Un compte existe déjà pour cette adresse",
+        "email_exists": "Un compte existe déjà pour cette adresse",
+        "weak_password": "Le mot de passe doit contenir au moins 6 caractères.",
+        "signup_disabled": "Les inscriptions sont fermées",
+        "email_provider_disabled": "Les inscriptions par e-mail sont désactivées",
+        "email_address_invalid": "Adresse e-mail invalide",
+        "over_email_send_rate_limit": "Trop d'e-mails envoyés, réessayez plus tard",
+        "over_request_rate_limit": "Trop de tentatives, réessayez plus tard"
+      }
+    }
+  },
+  "dialog": {
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "close": "Fermer"
+  },
+  "toast": {
+    "region": "Notifications",
+    "close": "Fermer la notification",
+    "success": "Succès",
+    "error": "Erreur",
+    "warning": "Avertissement",
+    "info": "Information"
+  },
+  "story": {
+    "title": "Histoire de la construction",
+    "placeholder": "L'histoire partagée de cette construction s'affichera ici.",
+    "shareLink": "Lien de partage"
+  }
+}

@@ -1,0 +1,5 @@
+/**
+ * Signal processing for Guitar Builder. Populated by the tap-tone and
+ * acoustic-analysis changes; this package must stay free of DOM APIs.
+ */
+export const DSP_PACKAGE_NAME = "@gb/dsp";
