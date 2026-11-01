@@ -59,7 +59,7 @@
 
 ## 9. Integration check
 
-- [ ] 9.1 Run `pnpm check`, `pnpm build`, `pnpm test:db`, `pnpm test:e2e` and `openspec validate --strict` from a clean install; verify all pass
+- [x] 9.1 Run `pnpm check`, `pnpm build`, `pnpm test:db`, `pnpm test:e2e` and `openspec validate --strict` from a clean install; verify all pass
 
 ## Workflow follow-up
 
