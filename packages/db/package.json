@@ -1,0 +1,20 @@
+{
+  "name": "@gb/db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Database types for the Supabase schema in supabase/migrations.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "gen-types": "bash scripts/gen-types.sh"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}

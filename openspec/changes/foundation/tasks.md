@@ -2,9 +2,9 @@
 
 ## 1. Workspace and toolchain
 
-- [ ] 1.1 Create the pnpm workspace (root `package.json` with `packageManager`, `pnpm-workspace.yaml`, `.npmrc` with exact saves, `.nvmrc`, `tsconfig.base.json`) and the four packages `apps/web`, `packages/ui`, `packages/db`, `packages/dsp`; verify `pnpm install` succeeds and `pnpm -r exec pwd` lists all four
-- [ ] 1.2 Configure Biome 2 (formatter, recommended linter with accessibility rules, Tailwind directives in CSS, generated files ignored); verify `pnpm lint` passes
-- [ ] 1.3 Add the root scripts `dev`, `build`, `check`, `typecheck`, `lint`, `test`, `test:db`, `test:e2e`, and Vitest in every package (`packages/dsp` with its placeholder test); verify `pnpm check` passes on the skeleton
+- [x] 1.1 Create the pnpm workspace (root `package.json` with `packageManager`, `pnpm-workspace.yaml`, `.npmrc` with exact saves, `.nvmrc`, `tsconfig.base.json`) and the four packages `apps/web`, `packages/ui`, `packages/db`, `packages/dsp`; verify `pnpm install` succeeds and `pnpm -r exec pwd` lists all four
+- [x] 1.2 Configure Biome 2 (formatter, recommended linter with accessibility rules, Tailwind directives in CSS, generated files ignored); verify `pnpm lint` passes
+- [x] 1.3 Add the root scripts `dev`, `build`, `check`, `typecheck`, `lint`, `test`, `test:db`, `test:e2e`, and Vitest in every package (`packages/dsp` with its placeholder test); verify `pnpm check` passes on the skeleton
 
 ## 2. Design system (`packages/ui`)
 

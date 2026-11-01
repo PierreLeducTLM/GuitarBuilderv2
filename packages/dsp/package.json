@@ -1,0 +1,19 @@
+{
+  "name": "@gb/dsp",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pure-TypeScript signal processing shared by the tap-tone dialog, build analyzer, wood calculator and simulator. No DOM.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}
