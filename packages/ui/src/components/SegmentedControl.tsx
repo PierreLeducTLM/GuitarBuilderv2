@@ -73,7 +73,9 @@ export function SegmentedControl<T extends string>({
               checked={checked}
               aria-label={option.ariaLabel}
               onChange={() => onChange(option.value)}
-              className="sr-only"
+              // Invisible but covering the whole segment, so the native radio is what
+              // pointers and assistive technology interact with.
+              className="absolute inset-0 m-0 cursor-pointer appearance-none rounded-lg opacity-0 disabled:cursor-not-allowed"
             />
             {option.label}
           </label>
