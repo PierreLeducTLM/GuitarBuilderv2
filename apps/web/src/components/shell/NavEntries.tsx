@@ -10,7 +10,7 @@ import { sectionIcons } from "./navigation";
 type Variant = "bar" | "list" | "tabs";
 
 const containerClasses: Record<Variant, string> = {
-  bar: "flex gap-0.5 rounded-xl border border-line bg-panel p-1",
+  bar: "inline-flex gap-0.5 rounded-xl border border-line bg-panel p-1",
   list: "flex flex-col gap-1",
   tabs: "grid auto-cols-fr grid-flow-col",
 };

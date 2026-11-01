@@ -58,16 +58,19 @@ export function AppShell({ email, role, children }: AppShellProps) {
         {t("shell.skipToContent")}
       </a>
 
-      {/* Desktop header */}
+      {/* Desktop header: title, preferences and user on the first row; the section
+          bar on the second, so six entries fit at 1024 px without truncating the title. */}
       <header className="sticky top-0 z-20 hidden border-b border-line bg-ground/95 backdrop-blur lg:block">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-7 py-3">
-          <AppTitle />
-          <NavEntries sections={sections} variant="bar" label={t("nav.label")} />
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher />
-            <ThemeSelector />
-            <UserMenu email={email} />
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-7 pt-3 pb-3">
+          <div className="flex items-center justify-between gap-4">
+            <AppTitle />
+            <div className="flex shrink-0 items-center gap-2">
+              <LanguageSwitcher />
+              <ThemeSelector />
+              <UserMenu email={email} />
+            </div>
           </div>
+          <NavEntries sections={sections} variant="bar" label={t("nav.label")} />
         </div>
       </header>
 

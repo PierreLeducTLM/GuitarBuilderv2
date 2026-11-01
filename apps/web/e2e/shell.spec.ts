@@ -203,6 +203,17 @@ test.describe("admin-only sections", () => {
     const regular = await color(en.nav.chat);
     expect(await color(en.nav.references)).not.toBe(regular);
     expect(await color(en.nav.admin)).toBe(await color(en.nav.references));
+
+    // Even at the narrowest desktop width, all six entries fit and the title is whole.
+    await page.setViewportSize({ width: 1024, height: 700 });
+    for (const text of [en.app.title, en.app.subtitle]) {
+      const truncated = await page
+        .getByRole("banner")
+        .getByText(text, { exact: true })
+        .evaluate((element) => element.scrollWidth > element.clientWidth);
+      expect(truncated, text).toBe(false);
+    }
+    await expect(mainNav(page).getByRole("link", { name: en.nav.admin })).toBeInViewport();
   });
 
   test("survive a reload for administrators", async ({ page }) => {
