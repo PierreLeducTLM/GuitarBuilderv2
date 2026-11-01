@@ -74,3 +74,9 @@ Sign-up, email verification and session lifetimes are Supabase Auth settings: `s
 - **Allow new users to sign up**: the operator switch for open sign-ups. Because the first account becomes administrator, consider keeping it off on a fresh deployment and creating the owner's account from the dashboard (Authentication → Add user); the database trigger makes that first account the administrator. Turn sign-ups on afterwards if wanted.
 - **Minimum password length**: 6. **JWT expiry**: 3600 seconds. **Refresh token rotation**: on.
 - **Confirm signup email template**: the content of `supabase/templates/confirmation.html`, whose link works on any device.
+
+## Deployment
+
+- **Web app:** a Vercel project imported from this repository with **Root Directory** `apps/web` and the environment variables `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Every pull request gets a preview deployment.
+- **Database:** `.github/workflows/deploy-db.yml` applies new migrations to the hosted Supabase project when they reach `main`. It needs the repository secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF` and `SUPABASE_DB_PASSWORD`, and skips itself until they are set. It can also be run by hand from the Actions tab.
+- **Auth redirects:** in Supabase, Authentication → URL Configuration, set the Site URL to the production address and allow `http://localhost:3000/**` and the Vercel preview addresses.
