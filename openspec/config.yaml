@@ -1,0 +1,64 @@
+schema: spec-driven
+
+context: |
+  The specs in openspec/specs were extracted on 2026-11-01 from the legacy
+  implementation (commit 3dcaed9) and are the source of truth for a full rewrite.
+  Where the legacy code was buggy, the specs state the intended behavior; the
+  differences and the legacy audit are listed in docs/rewrite/README.md and
+  docs/rewrite/legacy-findings/. Treat the legacy src/ and supabase/ code as
+  reference material only; do not port it line by line or copy its access rules.
+  Every access rule in the specs must be enforced on the server, never only in the UI.
+  All user-visible text must be available in English and French.
+  Units: lengths in mm, mass in g, frequency in Hz, density in kg/m^3, moduli in GPa.
+  Stack (decided 2026-11-01): pnpm monorepo (apps/web, packages/dsp, packages/ui,
+  packages/db); Next.js App Router + React + TypeScript (strict) on Vercel; Supabase
+  (Postgres + pgvector, Auth, Storage, Realtime) with every access rule as a tested
+  RLS policy (pgTAP); Google Gemini for AI (gemini-embedding-2 at 768 dimensions, a
+  current Gemini Flash model set by configuration); Tailwind CSS v4 with custom design
+  tokens, Radix primitives, Motion; next-intl (en, fr); Vitest, Playwright, pgTAP in CI.
+  All signal processing lives in packages/dsp (pure TypeScript, no DOM), shared by the
+  tap-tone dialog, the build analyzer, the wood calculator and the simulator.
+  The visual design is new and bespoke; do not reproduce the legacy look.
+  Visual direction (chosen 2026-11-01): "Oscilloscope", a dark instrument panel. Night
+  #0A0D10 ground, panels #12171C with #26313B hairlines, readout text #E6EBEF / dim
+  #A3AEB9, phosphor amber #FFB23E for signals and primary actions (dark text on it),
+  teal #4CD4C0 for completed states; Space Grotesk for words, JetBrains Mono for every
+  number; glowing traces on graticule grids, LED-segment progress. Dark is the default
+  look; the light theme is a light counterpart with the same roles at AA contrast.
+  The concepts are at https://claude.ai/artifact/M1hH26F23oyJEXW3xwao8U (row C).
+
+rules:
+  specs:
+    - Keep each requirement body under 500 characters (strict validation); put formulas, constants and lists in scenarios.
+    - Write formulas in plain text with every symbol and unit defined.
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

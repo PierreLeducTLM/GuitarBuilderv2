@@ -1,0 +1,327 @@
+# app-shell Specification
+
+## Purpose
+The application shell is the frame every signed-in user works in. It provides the section navigation (Builds, Chat, Simulator, Wood Properties, and the admin-only References and Admin sections), shows who is signed in and offers sign-out, applies the user's theme and language preferences, and defines which URLs are public. It also provides shared interaction patterns (confirmation dialog, text-input dialog, toast notifications) that other capabilities rely on.
+
+## Requirements
+
+### Requirement: Authenticated Access Gate
+The system SHALL require a signed-in session for every URL except the public build-story URL, and SHALL show the sign-in screen (see user-auth) instead of the shell to a visitor without a session. The requested URL is kept while the visitor signs in; once signed in, the shell renders that URL, subject to the redirect and admin-only rules of this capability.
+
+#### Scenario: Visitor without a session opens a section URL
+- **GIVEN** no signed-in session exists in the browser
+- **WHEN** the visitor opens `/builds`
+- **THEN** the sign-in screen is shown
+- **AND** no navigation, header or section content of the shell is shown
+
+#### Scenario: Signing in keeps the requested section
+- **GIVEN** the visitor opened `/chat` and was shown the sign-in screen
+- **WHEN** the visitor signs in successfully
+- **THEN** the Chat section is displayed at `/chat`
+
+### Requirement: Session Restore Loading State
+The system SHALL show a full-screen loading indicator ("Loading...") while it determines on page load whether a stored session exists, instead of showing either the sign-in screen or the shell.
+
+#### Scenario: Session restore in progress
+- **WHEN** a page is loaded and the system is still determining whether a stored session exists
+- **THEN** a full-screen loading indicator is shown
+- **AND** neither the sign-in form nor the shell is shown yet
+
+### Requirement: Public Build Story Route
+The system SHALL serve every URL of the form `/story/<share token>` without requiring sign-in and without the shell (no header, navigation, or user menu), whether or not the visitor has a session. The content and access rules of the story page are specified by the build-sharing capability.
+
+#### Scenario: Anonymous visitor opens a story link
+- **GIVEN** no signed-in session exists
+- **WHEN** the visitor opens `/story/abc123`
+- **THEN** the public story page for that token is shown
+- **AND** the sign-in screen is not shown
+
+#### Scenario: Signed-in user opens a story link
+- **GIVEN** the user is signed in
+- **WHEN** the user opens `/story/abc123`
+- **THEN** the public story page is shown without the shell's header and navigation
+
+### Requirement: Application Sections and URLs
+The system SHALL expose these bookmarkable sections, in this navigation order and with these labels (English / French):
+1. Builds / Constructions: `/builds` (list) and `/builds/<build id>` (detail); all users.
+2. Chat / Chat: `/chat`; all users.
+3. Simulator / Simulateur: `/simulator`; all users.
+4. Wood Props / Propriétés Bois: `/wood-properties`; all users.
+5. References / Références: `/references`; administrators only.
+6. Admin / Admin: `/admin`; administrators only.
+
+#### Scenario: Navigating between sections
+- **GIVEN** the user is on `/builds`
+- **WHEN** the user selects "Simulator" in the navigation
+- **THEN** the URL becomes `/simulator`
+- **AND** the Simulator section is displayed
+
+#### Scenario: Opening a build detail URL directly
+- **WHEN** a signed-in user opens `/builds/<id of one of their builds>`
+- **THEN** the Builds section shows that build's detail view
+
+### Requirement: Navigation Entry Presentation
+The system SHALL show each navigation entry with an icon and its label, and SHALL highlight as active the entry whose URL prefix matches the current URL. The references capability defines any query parameters accepted by `/references`. The browser tab title is "Guitar Build Tracking App".
+
+#### Scenario: Active section for a nested URL
+- **WHEN** the user is viewing `/builds/7f3c-example`
+- **THEN** the Builds navigation entry is highlighted as active
+- **AND** no other entry is highlighted
+
+### Requirement: Default and Unknown Route Redirects
+The system SHALL redirect `/`, and any URL that does not match a section available to the current user, to `/builds`, replacing the current browser-history entry. Selecting the application title or logo in the header SHALL also navigate to `/builds`.
+
+#### Scenario: Root URL
+- **WHEN** a signed-in user opens `/`
+- **THEN** the user is redirected to `/builds`
+
+#### Scenario: Unknown URL
+- **WHEN** a signed-in user opens `/does-not-exist`
+- **THEN** the user is redirected to `/builds`
+- **AND** pressing the browser Back button does not return to `/does-not-exist`
+
+#### Scenario: Title click
+- **WHEN** the user clicks the application title in the header
+- **THEN** the Builds list at `/builds` is displayed
+
+### Requirement: Admin-Only Sections
+The system SHALL show the References and Admin navigation entries only to users whose role is admin, and SHALL treat `/references` and `/admin` as unknown routes (redirect to `/builds`) for users who are not administrators. Hiding entries is a convenience only; the server independently enforces administrator-only operations (see admin-console).
+
+#### Scenario: Regular user navigation
+- **GIVEN** a signed-in user whose role is user
+- **WHEN** the shell is displayed
+- **THEN** the navigation lists Builds, Chat, Simulator and Wood Props only
+
+#### Scenario: Regular user opens an admin URL
+- **GIVEN** a signed-in user whose role is user
+- **WHEN** the user opens `/admin` or `/references`
+- **THEN** the user is redirected to `/builds`
+
+#### Scenario: Administrator navigation
+- **GIVEN** a signed-in user whose role is admin
+- **WHEN** the shell is displayed
+- **THEN** the navigation lists Builds, Chat, Simulator, Wood Props, References and Admin, in that order
+
+### Requirement: Admin Entries Visually Distinguished
+The system SHALL visually distinguish the admin-only navigation entries from regular entries (a distinct accent colour, in both active and inactive states) in every navigation form: desktop header bar, mobile slide-out menu, and mobile bottom tab bar.
+
+#### Scenario: Administrator sees distinguished entries
+- **GIVEN** a signed-in administrator
+- **WHEN** any navigation form is displayed
+- **THEN** References and Admin use an accent colour different from Builds, Chat, Simulator and Wood Props
+
+### Requirement: Admin Deep Links Wait For Role
+The system SHALL NOT redirect away from an admin-only URL until the signed-in user's role has been loaded from their profile (see user-auth), so that administrators can bookmark and reload `/admin` and `/references`. Until the role is known, admin-only navigation entries are hidden.
+
+#### Scenario: Administrator reloads the admin console
+- **GIVEN** a signed-in administrator is on `/admin`
+- **WHEN** the administrator reloads the page
+- **THEN** the admin console is displayed at `/admin` once the role has been loaded
+- **AND** the administrator is not redirected to `/builds`
+
+### Requirement: Desktop Header
+The system SHALL, on viewports at least 1024 px wide, show a header that stays visible while scrolling and contains the application title ("Guitar Builder" / "Constructeur de Guitare") with its subtitle ("Track and analyze your guitar building projects"), a horizontal bar with one entry per available section, the language switcher, the theme selector, and a signed-in user button.
+
+#### Scenario: Wide viewport layout
+- **GIVEN** a signed-in user on a viewport 1280 px wide
+- **WHEN** the shell is displayed
+- **THEN** the header shows the title, the section entries, the EN/FR switcher, the theme selector and the user button
+- **AND** no bottom tab bar is shown
+
+### Requirement: Desktop User Menu
+The system SHALL show "Signed in as" and the signed-in user's email address on the desktop user button, and clicking it SHALL toggle a dropdown containing a single "Sign Out" action; clicking anywhere outside the dropdown closes it.
+
+#### Scenario: Open the user dropdown
+- **GIVEN** a signed-in user on a wide viewport
+- **WHEN** the user clicks the button showing their email
+- **THEN** a dropdown with a "Sign Out" action appears
+
+#### Scenario: Dismiss the user dropdown
+- **GIVEN** the user dropdown is open
+- **WHEN** the user clicks elsewhere on the page
+- **THEN** the dropdown closes without signing out
+
+### Requirement: Mobile Slide-Out Menu
+The system SHALL, on viewports narrower than 1024 px, replace the header navigation with a menu button that opens a slide-out menu from the right containing a close button, "Signed in as" with the user's email, the available sections (active entry highlighted), and a "Sign Out" button. While it is open the page behind is dimmed and SHALL NOT scroll.
+
+#### Scenario: Open the slide-out menu
+- **GIVEN** a signed-in user on a narrow viewport
+- **WHEN** the user taps the menu button
+- **THEN** the slide-out menu opens showing the user's email, the available sections and a "Sign Out" button
+- **AND** the page behind is dimmed and cannot be scrolled
+
+#### Scenario: Choose a section from the slide-out menu
+- **GIVEN** the slide-out menu is open
+- **WHEN** the user taps "Chat"
+- **THEN** the URL becomes `/chat`
+- **AND** the menu closes
+
+#### Scenario: Close the menu by tapping outside
+- **GIVEN** the slide-out menu is open
+- **WHEN** the user taps the dimmed area outside the menu or the close button
+- **THEN** the menu closes and the current section is unchanged
+
+### Requirement: Mobile Bottom Tab Bar
+The system SHALL, on viewports narrower than 1024 px, show a tab bar fixed to the bottom of the screen with one entry (icon and short label) per available section, highlighting the active entry; page content SHALL leave enough room at the bottom that the bar never hides it.
+
+#### Scenario: Bottom tab bar navigation
+- **GIVEN** a signed-in user on a narrow viewport
+- **WHEN** the user taps "Wood Props" in the bottom tab bar
+- **THEN** the URL becomes `/wood-properties`
+- **AND** the "Wood Props" tab is highlighted as active
+
+### Requirement: Preferences Reachable On All Viewports
+The system SHALL make the language switcher and the theme selector reachable on narrow viewports as well as wide ones (for example inside the mobile slide-out menu).
+
+#### Scenario: Change language on a phone
+- **GIVEN** a signed-in user on a narrow viewport
+- **WHEN** the user opens the slide-out menu
+- **THEN** the EN/FR switcher and the theme selector are available
+
+### Requirement: Sign Out From the Shell
+The system SHALL offer a sign-out action in the desktop user dropdown and in the mobile slide-out menu, and on success SHALL end the session and show the sign-in screen. If signing out fails, the system SHALL show the message "Failed to sign out" and the user remains signed in.
+
+#### Scenario: Successful sign-out
+- **WHEN** the user selects "Sign Out"
+- **THEN** the session ends
+- **AND** the sign-in screen is shown
+
+#### Scenario: Sign-out failure
+- **GIVEN** the authentication service rejects the sign-out request
+- **WHEN** the user selects "Sign Out"
+- **THEN** the message "Failed to sign out" is shown
+- **AND** the user stays in the shell
+
+### Requirement: Theme Selection and Persistence
+The system SHALL let the user choose among Light, System and Dark themes with a three-option control (tooltips "Light Mode", "System Theme", "Dark Mode") that highlights the active option, apply the choice immediately, and persist it in the browser (per browser, not per account). When nothing is stored the theme is System.
+
+#### Scenario: Choose dark theme
+- **WHEN** the user selects Dark
+- **THEN** the interface switches to the dark appearance immediately
+- **AND** after reloading the page the dark appearance is still applied and Dark is shown as active
+
+#### Scenario: Nothing stored
+- **GIVEN** no theme preference is stored in the browser
+- **WHEN** the user opens the application
+- **THEN** System is shown as the active theme option
+
+### Requirement: System Theme Follows Device Preference
+The system SHALL, while System is selected, use the dark appearance when the operating system or browser prefers a dark colour scheme and the light appearance otherwise, and SHALL follow changes to that preference while the application is open.
+
+#### Scenario: First visit with a dark device
+- **GIVEN** no theme preference is stored and the operating system prefers dark
+- **WHEN** the user opens the application
+- **THEN** the dark appearance is applied
+
+#### Scenario: System preference changes
+- **GIVEN** the user has selected System and the operating system prefers light
+- **WHEN** the operating system preference switches to dark
+- **THEN** the interface switches to the dark appearance
+
+### Requirement: Theme Applies To All Screens
+The system SHALL apply the stored theme to every screen it renders, including the loading screen, the sign-in screen and the public story page, not only to the signed-in shell.
+
+#### Scenario: Sign-in screen honours the theme
+- **GIVEN** the browser has Dark stored as the theme preference and no session exists
+- **WHEN** the visitor opens the application
+- **THEN** the sign-in screen is shown with the dark appearance
+
+### Requirement: Language Switching
+The system SHALL display all interface text in English or French, let the user switch with an EN/FR control that highlights the active language, apply the switch immediately without reloading, and persist the choice in the browser.
+
+#### Scenario: Switch to French
+- **GIVEN** the interface is in English
+- **WHEN** the user clicks "FR"
+- **THEN** interface text switches to French immediately (for example "Builds" becomes "Constructions" and "Sign Out" becomes "Déconnexion")
+- **AND** "FR" is highlighted
+
+#### Scenario: Language persists across visits
+- **GIVEN** the user previously selected French in this browser
+- **WHEN** the user opens the application again
+- **THEN** the interface is displayed in French
+
+### Requirement: Initial Language and Fallback
+The system SHALL start in the language previously chosen in this browser, or in English if none was chosen, and SHALL show the English text for any text that has no French translation. Translations are loaded per language at runtime, so a language can be added without changing feature behavior.
+
+#### Scenario: First visit defaults to English
+- **GIVEN** no language choice is stored in the browser
+- **WHEN** the user opens the application
+- **THEN** the interface is displayed in English
+
+#### Scenario: Missing French translation
+- **GIVEN** the interface is in French and a piece of text has no French translation
+- **WHEN** that text is displayed
+- **THEN** its English text is shown
+
+### Requirement: Confirmation Dialog
+The system SHALL provide a reusable modal confirmation dialog that any feature uses before a destructive or significant action, showing a title, a message, a cancel button and a confirm button, and performing the action only when the user confirms. The cancel button, a close (×) button and clicking the dimmed backdrop all dismiss it without performing the action; while open it blocks the page behind.
+
+#### Scenario: User confirms
+- **GIVEN** a feature has opened the confirmation dialog for an action
+- **WHEN** the user clicks the confirm button
+- **THEN** the action is performed
+- **AND** the dialog closes
+
+#### Scenario: User dismisses via backdrop
+- **GIVEN** the confirmation dialog is open
+- **WHEN** the user clicks the dimmed backdrop outside the dialog
+- **THEN** the dialog closes
+- **AND** the action is not performed
+
+### Requirement: Confirmation Dialog Labels and Severity
+The system SHALL label the confirmation dialog buttons "Confirm" and "Cancel" (localized) unless the calling feature supplies its own labels (for example "Delete"), and SHALL support a severity variant (danger, warning, or info; warning by default) that changes the emphasis of the confirm button. Danger is used for irreversible deletions.
+
+#### Scenario: Deletion confirmation
+- **GIVEN** a feature opens the dialog with variant danger and confirm label "Delete"
+- **WHEN** the dialog is displayed
+- **THEN** the confirm button reads "Delete" and is emphasised as a dangerous action
+- **AND** the cancel button reads "Cancel" (or "Annuler" in French)
+
+### Requirement: Text Input Dialog
+The system SHALL provide a reusable modal dialog that asks for one line of text, showing a title, an optional message, an optional placeholder and an initial value, and returning the entered text only when the user confirms. Default button labels are "Save" and "Cancel" (localized) unless the calling feature supplies its own. It appears above any other open dialog.
+
+#### Scenario: Cancel the input dialog
+- **GIVEN** the text input dialog is open
+- **WHEN** the user clicks the close (×) button, the cancel button, or the backdrop
+- **THEN** the dialog closes and no value is returned
+
+### Requirement: Text Input Dialog Value Handling
+The system SHALL, when the text input dialog opens, pre-fill the input with the initial value, focus it and select its text; confirming (button or Enter key) SHALL return the value with leading and trailing whitespace removed, and the confirm button SHALL be disabled while the trimmed value is empty.
+
+#### Scenario: Enter and confirm text
+- **GIVEN** the text input dialog is open with initial value "Resonance Analysis"
+- **WHEN** the user replaces the text with "  Top tap test  " and presses Enter
+- **THEN** the dialog returns "Top tap test"
+
+#### Scenario: Blank input cannot be confirmed
+- **GIVEN** the text input dialog is open
+- **WHEN** the input contains only spaces
+- **THEN** the confirm button is disabled
+
+### Requirement: Toast Notifications
+The system SHALL provide transient toast notifications that any feature can raise with a type (success, error, warning, or info) and a message, displayed prominently over the page with a type-specific icon and accent. Several toasts may be visible at once and stack without overlapping; toasts do not block interaction with the rest of the page.
+
+#### Scenario: Feature raises an error toast
+- **WHEN** a feature raises an error toast with the message "Save failed"
+- **THEN** a toast with an error icon and the text "Save failed" appears over the page
+
+### Requirement: Toast Dismissal
+The system SHALL remove a toast automatically after its duration (default 3 seconds) with a brief fade-out of about 300 ms, and SHALL give each toast a close (×) button that dismisses it immediately.
+
+#### Scenario: Toast auto-dismisses
+- **GIVEN** a feature raises a success toast without a custom duration
+- **WHEN** 3 seconds have elapsed
+- **THEN** the toast fades out and is removed
+
+#### Scenario: Toast dismissed manually
+- **GIVEN** an error toast is visible
+- **WHEN** the user clicks its close (×) button
+- **THEN** the toast is removed immediately
+
+### Requirement: Direct Links and Reloads
+The system SHALL load correctly when any section URL or public story URL is opened directly, bookmarked, shared, or reloaded, rather than only when reached by in-app navigation.
+
+#### Scenario: Reload a section
+- **GIVEN** a signed-in user is on `/simulator`
+- **WHEN** the user reloads the browser page
+- **THEN** the Simulator section is displayed at `/simulator`
