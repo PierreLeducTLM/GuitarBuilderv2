@@ -1,0 +1,111 @@
+{
+  "app": {
+    "title": "Guitar Builder",
+    "subtitle": "Track and analyze your guitar building projects",
+    "documentTitle": "Guitar Build Tracking App",
+    "description": "Build, measure and voice your instruments.",
+    "loading": "Loading...",
+    "homeLink": "Guitar Builder, go to Builds"
+  },
+  "nav": {
+    "label": "Sections",
+    "builds": "Builds",
+    "chat": "Chat",
+    "simulator": "Simulator",
+    "woodProperties": "Wood Props",
+    "references": "References",
+    "admin": "Admin",
+    "short": {
+      "builds": "Builds",
+      "chat": "Chat",
+      "simulator": "Simulator",
+      "woodProperties": "Wood",
+      "references": "Refs",
+      "admin": "Admin"
+    },
+    "adminOnly": "Administrators only"
+  },
+  "shell": {
+    "signedInAs": "Signed in as",
+    "signOut": "Sign Out",
+    "signOutFailed": "Failed to sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menuTitle": "Menu",
+    "preferences": "Preferences",
+    "skipToContent": "Skip to content"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light Mode",
+    "system": "System Theme",
+    "dark": "Dark Mode"
+  },
+  "language": {
+    "label": "Language",
+    "en": "EN",
+    "fr": "FR",
+    "enName": "English",
+    "frName": "French"
+  },
+  "sections": {
+    "placeholder": "This section is being rebuilt. Its tools arrive in an upcoming release.",
+    "buildDetail": "Build",
+    "buildId": "Build ID"
+  },
+  "auth": {
+    "subtitleSignIn": "Welcome back",
+    "subtitleSignUp": "Create your account",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "emailPlaceholder": "you@example.com",
+    "passwordHint": "Minimum 6 characters",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "pleaseWait": "Please wait...",
+    "switchToSignUp": "Don't have an account? Sign up",
+    "switchToSignIn": "Already have an account? Sign in",
+    "note": "By continuing, you agree to track your guitar builds securely",
+    "signUpSuccess": "Account created! Please check your email to verify your account.",
+    "errors": {
+      "fillAllFields": "Please fill in all fields",
+      "invalidEmail": "Enter a valid email address",
+      "passwordTooShort": "Password must be at least 6 characters",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "unexpected": "An unexpected error occurred",
+      "confirmationFailed": "The verification link is invalid or has expired. Please sign in or sign up again.",
+      "service": {
+        "invalid_credentials": "Invalid login credentials",
+        "email_not_confirmed": "Email not confirmed",
+        "user_already_exists": "User already registered",
+        "email_exists": "User already registered",
+        "weak_password": "Password should be at least 6 characters.",
+        "signup_disabled": "Signups not allowed for this instance",
+        "email_provider_disabled": "Email signups are disabled",
+        "email_address_invalid": "Email address is invalid",
+        "over_email_send_rate_limit": "Email rate limit exceeded",
+        "over_request_rate_limit": "Request rate limit reached"
+      }
+    }
+  },
+  "dialog": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close"
+  },
+  "toast": {
+    "region": "Notifications",
+    "close": "Dismiss notification",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "story": {
+    "title": "Build story",
+    "placeholder": "This shared build story will appear here.",
+    "shareLink": "Share link"
+  }
+}

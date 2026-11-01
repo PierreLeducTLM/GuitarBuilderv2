@@ -1,12 +1,7 @@
-import { Button, Panel } from "@gb/ui";
+import { redirect } from "next/navigation";
+import { DEFAULT_ROUTE } from "@/lib/routes";
 
+// The proxy already redirects "/"; this covers requests it does not see.
 export default function Home() {
-  return (
-    <main className="p-8">
-      <Panel>
-        <p className="font-mono text-amber-ink">181.6 Hz</p>
-        <Button>Start</Button>
-      </Panel>
-    </main>
-  );
+  redirect(DEFAULT_ROUTE);
 }
