@@ -22,7 +22,7 @@ pnpm monorepo: `apps/web` (Next.js App Router, React, TypeScript strict), `packa
 
 ## Commands
 
-Run from the repo root (available once the `foundation` change has landed):
+Run from the repo root:
 
 - `pnpm install`
 - `pnpm dev`: run the web app
