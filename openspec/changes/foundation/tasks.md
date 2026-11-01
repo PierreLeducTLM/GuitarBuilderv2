@@ -54,8 +54,8 @@
 
 ## 8. CI and documentation
 
-- [ ] 8.1 Add `.github/workflows/ci.yml`: install, `check`, `build`, e2e (Playwright browsers installed in CI), and a database job with the Supabase CLI (`supabase db start`, `supabase test db`, race script); verify the YAML parses and every command it runs exists in the repository
-- [ ] 8.2 Document setup and commands in the root `README.md` (environment variables, local Supabase, test commands, Auth settings for production); verify each documented command runs as written
+- [x] 8.1 Add `.github/workflows/ci.yml`: install, `check`, `build`, e2e (Playwright browsers installed in CI), and a database job with the Supabase CLI (`supabase db start`, `supabase test db`, race script); verify the YAML parses and every command it runs exists in the repository
+- [x] 8.2 Document setup and commands in the root `README.md` (environment variables, local Supabase, test commands, Auth settings for production); verify each documented command runs as written
 
 ## 9. Integration check
 
