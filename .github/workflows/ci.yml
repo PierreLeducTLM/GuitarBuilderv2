@@ -22,7 +22,7 @@ jobs:
       # The production build only needs the public variables to exist; it makes no
       # request to Supabase. The e2e tests build their own copy against a fake server.
       NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
     steps:
       - uses: actions/checkout@v5
 

@@ -28,5 +28,5 @@ None. `app-shell` and `user-auth` are implemented as written; the role model's s
 
 - New code: everything under `apps/`, `packages/`, `supabase/`, `scripts/` and `.github/`.
 - New dependencies (exact versions): Next.js, React, next-intl, `@supabase/ssr`, `@supabase/supabase-js`, Tailwind CSS v4, Radix primitives, lucide-react, Fontsource fonts, Biome, Vitest, Playwright, TypeScript.
-- Configuration: the browser receives only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; `.env.example` documents them. Sign-up, email verification and the site URL are Supabase Auth settings (`supabase/config.toml` locally, the dashboard in production).
+- Configuration: the browser receives only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (legacy name `NEXT_PUBLIC_SUPABASE_ANON_KEY`); `.env.example` documents them. Sign-up, email verification and the site URL are Supabase Auth settings (`supabase/config.toml` locally, the dashboard in production).
 - Out of scope, left to the owning capabilities: admin console screens and user deletion (`admin-console`), every section's real content, and the story page's content and access rules (`build-story-sharing`).

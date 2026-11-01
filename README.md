@@ -39,7 +39,7 @@ cp apps/web/.env.example apps/web/.env.local    # then paste the API URL and ano
 pnpm dev                                        # http://localhost:3000
 ```
 
-The app refuses to start without `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; they are the only configuration that reaches the browser. The first account to sign up on an empty database becomes the administrator.
+The app refuses to start without `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (the legacy name `NEXT_PUBLIC_SUPABASE_ANON_KEY` is also accepted for the key); they are the only configuration that reaches the browser. The first account to sign up on an empty database becomes the administrator.
 
 ## Commands
 
@@ -77,6 +77,6 @@ Sign-up, email verification and session lifetimes are Supabase Auth settings: `s
 
 ## Deployment
 
-- **Web app:** a Vercel project imported from this repository with **Root Directory** `apps/web` and the environment variables `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Every pull request gets a preview deployment.
+- **Web app:** a Vercel project imported from this repository with **Root Directory** `apps/web` and the environment variables `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for Production and Preview (Supabase's Vercel integration creates both). Every pull request gets a preview deployment.
 - **Database:** `.github/workflows/deploy-db.yml` applies new migrations to the hosted Supabase project when they reach `main`. It needs the repository secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF` and `SUPABASE_DB_PASSWORD`, and skips itself until they are set. It can also be run by hand from the Actions tab.
 - **Auth redirects:** in Supabase, Authentication → URL Configuration, set the Site URL to the production address and allow `http://localhost:3000/**` and the Vercel preview addresses.

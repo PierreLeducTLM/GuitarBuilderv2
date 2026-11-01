@@ -25,7 +25,7 @@
 ## 4. App foundation (`apps/web`)
 
 - [x] 4.1 Create the Next.js 16 app (App Router, strict TypeScript, typed routes, `transpilePackages` for the workspace packages, PostCSS with Tailwind, global stylesheet importing `@gb/ui`); verify `pnpm build` succeeds
-- [x] 4.2 Validate `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from `next.config.ts` and add `.env.example`; verify a unit test of the validator and that `pnpm build` without the variables stops with a message naming them
+- [x] 4.2 Validate `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` accepted) from `next.config.ts` and add `.env.example`; verify a unit test of the validator and that `pnpm build` without the variables stops with a message naming them
 - [x] 4.3 Add the Supabase browser, server and proxy clients typed with `@gb/db`; verify they type-check
 - [x] 4.4 Set up next-intl without URL prefixes: `gb-locale` cookie, English default, French merged over English, typed message keys, shared date and number formats, `gb-tz` time-zone cookie; verify unit tests for locale resolution, fallback merging, catalog key parity and per-locale formatting
 - [x] 4.5 Implement theme resolution (shared pure function), the pre-paint head script in the root layout and the client ThemeProvider with the live `prefers-color-scheme` listener; verify unit tests for resolution and parsing of stored values
