@@ -8,10 +8,10 @@
 
 ## 2. Design system (`packages/ui`)
 
-- [ ] 2.1 Define the dark and light themes in `src/tokens/themes.ts` with the documented text/background pairs, generate `src/styles/tokens.css`, and add tests that the CSS is up to date and that every pair is at least 4.5:1 in both themes; verify `pnpm --filter @gb/ui test` passes
-- [ ] 2.2 Wire Tailwind v4 (`src/styles/theme.css` with `@theme inline`, default palette cleared, radii, fonts, `@source`) and self-hosted Space Grotesk and JetBrains Mono from Fontsource; verify the built app's CSS contains the token utilities and serves the font files from its own origin
-- [ ] 2.3 Build Button (primary, secondary, ghost, danger), IconButton (required label), Field/TextInput (label, hint, error, `aria-describedby`, `aria-invalid`), Panel, Chip, SegmentedControl (radio-group keyboard behavior) and LedProgress (`progressbar` semantics), all with focus rings and 44 px targets; verify with component tests for the label, keyboard and ARIA behavior
-- [ ] 2.4 Build ConfirmDialog (title, message, × close, cancel, confirm, backdrop dismissal, danger/warning/info emphasis), TextInputDialog (prefilled, focused and selected, trimmed result, Enter confirms, confirm disabled while blank, above other dialogs) and the Toast provider (success/error/warning/info icons and accents, stacking, non-blocking, 3 s default, about 300 ms fade, × close); verify with component tests for confirm/cancel/backdrop, trimming and blank input, and toast timing
+- [x] 2.1 Define the dark and light themes in `src/tokens/themes.ts` with the documented text/background pairs, generate `src/styles/tokens.css`, and add tests that the CSS is up to date and that every pair is at least 4.5:1 in both themes; verify `pnpm --filter @gb/ui test` passes
+- [x] 2.2 Wire Tailwind v4 (`src/styles/theme.css` with `@theme inline`, default palette cleared, radii, fonts, `@source`) and self-hosted Space Grotesk and JetBrains Mono from Fontsource; verify the built app's CSS contains the token utilities and serves the font files from its own origin
+- [x] 2.3 Build Button (primary, secondary, ghost, danger), IconButton (required label), Field/TextInput (label, hint, error, `aria-describedby`, `aria-invalid`), Panel, Chip, SegmentedControl (radio-group keyboard behavior) and LedProgress (`progressbar` semantics), all with focus rings and 44 px targets; verify with component tests for the label, keyboard and ARIA behavior
+- [x] 2.4 Build ConfirmDialog (title, message, × close, cancel, confirm, backdrop dismissal, danger/warning/info emphasis), TextInputDialog (prefilled, focused and selected, trimmed result, Enter confirms, confirm disabled while blank, above other dialogs) and the Toast provider (success/error/warning/info icons and accents, stacking, non-blocking, 3 s default, about 300 ms fade, × close); verify with component tests for confirm/cancel/backdrop, trimming and blank input, and toast timing
 
 ## 3. Database
 

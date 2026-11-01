@@ -1,0 +1,13 @@
+/*
+ * Guitar Builder design system stylesheet. Import it after Tailwind:
+ *   @import "tailwindcss";
+ *   @import "@gb/ui/styles.css";
+ */
+@import "@fontsource-variable/space-grotesk/wght.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
+@import "./tokens.css";
+@import "./theme.css";
+@import "./base.css";
+
+/* Generate utilities used by the components in this package. */
+@source "../";

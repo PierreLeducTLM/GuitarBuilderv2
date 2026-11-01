@@ -1,0 +1,112 @@
+/* Generated from src/tokens/themes.ts by scripts/build-tokens.ts. Do not edit. */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --gb-ground: #0a0d10;
+  --gb-inset: #0f1418;
+  --gb-panel: #12171c;
+  --gb-raised: #182029;
+  --gb-selected: #26313b;
+  --gb-line: #26313b;
+  --gb-line-strong: #3a4651;
+  --gb-grid: #1c242c;
+  --gb-fg: #e6ebef;
+  --gb-fg-dim: #a3aeb9;
+  --gb-fg-faint: #8794a1;
+  --gb-amber: #ffb23e;
+  --gb-on-amber: #0a0d10;
+  --gb-amber-ink: #ffb23e;
+  --gb-amber-soft: #1f1a12;
+  --gb-teal: #4cd4c0;
+  --gb-on-teal: #0a0d10;
+  --gb-teal-ink: #4cd4c0;
+  --gb-teal-soft: #14272a;
+  --gb-teal-line: #2e5e58;
+  --gb-admin-ink: #c9a2ff;
+  --gb-admin-soft: #1f1b2c;
+  --gb-danger: #ff6b63;
+  --gb-on-danger: #0a0d10;
+  --gb-danger-ink: #ff8b85;
+  --gb-danger-soft: #2a1a1c;
+  --gb-info-ink: #7db9ff;
+  --gb-info-soft: #152131;
+  --gb-focus: #ffb23e;
+  --gb-overlay: rgba(5, 7, 9, 0.72);
+  --gb-glow-amber: rgba(255, 178, 62, 0.35);
+  --gb-glow-teal: rgba(76, 212, 192, 0.55);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --gb-ground: #f3f5f7;
+  --gb-inset: #eaeef1;
+  --gb-panel: #ffffff;
+  --gb-raised: #eef1f4;
+  --gb-selected: #dce2e8;
+  --gb-line: #d3dae0;
+  --gb-line-strong: #a5b0ba;
+  --gb-grid: #e3e8ec;
+  --gb-fg: #0d1318;
+  --gb-fg-dim: #4a5663;
+  --gb-fg-faint: #5e6a76;
+  --gb-amber: #ffb23e;
+  --gb-on-amber: #0a0d10;
+  --gb-amber-ink: #8a4f00;
+  --gb-amber-soft: #fff3df;
+  --gb-teal: #4cd4c0;
+  --gb-on-teal: #0a0d10;
+  --gb-teal-ink: #06705f;
+  --gb-teal-soft: #e0f6f2;
+  --gb-teal-line: #7fd3c6;
+  --gb-admin-ink: #7a3db8;
+  --gb-admin-soft: #f2eafb;
+  --gb-danger: #c4302b;
+  --gb-on-danger: #ffffff;
+  --gb-danger-ink: #b3261e;
+  --gb-danger-soft: #fce9e8;
+  --gb-info-ink: #1f5daa;
+  --gb-info-soft: #e5effa;
+  --gb-focus: #8a4f00;
+  --gb-overlay: rgba(13, 19, 24, 0.45);
+  --gb-glow-amber: rgba(255, 178, 62, 0.45);
+  --gb-glow-teal: rgba(6, 112, 95, 0.25);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --gb-ground: #f3f5f7;
+    --gb-inset: #eaeef1;
+    --gb-panel: #ffffff;
+    --gb-raised: #eef1f4;
+    --gb-selected: #dce2e8;
+    --gb-line: #d3dae0;
+    --gb-line-strong: #a5b0ba;
+    --gb-grid: #e3e8ec;
+    --gb-fg: #0d1318;
+    --gb-fg-dim: #4a5663;
+    --gb-fg-faint: #5e6a76;
+    --gb-amber: #ffb23e;
+    --gb-on-amber: #0a0d10;
+    --gb-amber-ink: #8a4f00;
+    --gb-amber-soft: #fff3df;
+    --gb-teal: #4cd4c0;
+    --gb-on-teal: #0a0d10;
+    --gb-teal-ink: #06705f;
+    --gb-teal-soft: #e0f6f2;
+    --gb-teal-line: #7fd3c6;
+    --gb-admin-ink: #7a3db8;
+    --gb-admin-soft: #f2eafb;
+    --gb-danger: #c4302b;
+    --gb-on-danger: #ffffff;
+    --gb-danger-ink: #b3261e;
+    --gb-danger-soft: #fce9e8;
+    --gb-info-ink: #1f5daa;
+    --gb-info-soft: #e5effa;
+    --gb-focus: #8a4f00;
+    --gb-overlay: rgba(13, 19, 24, 0.45);
+    --gb-glow-amber: rgba(255, 178, 62, 0.45);
+    --gb-glow-teal: rgba(6, 112, 95, 0.25);
+  }
+}

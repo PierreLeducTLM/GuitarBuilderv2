@@ -1,0 +1,92 @@
+/*
+ * Tailwind CSS v4 theme for Guitar Builder, mapped onto the --gb-* tokens.
+ * The default palette is cleared so only token colours exist as utilities.
+ */
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-ground: var(--gb-ground);
+  --color-inset: var(--gb-inset);
+  --color-panel: var(--gb-panel);
+  --color-raised: var(--gb-raised);
+  --color-selected: var(--gb-selected);
+  --color-line: var(--gb-line);
+  --color-line-strong: var(--gb-line-strong);
+  --color-grid: var(--gb-grid);
+  --color-fg: var(--gb-fg);
+  --color-fg-dim: var(--gb-fg-dim);
+  --color-fg-faint: var(--gb-fg-faint);
+  --color-amber: var(--gb-amber);
+  --color-on-amber: var(--gb-on-amber);
+  --color-amber-ink: var(--gb-amber-ink);
+  --color-amber-soft: var(--gb-amber-soft);
+  --color-teal: var(--gb-teal);
+  --color-on-teal: var(--gb-on-teal);
+  --color-teal-ink: var(--gb-teal-ink);
+  --color-teal-soft: var(--gb-teal-soft);
+  --color-teal-line: var(--gb-teal-line);
+  --color-admin-ink: var(--gb-admin-ink);
+  --color-admin-soft: var(--gb-admin-soft);
+  --color-danger: var(--gb-danger);
+  --color-on-danger: var(--gb-on-danger);
+  --color-danger-ink: var(--gb-danger-ink);
+  --color-danger-soft: var(--gb-danger-soft);
+  --color-info-ink: var(--gb-info-ink);
+  --color-info-soft: var(--gb-info-soft);
+  --color-focus: var(--gb-focus);
+  --color-overlay: var(--gb-overlay);
+
+  --font-*: initial;
+  --font-sans: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+
+  --radius-*: initial;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.125rem;
+  --radius-full: 9999px;
+
+  --shadow-glow-amber: 0 0 18px var(--gb-glow-amber);
+  --shadow-glow-teal: 0 0 8px var(--gb-glow-teal);
+  --shadow-panel: 0 12px 32px -12px rgb(0 0 0 / 0.45);
+
+  --animate-toast-in: gb-toast-in 180ms ease-out;
+  --animate-sheet-in: gb-sheet-in 220ms ease-out;
+  --animate-fade-in: gb-fade-in 160ms ease-out;
+  --animate-trace: gb-trace 1.6s linear infinite;
+}
+
+@keyframes gb-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes gb-sheet-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes gb-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes gb-trace {
+  from {
+    stroke-dashoffset: 240;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
