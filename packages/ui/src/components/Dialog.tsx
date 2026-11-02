@@ -17,6 +17,8 @@ export interface DialogFrameProps {
   icon?: ReactNode;
   /** Stacking layer: `top` dialogs appear above any other open dialog. */
   layer?: "base" | "top";
+  /** `lg` widens the dialog for rich content such as a step's photos and graphs. */
+  size?: "md" | "lg";
   onOpenAutoFocus?: (event: Event) => void;
   children?: ReactNode;
   footer?: ReactNode;
@@ -34,6 +36,7 @@ export function DialogFrame({
   closeLabel,
   icon,
   layer = "base",
+  size = "md",
   onOpenAutoFocus,
   children,
   footer,
@@ -53,7 +56,8 @@ export function DialogFrame({
           // Without a description, tell Radix there is none on purpose.
           {...(description ? {} : { "aria-describedby": undefined })}
           className={cx(
-            "fixed top-1/2 left-1/2 flex max-h-[calc(100dvh-2rem)] w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 animate-fade-in flex-col gap-4 overflow-y-auto rounded-3xl border border-line bg-panel p-5 shadow-panel",
+            "fixed top-1/2 left-1/2 flex max-h-[calc(100dvh-2rem)] -translate-x-1/2 -translate-y-1/2 animate-fade-in flex-col gap-4 overflow-y-auto rounded-3xl border border-line bg-panel p-5 shadow-panel",
+            size === "lg" ? "w-[min(44rem,calc(100vw-2rem))]" : "w-[min(28rem,calc(100vw-2rem))]",
             layer === "top" ? "z-[61]" : "z-[51]",
           )}
         >

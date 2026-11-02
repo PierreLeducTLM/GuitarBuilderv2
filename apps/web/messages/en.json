@@ -108,6 +108,125 @@
     "placeholder": "This shared build story will appear here.",
     "shareLink": "Share link"
   },
+  "builds": {
+    "title": "Your Builds ({count})",
+    "titlePlain": "Your Builds",
+    "loading": "Loading builds...",
+    "loadFailed": "Failed to load guitar builds",
+    "empty": "No guitar builds yet",
+    "emptyHint": "Click \"Add New Build\" to get started",
+    "addNew": "Add New Build",
+    "guitarType": {
+      "classical": "Classical",
+      "steel_string": "Steel-string"
+    },
+    "create": {
+      "title": "Add New Guitar Build",
+      "nameLabel": "Build Name",
+      "namePlaceholder": "e.g., Build #1",
+      "nameRequired": "Enter a name for the build.",
+      "typeLabel": "Guitar Type",
+      "typeRequired": "Choose a guitar type.",
+      "boboLabel": "Bolt-on/bolt-off (BOBO) neck",
+      "submit": "Add Build",
+      "submitting": "Adding...",
+      "failed": "Failed to add guitar build. Please try again."
+    },
+    "detail": {
+      "loading": "Loading build...",
+      "back": "Back to Builds",
+      "share": "Share",
+      "delete": "Delete Build",
+      "created": "Created {date}",
+      "typeNotSet": "Guitar type not set",
+      "boboNeck": "BOBO neck",
+      "readOnly": "Read-only: this build belongs to another user.",
+      "tabsLabel": "Build views",
+      "tabOverview": "Overview",
+      "tabSequence": "Sequence Diagram"
+    },
+    "summary": {
+      "progressLabel": "Build progress",
+      "progress": "{completed} of {total} steps · {percent}%",
+      "latestMeasurement": "Latest measurement",
+      "measurementValue": "{frequency} Hz",
+      "noMeasurement": "No measurement yet",
+      "nextUp": "Next up: {step}",
+      "allDone": "All steps done"
+    },
+    "construction": {
+      "title": "Construction",
+      "change": "Change",
+      "boboYes": "BOBO neck: Yes",
+      "boboNo": "BOBO neck: No",
+      "notSetHint": "Choose a guitar type so that the steps that don't apply to this build are hidden."
+    },
+    "acoustics": {
+      "title": "Acoustic analysis",
+      "placeholder": "The acoustic analysis tools arrive in an upcoming release."
+    },
+    "deleteDialog": {
+      "title": "Delete Build",
+      "message": "Are you sure you want to delete this guitar build?",
+      "confirm": "Delete",
+      "failed": "Failed to delete guitar build"
+    },
+    "saveFailed": "Failed to save changes"
+  },
+  "sequence": {
+    "loading": "Loading diagram...",
+    "diagramLabel": "Build sequence diagram",
+    "legend": {
+      "label": "Step states",
+      "completed": "Completed",
+      "ready": "Ready",
+      "notStarted": "Not started"
+    },
+    "controls": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fitView": "Fit view",
+      "label": "Diagram controls"
+    },
+    "stepName": "Step {number}: {label}, {status}",
+    "stepNumber": "Step {number}",
+    "completedIcon": "Completed",
+    "hint": "This step is part of the guitar building process. Follow the sequence to ensure proper construction order.",
+    "notes": "Notes",
+    "notesPlaceholder": "Add notes about this step...",
+    "photos": "Photos",
+    "soundAnalysis": "Sound Analysis",
+    "markCompleted": "Mark as Completed",
+    "markIncomplete": "Mark as Incomplete",
+    "close": "Close",
+    "photo": {
+      "add": "Add Photo",
+      "uploading": "Uploading...",
+      "camera": "Camera",
+      "empty": "No photos added yet. Click \"Add Photo\" or \"Camera\" to upload.",
+      "uploadFailed": "Failed to upload some or all photos",
+      "delete": "Delete photo {index}",
+      "deleteFailed": "Failed to delete photo",
+      "alt": "Photo {index} of {label}",
+      "open": "Open photo {index} full screen",
+      "closeViewer": "Close photo"
+    },
+    "measurement": {
+      "empty": "No sound analysis recorded.",
+      "peak": "Peak: {frequency} Hz",
+      "editDescription": "Edit Description",
+      "descriptionLabel": "Description",
+      "editLabel": "Edit description: {description}",
+      "delete": "Delete sound analysis {description}",
+      "deleteTitle": "Delete Analysis",
+      "deleteMessage": "Are you sure you want to delete this sound analysis? This action cannot be undone.",
+      "deleteConfirm": "Delete",
+      "graphLabel": "Spectrum of {description}, peak at {frequency} Hz",
+      "frequencyAxis": "Frequency (Hz)",
+      "levelAxis": "Level (dB)",
+      "peakMarker": "{frequency} Hz"
+    }
+  },
   "steps": {
     "TrussRod": "Truss rod",
     "MakeTrussNut": "Make truss rod nut",

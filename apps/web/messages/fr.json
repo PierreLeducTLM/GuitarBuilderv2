@@ -108,6 +108,125 @@
     "placeholder": "L'histoire partagée de cette construction s'affichera ici.",
     "shareLink": "Lien de partage"
   },
+  "builds": {
+    "title": "Vos fabrications ({count})",
+    "titlePlain": "Vos fabrications",
+    "loading": "Chargement des fabrications...",
+    "loadFailed": "Impossible de charger les fabrications de guitares",
+    "empty": "Aucune fabrication de guitare pour l'instant",
+    "emptyHint": "Cliquez sur « Ajouter une fabrication » pour commencer",
+    "addNew": "Ajouter une fabrication",
+    "guitarType": {
+      "classical": "Classique",
+      "steel_string": "Cordes acier"
+    },
+    "create": {
+      "title": "Nouvelle fabrication de guitare",
+      "nameLabel": "Nom de la fabrication",
+      "namePlaceholder": "p. ex. Fabrication n° 1",
+      "nameRequired": "Saisissez un nom pour la fabrication.",
+      "typeLabel": "Type de guitare",
+      "typeRequired": "Choisissez un type de guitare.",
+      "boboLabel": "Manche boulonné-déboulonnable (BOBO)",
+      "submit": "Ajouter la fabrication",
+      "submitting": "Ajout...",
+      "failed": "Impossible d'ajouter la fabrication. Veuillez réessayer."
+    },
+    "detail": {
+      "loading": "Chargement de la fabrication...",
+      "back": "Retour aux fabrications",
+      "share": "Partager",
+      "delete": "Supprimer la fabrication",
+      "created": "Créée le {date}",
+      "typeNotSet": "Type de guitare non défini",
+      "boboNeck": "Manche BOBO",
+      "readOnly": "Lecture seule : cette fabrication appartient à un autre utilisateur.",
+      "tabsLabel": "Vues de la fabrication",
+      "tabOverview": "Aperçu",
+      "tabSequence": "Diagramme des étapes"
+    },
+    "summary": {
+      "progressLabel": "Avancement de la fabrication",
+      "progress": "{completed} étapes sur {total} · {percent} %",
+      "latestMeasurement": "Dernière mesure",
+      "measurementValue": "{frequency} Hz",
+      "noMeasurement": "Aucune mesure pour l'instant",
+      "nextUp": "Prochaine étape : {step}",
+      "allDone": "Toutes les étapes sont terminées"
+    },
+    "construction": {
+      "title": "Construction",
+      "change": "Modifier",
+      "boboYes": "Manche BOBO : oui",
+      "boboNo": "Manche BOBO : non",
+      "notSetHint": "Choisissez un type de guitare pour masquer les étapes qui ne s'appliquent pas à cette fabrication."
+    },
+    "acoustics": {
+      "title": "Analyse acoustique",
+      "placeholder": "Les outils d'analyse acoustique arrivent dans une prochaine version."
+    },
+    "deleteDialog": {
+      "title": "Supprimer la fabrication",
+      "message": "Voulez-vous vraiment supprimer cette fabrication de guitare ?",
+      "confirm": "Supprimer",
+      "failed": "Impossible de supprimer la fabrication"
+    },
+    "saveFailed": "Impossible d'enregistrer les modifications"
+  },
+  "sequence": {
+    "loading": "Chargement du diagramme...",
+    "diagramLabel": "Diagramme des étapes de fabrication",
+    "legend": {
+      "label": "États des étapes",
+      "completed": "Terminée",
+      "ready": "Prête",
+      "notStarted": "Non commencée"
+    },
+    "controls": {
+      "zoomIn": "Zoom avant",
+      "zoomOut": "Zoom arrière",
+      "fitView": "Ajuster à la vue",
+      "label": "Commandes du diagramme"
+    },
+    "stepName": "Étape {number} : {label}, {status}",
+    "stepNumber": "Étape {number}",
+    "completedIcon": "Terminée",
+    "hint": "Cette étape fait partie du processus de fabrication de la guitare. Suivez la séquence pour respecter l'ordre de construction.",
+    "notes": "Notes",
+    "notesPlaceholder": "Ajoutez des notes sur cette étape...",
+    "photos": "Photos",
+    "soundAnalysis": "Analyse sonore",
+    "markCompleted": "Marquer comme terminée",
+    "markIncomplete": "Marquer comme non terminée",
+    "close": "Fermer",
+    "photo": {
+      "add": "Ajouter une photo",
+      "uploading": "Téléversement...",
+      "camera": "Appareil photo",
+      "empty": "Aucune photo pour l'instant. Cliquez sur « Ajouter une photo » ou « Appareil photo » pour téléverser.",
+      "uploadFailed": "Impossible de téléverser une partie ou la totalité des photos",
+      "delete": "Supprimer la photo {index}",
+      "deleteFailed": "Impossible de supprimer la photo",
+      "alt": "Photo {index} de {label}",
+      "open": "Afficher la photo {index} en plein écran",
+      "closeViewer": "Fermer la photo"
+    },
+    "measurement": {
+      "empty": "Aucune analyse sonore enregistrée.",
+      "peak": "Pic : {frequency} Hz",
+      "editDescription": "Modifier la description",
+      "descriptionLabel": "Description",
+      "editLabel": "Modifier la description : {description}",
+      "delete": "Supprimer l'analyse sonore {description}",
+      "deleteTitle": "Supprimer l'analyse",
+      "deleteMessage": "Voulez-vous vraiment supprimer cette analyse sonore ? Cette action est irréversible.",
+      "deleteConfirm": "Supprimer",
+      "graphLabel": "Spectre de {description}, pic à {frequency} Hz",
+      "frequencyAxis": "Fréquence (Hz)",
+      "levelAxis": "Niveau (dB)",
+      "peakMarker": "{frequency} Hz"
+    }
+  },
   "steps": {
     "TrussRod": "Tige de réglage",
     "MakeTrussNut": "Fabriquer l'écrou de la tige de réglage",

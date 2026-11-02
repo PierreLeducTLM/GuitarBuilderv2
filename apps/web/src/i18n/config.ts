@@ -39,6 +39,13 @@ export const formats = {
   dateTime: {
     short: { day: "numeric", month: "short", year: "numeric" },
     long: { day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "2-digit" },
+    dateTimeShort: {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    },
   },
   number: {
     integer: { maximumFractionDigits: 0 },
