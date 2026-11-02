@@ -33,23 +33,23 @@
 
 ## 2. Step template and derived state (`apps/web/src/lib/sequence/`)
 
-- [ ] 2.1 Add `@xyflow/react` and `@dagrejs/dagre` to `apps/web`, pinned exactly to the newest releases at least two weeks old. Verify `pnpm install` succeeds and the lockfile records exact versions
-- [ ] 2.2 Write `template.ts` (132 steps with key, number, group, guitar type, needs-BOBO and highlight, plus the 144 arrows), and add the `steps.<key>` English and French labels to `messages/en.json` and `messages/fr.json`. Verify with a conformance test that parses `openspec/specs/build-sequence/spec.md` and matches:
+- [x] 2.1 Add `@xyflow/react` and `@dagrejs/dagre` to `apps/web`, pinned exactly to the newest releases at least two weeks old. Verify `pnpm install` succeeds and the lockfile records exact versions
+- [x] 2.2 Write `template.ts` (132 steps with key, number, group, guitar type, needs-BOBO and highlight, plus the 144 arrows), and add the `steps.<key>` English and French labels to `messages/en.json` and `messages/fr.json`. Verify with a conformance test that parses `openspec/specs/build-sequence/spec.md` and matches:
   - keys, order and numbers;
   - English and French labels;
   - every connection and cross-group arrow;
   - the 10 starting steps, the single final step and the duplicated labels
-- [ ] 2.3 Implement applicability and `displayGraph` (hidden-step bridging with redundant bridges left out). Verify unit tests for:
+- [x] 2.3 Implement applicability and `displayGraph` (hidden-step bridging with redundant bridges left out). Verify unit tests for:
   - the 12/10/2/6 applicability lists;
   - all six step and arrow counts (120/129, 112/120, 120/131, 114/124, 132/144, 124/135);
   - the four Hidden Step Bridging scenarios
-- [ ] 2.4 Implement `mergeStepState`, `stepStatus` (completed, ready, not started), `progress`, `nextUp` and `latestMeasurement`. Verify unit tests for:
+- [x] 2.4 Implement `mergeStepState`, `stepStatus` (completed, ready, not started), `progress`, `nextUp` and `latestMeasurement`. Verify unit tests for:
   - Step State Loading (no state, missing fields, unknown keys);
   - the Ready Steps scenarios;
   - "30 of 120 steps · 25%";
   - progress ignoring a completed hidden step;
   - next up skipping completed steps
-- [ ] 2.5 Implement the dagre layout function (left to right, 100 px layers, 50 px spacing, 200 × 60 boxes), the spectrum mapping (`x = (f − 20) / 1980`, `y = (−20 − clamp(dB, −100, −20)) / 80`, ascending points up to 2000 Hz) and the photo file-name generator. Verify unit tests for:
+- [x] 2.5 Implement the dagre layout function (left to right, 100 px layers, 50 px spacing, 200 × 60 boxes), the spectrum mapping (`x = (f − 20) / 1980`, `y = (−20 − clamp(dB, −100, −20)) / 80`, ascending points up to 2000 Hz) and the photo file-name generator. Verify unit tests for:
   - the predecessor-left and same-layer scenarios;
   - spacing;
   - mapping, clamping and dropping points above 2000 Hz;
