@@ -71,7 +71,7 @@
 
 ## 5. Builds list and creation
 
-- [ ] 5.1 Build `/builds`:
+- [x] 5.1 Build `/builds`:
   - a Server Component reading the user's builds newest first;
   - "Your Builds (<n>)", cards with name and translated guitar type, linking to `/builds/<id>`;
   - the empty-state panel;
@@ -80,7 +80,7 @@
   - every string in `en.json` and `fr.json`.
 
   Verify end-to-end tests for order, count, the card without a guitar type, the empty state and the error message
-- [ ] 5.2 Build the "Add New Build" dialog:
+- [x] 5.2 Build the "Add New Build" dialog:
   - name with its placeholder, guitar type with nothing preselected, BOBO checked;
   - blank-name and missing-type blocking;
   - "Adding..." while disabled;
@@ -91,40 +91,40 @@
 
 ## 6. Build detail page
 
-- [ ] 6.1 Build `/builds/[id]`:
+- [x] 6.1 Build `/builds/[id]`:
   - a Server Component that checks the id is a UUID and reads the build, redirecting to `/builds` when it is missing or unreadable;
   - `loading.tsx` "Loading build...";
   - the header: Back to Builds, Delete Build, name, translated variant or "Guitar type not set", "Created <short date>";
   - `canEdit` passed down.
 
   Verify end-to-end tests for the header in English and French, back navigation, a link to another user's build and a link to a deleted build
-- [ ] 6.2 Build the summary strip ("<C> of <T> steps · <P>%" with `LedProgress`, the latest measurement or "No measurement yet", "Next up" or "All steps done") and the Overview and Sequence Diagram tabs held in page state. "Next up" switches to the Sequence tab and opens that step. Verify end-to-end tests for the strip on seeded state, the reload resetting to Overview, and Next up opening the step
-- [ ] 6.3 Build the Overview "Construction" section with "Change" (a dialog reusing the guitar type and BOBO fields) and the "Guitar type not set" invitation. Saving refreshes the page. Verify end-to-end tests that switching steel-string to classical swaps the bridge steps, and switching back shows the earlier notes again
-- [ ] 6.4 Implement Delete Build: the confirmation with the specified title, message and actions; photo paths, storage removal, then row deletion; "Failed to delete guitar build" on any failure; then `/builds`. Verify end-to-end tests for confirm (build and its photo files gone), cancel and failure
-- [ ] 6.5 Implement the read-only view for an administrator on another user's build: no delete, variant change, step editing, photo or measurement controls. Verify an end-to-end test as administrator, and that the administrator's own list shows only their builds
+- [x] 6.2 Build the summary strip ("<C> of <T> steps · <P>%" with `LedProgress`, the latest measurement or "No measurement yet", "Next up" or "All steps done") and the Overview and Sequence Diagram tabs held in page state. "Next up" switches to the Sequence tab and opens that step. Verify end-to-end tests for the strip on seeded state, the reload resetting to Overview, and Next up opening the step
+- [x] 6.3 Build the Overview "Construction" section with "Change" (a dialog reusing the guitar type and BOBO fields) and the "Guitar type not set" invitation. Saving refreshes the page. Verify end-to-end tests that switching steel-string to classical swaps the bridge steps, and switching back shows the earlier notes again
+- [x] 6.4 Implement Delete Build: the confirmation with the specified title, message and actions; photo paths, storage removal, then row deletion; "Failed to delete guitar build" on any failure; then `/builds`. Verify end-to-end tests for confirm (build and its photo files gone), cancel and failure
+- [x] 6.5 Implement the read-only view for an administrator on another user's build: no delete, variant change, step editing, photo or measurement controls. Verify an end-to-end test as administrator, and that the administrator's own list shows only their builds
 
 ## 7. Sequence diagram
 
-- [ ] 7.1 Build the diagram canvas, loaded with `next/dynamic` and "Loading diagram...":
+- [x] 7.1 Build the diagram canvas, loaded with `next/dynamic` and "Loading diagram...":
   - React Flow with dragging, connecting and selection off, zoom 10–150%, controls, dotted background;
   - right-angled, non-animated arrows from the display graph;
   - the dagre layout;
   - React Flow variables mapped to tokens.
 
   Verify end-to-end tests that a new steel-string BOBO build shows 120 boxes and 131 arrows, a classical build without BOBO 112 and 120, and that dragging a box does not move it
-- [ ] 7.2 Build the step node as a button: zero-padded number, translated label, completed badge, ready and not-started looks, the two variant highlights, the accessible name; plus the three-state legend. Verify a component test of the node's accessible name and states, and an end-to-end test that a new build shows exactly the 10 starting steps as ready
-- [ ] 7.3 Persist the viewport per build in `localStorage` (try/catch) on move end, restore it, and fit the view when nothing is stored. Verify end-to-end tests that a zoomed viewport is restored after a reload and that another build opens fitted
+- [x] 7.2 Build the step node as a button: zero-padded number, translated label, completed badge, ready and not-started looks, the two variant highlights, the accessible name; plus the three-state legend. Verify a component test of the node's accessible name and states, and an end-to-end test that a new build shows exactly the 10 starting steps as ready
+- [x] 7.3 Persist the viewport per build in `localStorage` (try/catch) on move end, restore it, and fit the view when nothing is stored. Verify end-to-end tests that a zoomed viewport is restored after a reload and that another build opens fitted
 
 ## 8. Step dialog: completion, notes and saving
 
-- [ ] 8.1 Build the step store and serial save queue:
+- [x] 8.1 Build the step store and serial save queue:
   - optimistic changes;
   - reconciliation with the returned entry;
   - notes saved 500 ms after typing stops, flushed on close, page hide and before other changes to the step;
   - revert plus "Failed to save changes" on failure, with notes kept in the field.
 
   Verify unit tests for ordering, notes coalescing, flush-before-complete and failure handling
-- [ ] 8.2 Build the step details dialog:
+- [x] 8.2 Build the step details dialog:
   - "Step <n>", the label with its check icon, the info hint;
   - the Notes, Photos and Sound Analysis sections;
   - "Mark as Completed" / "Mark as Incomplete", which saves and closes;
@@ -134,19 +134,19 @@
 
 ## 9. Step photos
 
-- [ ] 9.1 Implement photo upload:
+- [x] 9.1 Implement photo upload:
   - "Add Photo" with multiple images, uploaded in parallel, appended in selection order;
   - "Uploading..." with both buttons disabled;
   - "Failed to upload some or all photos" on any failure, with uploaded files removed if the reference save fails;
   - "Camera" shown only when a video input exists.
 
   Verify end-to-end tests for three files after an existing photo, a partial failure keeping the successful files, a total failure, and Camera hidden without a camera
-- [ ] 9.2 Build the gallery (square thumbnails, the empty text, a full-screen view closed by × or a backdrop click) and one-click deletion (storage first, empty result treated as refused, a missing file still removable, "Failed to delete photo"). Verify end-to-end tests for deleting the second of three photos, its URL no longer serving, a deletion failure, and the full-screen view
+- [x] 9.2 Build the gallery (square thumbnails, the empty text, a full-screen view closed by × or a backdrop click) and one-click deletion (storage first, empty result treated as refused, a missing file still removable, "Failed to delete photo"). Verify end-to-end tests for deleting the second of three photos, its URL no longer serving, a deletion failure, and the full-screen view
 
 ## 10. Step measurements
 
-- [ ] 10.1 Build the spectrum graph SVG: 20–2000 Hz and −100 to −20 dB axes, the labelled grid lines, the clamped trace, and the dashed peak marker with its "<f> Hz" label. Verify a component test of grid labels, the peak marker and a clamped point
-- [ ] 10.2 Build the Sound Analysis list:
+- [x] 10.1 Build the spectrum graph SVG: 20–2000 Hz and −100 to −20 dB axes, the labelled grid lines, the clamped trace, and the dashed peak marker with its "<f> Hz" label. Verify a component test of grid labels, the peak marker and a clamped point
+- [x] 10.2 Build the Sound Analysis list:
   - measurements in added order, or "No sound analysis recorded.";
   - description, local date and time, "Peak: <f> Hz" with one decimal, graph;
   - "Edit Description" (pre-filled, trimmed, Save disabled while blank);
@@ -156,7 +156,7 @@
 
 ## 11. Documentation and integration
 
-- [ ] 11.1 Update the root `README.md` with the photo bucket, the storage tables in the local test shim, and the project-wide upload size limit. Verify each documented command runs as written
+- [x] 11.1 Update the root `README.md` with the photo bucket, the storage tables in the local test shim, and the project-wide upload size limit. Verify each documented command runs as written
 - [ ] 11.2 Run `pnpm check`, `pnpm build`, `pnpm test:db`, `pnpm test:e2e` and `openspec validate --strict` from a clean install. Verify all pass
 
 ## Workflow follow-up

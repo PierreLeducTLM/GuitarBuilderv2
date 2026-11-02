@@ -49,9 +49,7 @@
     "frName": "French"
   },
   "sections": {
-    "placeholder": "This section is being rebuilt. Its tools arrive in an upcoming release.",
-    "buildDetail": "Build",
-    "buildId": "Build ID"
+    "placeholder": "This section is being rebuilt. Its tools arrive in an upcoming release."
   },
   "auth": {
     "subtitleSignIn": "Welcome back",

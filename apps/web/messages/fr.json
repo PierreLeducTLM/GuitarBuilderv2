@@ -49,9 +49,7 @@
     "frName": "Français"
   },
   "sections": {
-    "placeholder": "Cette section est en cours de reconstruction. Ses outils arrivent dans une prochaine version.",
-    "buildDetail": "Construction",
-    "buildId": "Identifiant de la construction"
+    "placeholder": "Cette section est en cours de reconstruction. Ses outils arrivent dans une prochaine version."
   },
   "auth": {
     "subtitleSignIn": "Bon retour",
