@@ -56,8 +56,7 @@ None.
 - **Database:**
   - a new migration with the `builds` table, its policies and grants, the `updated_at` trigger, the `update_build_step` and `build_photo_paths` functions, and the `step-photos` bucket with its storage policies;
   - new pgTAP files;
-  - the local test shim gains a minimal `storage` schema;
-  - the CI database job starts the storage service so that the bucket columns exist.
+  - the local test shim gains a minimal `storage` schema.
 - **Packages:**
   - `@gb/db` gains the `builds` types and the two functions;
   - `@gb/ui` gains tokens for the ready state and the two variant highlights, under the contrast test.

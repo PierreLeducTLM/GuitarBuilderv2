@@ -141,7 +141,7 @@ Public means the storage service serves `/storage/v1/object/public/step-photos/<
 
 **Photo deletion:**
 - `storage.remove([path])` first; then `remove_photo`.
-- Supabase returns an empty list, not an error, when RLS refuses a delete. An empty result therefore counts as a failure ("Failed to delete photo"), unless a request to the public URL returns 404. In that case the file is already gone and only the reference is removed, so a broken migrated photo can still be cleaned up.
+- Supabase returns an empty list, not an error, when RLS refuses a delete (checked against the local Storage service). An empty result therefore counts as a failure ("Failed to delete photo"), unless a request to the public URL fails with a 4xx status (Storage answers 400 for a missing object). In that case the file is already gone and only the reference is removed, so a broken migrated photo can still be cleaned up.
 
 ### 5. Build deletion
 
@@ -284,7 +284,7 @@ A per-build store holds the merged state and a serial queue of `update_build_ste
 
 **Shim:** `scripts/test-db/supabase-shim.sql` gains a minimal `storage` schema (`buckets`, `objects` with RLS, `storage.foldername()`, Supabase's grants).
 
-**CI:** `supabase db start` runs only Postgres, so the storage service never applies its own schema migrations. The CI database job switches to `supabase start` with every service except the database and storage excluded.
+**CI:** the database job stays as it is. With the Supabase CLI version CI pins (2.122.0), `supabase db start` already creates the complete storage schema: the bucket columns, row-level security and the delete protection. The new suite passes that way locally.
 
 **End-to-end:** the fake Supabase server learns the builds REST calls the app makes, the two RPCs and the storage upload, remove and public-read endpoints. Each has failure switches for the specified error messages.
 
@@ -303,8 +303,8 @@ A per-build store holds the merged state and a serial queue of `update_build_ste
 
 - **[The step document grows with spectra]** A 331-point record is about 18 KB, so even heavy use stays in the low megabytes and loads with the detail page. If it becomes heavy, spectra can move to a side table behind the same function without changing the stored step format the spec defines.
 - **[Supabase's project-wide upload size limit (50 MB by default) still applies]** The app sets no limit of its own, so a larger file fails as a normal upload failure with the specified message. The operator can raise the project limit.
-- **[`allowed_mime_types` wildcards]** Supabase Storage accepts `image/*`; the apply step confirms it against the storage service's migration. If it does not, the bucket lists the common image types explicitly.
-- **[The storage service and the CI job cannot run here (no Docker)]** The pgTAP files run against the shim locally. CI is the first run against the real storage schema, as with `foundation`'s database job.
+- **[`allowed_mime_types` wildcards]** Confirmed against the local Storage service: `image/*` accepts PNG and refuses `text/html`.
+- **[Two database test paths]** The pgTAP files run both against the shim (`pnpm test:db`) and against the Supabase image (`supabase test db`, as in CI). The shim copies the storage tables, grants and delete protection of the image, so both paths give the same results.
 - **[The fake Supabase server can drift from PostgREST and Storage]**
   - It implements only the calls the app makes, with the same request shapes; the rules themselves are tested by pgTAP.
   - Recommended next step, outside this change: an end-to-end CI job against `supabase start`.

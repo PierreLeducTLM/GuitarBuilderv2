@@ -2,8 +2,8 @@
 
 ## 1. Database
 
-- [ ] 1.1 Extend `scripts/test-db/supabase-shim.sql` with a minimal `storage` schema: `storage.buckets` (`id`, `name`, `public`, `file_size_limit`, `allowed_mime_types`), `storage.objects` (`bucket_id`, `name`, `owner_id`, `metadata`, timestamps) with RLS enabled, `storage.foldername()`, and Supabase's grants on both tables. Verify `pnpm test:db` still passes the existing files
-- [ ] 1.2 Write the migration for `public.builds`: columns and checks, the owner/list index, the `updated_at` trigger, RLS policies, `revoke all` then column-level grants that leave out `share_token` and keep `sequence_state` and the share columns unwritable. Write `supabase/tests/database/05_builds_schema.test.sql` and `06_builds_access.test.sql` covering:
+- [x] 1.1 Extend `scripts/test-db/supabase-shim.sql` with a minimal `storage` schema: `storage.buckets` (`id`, `name`, `public`, `file_size_limit`, `allowed_mime_types`), `storage.objects` (`bucket_id`, `name`, `owner_id`, `metadata`, timestamps) with RLS enabled, `storage.foldername()`, and Supabase's grants on both tables. Verify `pnpm test:db` still passes the existing files
+- [x] 1.2 Write the migration for `public.builds`: columns and checks, the owner/list index, the `updated_at` trigger, RLS policies, `revoke all` then column-level grants that leave out `share_token` and keep `sequence_state` and the share columns unwritable. Write `supabase/tests/database/05_builds_schema.test.sql` and `06_builds_access.test.sql` covering:
   - owner CRUD;
   - other users and anonymous get nothing;
   - an administrator reads but cannot insert, update or delete others' builds, and cannot read `share_token`;
@@ -12,7 +12,7 @@
   - builds cascading with their user.
 
   Verify `pnpm test:db` passes
-- [ ] 1.3 Add `public.update_build_step(uuid, text, jsonb)` with the seven operations, the row lock, the shared "Build not found" error and the validation rules of design decision 3, and `public.build_photo_paths(uuid)`. Revoke execute from `public` and `anon`. Write `07_build_steps.test.sql` covering:
+- [x] 1.3 Add `public.update_build_step(uuid, text, jsonb)` with the seven operations, the row lock, the shared "Build not found" error and the validation rules of design decision 3, and `public.build_photo_paths(uuid)`. Revoke execute from `public` and `anon`. Write `07_build_steps.test.sql` covering:
   - each operation;
   - each validation error;
   - non-owner and administrator refusal;
@@ -20,7 +20,7 @@
   - the returned entry.
 
   Verify `pnpm test:db` passes
-- [ ] 1.4 Create the `step-photos` bucket (public, `image/*`, idempotent insert) and the owner-only insert, select and delete policies on `storage.objects`. Write `08_step_photos.test.sql`:
+- [x] 1.4 Create the `step-photos` bucket (public, `image/*`, idempotent insert) and the owner-only insert, select and delete policies on `storage.objects`. Write `08_step_photos.test.sql`:
   - the owner can insert, read and delete under their own build's folder;
   - another user, an administrator and anonymous cannot;
   - anonymous cannot list;
@@ -28,8 +28,8 @@
   - `build_photo_paths` returns only the owner's files.
 
   Verify `pnpm test:db` passes
-- [ ] 1.5 Change the CI database job to start the database and storage services (`supabase start` with the other services excluded) before `supabase test db`, so the storage schema is complete. Verify the workflow YAML parses and every command it runs exists in the repository
-- [ ] 1.6 Hand-write the `builds` row/insert/update types and the two function signatures in `packages/db/src/database.types.ts`, plus exported `GuitarType` and step-entry JSON types. Verify `pnpm --filter @gb/db test` and `pnpm typecheck` pass
+- [x] 1.5 Confirm that the CI database job's `supabase db start` (CLI 2.122.0) creates the complete storage schema, so the job needs no change. Verify by running `supabase db start` and `supabase test db` locally with that CLI version: the bucket is created and every test passes
+- [x] 1.6 Hand-write the `builds` row/insert/update types and the two function signatures in `packages/db/src/database.types.ts`, plus exported `GuitarType` and step-entry JSON types. Verify `pnpm --filter @gb/db test` and `pnpm typecheck` pass
 
 ## 2. Step template and derived state (`apps/web/src/lib/sequence/`)
 
@@ -156,7 +156,7 @@
 
 ## 11. Documentation and integration
 
-- [ ] 11.1 Update the root `README.md` with the photo bucket, the storage service needed by `pnpm test:db` in CI, and the project-wide upload size limit. Verify each documented command runs as written
+- [ ] 11.1 Update the root `README.md` with the photo bucket, the storage tables in the local test shim, and the project-wide upload size limit. Verify each documented command runs as written
 - [ ] 11.2 Run `pnpm check`, `pnpm build`, `pnpm test:db`, `pnpm test:e2e` and `openspec validate --strict` from a clean install. Verify all pass
 
 ## Workflow follow-up
