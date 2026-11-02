@@ -99,11 +99,17 @@ The system SHALL hide the template steps that do not apply to a build's construc
 #### Scenario: Classical-only steps
 - **WHEN** the applicability of steps is determined
 - **THEN** these 10 steps apply only to classical builds: CLFitHeadLaminate, CLDrillTuners, FabricateCLBridge, DrillStringHoles, RoutChannels, GlueTieBlock, ShapeBridgeWings2, ProfilePolish, MachineCompensated, ShapeMarkString
-- **AND** CLGlueBOBO1 and CLCutBOBO apply only to classical builds with a BOBO neck
+- **AND** CLGlueBOBO1 and CLCutBOBO apply only to builds with a BOBO neck that are classical or whose guitar type is not set
 
 #### Scenario: BOBO-only steps
 - **WHEN** the applicability of steps is determined
 - **THEN** these 6 steps apply only to builds with a BOBO neck, of either guitar type: BOBOFitLoose, BOBONeckGroove, BOBOGlueLosen, MortiseHeelBolt, MakeBoltBar and RoutHeelMortise
+
+#### Scenario: Guitar type not set and no BOBO neck
+- **GIVEN** a migrated build whose guitar type is not set and that has no BOBO neck
+- **WHEN** the applicability of its steps is determined
+- **THEN** CLGlueBOBO1, CLCutBOBO and the 6 BOBO-only steps are hidden
+- **AND** every classical-only and steel-string-only step is shown
 
 #### Scenario: Step and arrow counts per variant
 - **WHEN** the diagram is displayed
@@ -751,6 +757,26 @@ The system SHALL merge a build's stored step state onto the template by step key
 - **GIVEN** a stored entry that has only a key and a completed flag
 - **WHEN** the step's dialog is opened
 - **THEN** it shows empty notes, no photos and no measurements
+
+### Requirement: Step Save Failures
+The system SHALL show the message "Failed to save changes" when a change to a step's completion, notes or measurements cannot be saved, and SHALL NOT show that change as saved. Notes that could not be saved stay in the open Notes field and are sent again with the next edit, so typed text is never discarded by a failed save.
+
+#### Scenario: Completion cannot be saved
+- **GIVEN** the server refuses changes to the build
+- **WHEN** the user opens "Thickness blank" and presses "Mark as Completed"
+- **THEN** "Failed to save changes" is shown
+- **AND** "Thickness blank" carries no completion badge
+
+#### Scenario: Notes cannot be saved
+- **GIVEN** the connection drops while the user types notes on "Cut brace blanks"
+- **WHEN** the save fails
+- **THEN** "Failed to save changes" is shown and the typed text stays in the Notes field
+- **AND** after the connection returns and the user types again, reopening the step after a reload shows the full notes
+
+#### Scenario: Description edit cannot be saved
+- **GIVEN** the server refuses changes to the build
+- **WHEN** the user saves a new description for a measurement
+- **THEN** "Failed to save changes" is shown and the measurement keeps its previous description
 
 ### Requirement: Step Data Access
 The system SHALL let only a build's owner change its step state, upload photos to its steps or delete those photos; an administrator viewing another user's build sees it read-only (see `guitar-builds`). Without signing in, step data can be viewed only through the public story (`build-story-sharing`) and through the photo URLs.
