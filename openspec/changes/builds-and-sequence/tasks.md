@@ -57,7 +57,7 @@
 
 ## 3. Design tokens
 
-- [ ] 3.1 Add the `variant` and `bridgeBlank` roles to both themes in `packages/ui/src/tokens/themes.ts`, regenerate `tokens.css`, map them in `theme.css`, and add their text/background pairs to the contrast test. Verify `pnpm --filter @gb/ui test` passes with every pair at least 4.5:1
+- [x] 3.1 Add the `variant` and `bridgeBlank` roles to both themes in `packages/ui/src/tokens/themes.ts`, regenerate `tokens.css`, map them in `theme.css`, and add their text/background pairs to the contrast test. Verify `pnpm --filter @gb/ui test` passes with every pair at least 4.5:1
 
 ## 4. End-to-end test double
 
