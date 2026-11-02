@@ -61,7 +61,7 @@
 
 ## 4. End-to-end test double
 
-- [ ] 4.1 Extend `apps/web/e2e/fake-supabase.ts` with the calls the app makes:
+- [x] 4.1 Extend `apps/web/e2e/fake-supabase.ts` with the calls the app makes:
   - `builds` select (list with owner filter and order, single by id), insert returning, update and delete;
   - `rpc/update_build_step` and `rpc/build_photo_paths`, applying the same operations;
   - storage upload, remove (empty result when refused) and public read;
