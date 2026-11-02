@@ -157,7 +157,8 @@
 ## 11. Documentation and integration
 
 - [x] 11.1 Update the root `README.md` with the photo bucket, the storage tables in the local test shim, and the project-wide upload size limit. Verify each documented command runs as written
-- [ ] 11.2 Run `pnpm check`, `pnpm build`, `pnpm test:db`, `pnpm test:e2e` and `openspec validate --strict` from a clean install. Verify all pass
+- [x] 11.2 Run `pnpm check`, `pnpm build`, `pnpm test:db`, `pnpm test:e2e` and `openspec validate --strict` from a clean install. Verify all pass
+  - Note: pgTAP could not be installed where this change was implemented, so `pnpm test:db` itself did not run there. The same eight files passed with `supabase test db` (CLI 2.122.0, as in CI) and against the shim inside the Supabase Postgres container, and the first-admin race test passed.
 
 ## Workflow follow-up
 
