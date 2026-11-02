@@ -30,10 +30,61 @@ export const fakeSupabase = {
     failSignIn?: boolean;
     requireConfirmation?: boolean;
     signInDelayMs?: number;
+    failBuildList?: boolean;
+    failBuildInsert?: boolean;
+    buildInsertDelayMs?: number;
+    failBuildDelete?: boolean;
+    failStepChanges?: boolean;
+    failUploadsMatching?: string | null;
+    uploadDelayMs?: number;
+    failStorageRemove?: boolean;
   }) {
     await fetch(`${FAKE_SUPABASE}/__test/config`, { method: "POST", body: JSON.stringify(config) });
   },
+  /** Creates a build directly, as if it had been made earlier. */
+  async seedBuild(build: SeedBuild): Promise<StoredBuild> {
+    const response = await fetch(`${FAKE_SUPABASE}/__test/builds`, {
+      method: "POST",
+      body: JSON.stringify(build),
+    });
+    return (await response.json()) as StoredBuild;
+  },
+  /** Every stored build, of every user. */
+  async builds(): Promise<StoredBuild[]> {
+    return (await (await fetch(`${FAKE_SUPABASE}/__test/builds`)).json()) as StoredBuild[];
+  },
+  /** Every stored photo file path. */
+  async objects(): Promise<string[]> {
+    return (await (await fetch(`${FAKE_SUPABASE}/__test/objects`)).json()) as string[];
+  },
 };
+
+export interface SeedBuild {
+  ownerEmail: string;
+  name: string;
+  guitar_type?: "classical" | "steel_string" | null;
+  bobo_neck?: boolean;
+  created_at?: string;
+  sequence_state?: Record<string, unknown>[];
+  id?: string;
+}
+
+export interface StoredBuild {
+  id: string;
+  owner_id: string;
+  name: string;
+  guitar_type: "classical" | "steel_string" | null;
+  bobo_neck: boolean;
+  sequence_state: {
+    key: string;
+    completed?: boolean;
+    notes?: string;
+    photos?: { url: string; name: string }[];
+    measurements?: { id: string; description: string; frequency: number }[];
+  }[];
+  created_at: string;
+  updated_at: string;
+}
 
 export const ADMIN = { email: "admin@example.com", password: "spruce123" };
 export const LUTHIER = { email: "luthier@example.com", password: "spruce123" };

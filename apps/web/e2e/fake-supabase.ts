@@ -3,10 +3,22 @@
  * can sign in and exercise the shell without Docker. It is NOT a model of the
  * database rules: those are covered by the pgTAP suite (supabase/tests/database).
  *
- * Auth:  POST /auth/v1/token?grant_type=password|refresh_token, POST /auth/v1/signup,
- *        GET /auth/v1/user, POST /auth/v1/logout
- * REST:  GET /rest/v1/profiles?id=eq.<uuid>
- * Test control: POST /__test/reset, POST /__test/users, POST /__test/config
+ * Auth:    POST /auth/v1/token?grant_type=password|refresh_token, POST /auth/v1/signup,
+ *          GET /auth/v1/user, POST /auth/v1/logout
+ * REST:    GET /rest/v1/profiles?id=eq.<uuid>
+ *          GET|POST|PATCH|DELETE /rest/v1/builds (the select, eq, order and
+ *          object-response forms the app sends)
+ *          POST /rest/v1/rpc/update_build_step, POST /rest/v1/rpc/build_photo_paths
+ * Storage: POST /storage/v1/object/step-photos/<path> (upload),
+ *          DELETE /storage/v1/object/step-photos (remove),
+ *          GET|HEAD /storage/v1/object/public/step-photos/<path> (public read)
+ * Test control: POST /__test/reset, POST /__test/users, POST /__test/config,
+ *          POST /__test/builds, GET /__test/builds, GET /__test/objects
+ *
+ * Builds, steps and photos follow the same rules as the database (owner writes,
+ * administrators read, one step change at a time, owner-only photo files), and the
+ * Storage answers observed on a real stack: a refused remove returns [], a missing
+ * public object answers 400, and only images are accepted.
  *
  * Run: node e2e/fake-supabase.ts [port]   (Node >= 22.18 strips the types)
  */
@@ -22,9 +34,43 @@ interface User {
   createdAt: string;
 }
 
+interface Build {
+  id: string;
+  owner_id: string;
+  name: string;
+  guitar_type: "classical" | "steel_string" | null;
+  bobo_neck: boolean;
+  sequence_state: Record<string, unknown>[];
+  share_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface StoredObject {
+  ownerId: string;
+  contentType: string;
+  data: Buffer;
+}
+
 interface Config {
   /** Answer sign-out with a server error (app-shell: sign-out failure). */
   failLogout: boolean;
+  /** Answer the builds list with a server error (guitar-builds: list fails to load). */
+  failBuildList: boolean;
+  /** Refuse new builds (guitar-builds: creation fails). */
+  failBuildInsert: boolean;
+  /** Delay before answering a new build, to observe "Adding...". */
+  buildInsertDelayMs: number;
+  /** Refuse build deletion (guitar-builds: deletion fails). */
+  failBuildDelete: boolean;
+  /** Refuse every step change (build-sequence: Step Save Failures). */
+  failStepChanges: boolean;
+  /** Refuse uploads whose original file name matches this pattern. */
+  failUploadsMatching: string | null;
+  /** Delay before answering an upload, to observe "Uploading...". */
+  uploadDelayMs: number;
+  /** Answer photo removals as a refusal (an empty list). */
+  failStorageRemove: boolean;
   /** Answer sign-in with 503, which supabase-js treats as a network failure. */
   failSignIn: boolean;
   /** Sign-ups need email verification (no session until confirmed). */
@@ -36,8 +82,18 @@ interface Config {
 const users = new Map<string, User>();
 const accessTokens = new Map<string, string>();
 const refreshTokens = new Map<string, string>();
+const builds = new Map<string, Build>();
+const objects = new Map<string, StoredObject>();
 const defaults: Config = {
   failLogout: false,
+  failBuildList: false,
+  failBuildInsert: false,
+  buildInsertDelayMs: 0,
+  failBuildDelete: false,
+  failStepChanges: false,
+  failUploadsMatching: null,
+  uploadDelayMs: 0,
+  failStorageRemove: false,
   failSignIn: false,
   requireConfirmation: false,
   signInDelayMs: 0,
@@ -46,6 +102,8 @@ let config: Config = { ...defaults };
 
 function reset() {
   users.clear();
+  builds.clear();
+  objects.clear();
   accessTokens.clear();
   refreshTokens.clear();
   config = { ...defaults };
@@ -122,12 +180,18 @@ function bearerUser(request: IncomingMessage): User | undefined {
   return token ? userById(accessTokens.get(token)) : undefined;
 }
 
-async function body(request: IncomingMessage): Promise<Record<string, unknown>> {
+async function rawBody(request: IncomingMessage): Promise<Buffer> {
   const chunks: Buffer[] = [];
   for await (const chunk of request) chunks.push(chunk as Buffer);
-  const text = Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks);
+}
+
+async function body(request: IncomingMessage): Promise<Record<string, unknown>> {
+  const text = (await rawBody(request)).toString("utf8");
   return text ? (JSON.parse(text) as Record<string, unknown>) : {};
 }
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function send(response: ServerResponse, status: number, data?: unknown) {
   response.statusCode = status;
@@ -138,6 +202,367 @@ function send(response: ServerResponse, status: number, data?: unknown) {
 
 function authError(response: ServerResponse, status: number, code: string, message: string) {
   send(response, status, { code: status, error_code: code, msg: message });
+}
+
+/** A PostgREST error body. */
+function restError(response: ServerResponse, status: number, code: string, message: string) {
+  send(response, status, { code, message, details: null, hint: null });
+}
+
+// ---------------------------------------------------------------------------
+// Builds (mirrors supabase/migrations/20261102120000_builds_and_steps.sql)
+// ---------------------------------------------------------------------------
+
+const BUILD_COLUMNS = [
+  "id",
+  "owner_id",
+  "name",
+  "guitar_type",
+  "bobo_neck",
+  "sequence_state",
+  "share_enabled",
+  "created_at",
+  "updated_at",
+] as const;
+
+/** Builds the viewer may read: their own, or every build for an administrator. */
+function readableBuilds(viewer: User | undefined): Build[] {
+  if (!viewer) return [];
+  return [...builds.values()].filter((b) => b.owner_id === viewer.id || viewer.role === "admin");
+}
+
+/** Applies the `column=eq.value` filters of a PostgREST query. */
+function filterRows(rows: Build[], params: URLSearchParams): Build[] {
+  let result = rows;
+  for (const [column, value] of params) {
+    if (!value.startsWith("eq.")) continue;
+    const wanted = value.slice(3);
+    result = result.filter((row) => String(row[column as keyof Build]) === wanted);
+  }
+  return result;
+}
+
+function project(row: Build, params: URLSearchParams): Record<string, unknown> {
+  const columns = (params.get("select") ?? "*").split(",").map((c) => c.trim());
+  if (columns.includes("*")) return { ...row };
+  const projected: Record<string, unknown> = {};
+  for (const column of columns) {
+    if (!(BUILD_COLUMNS as readonly string[]).includes(column)) {
+      throw Object.assign(new Error(`permission denied for column ${column}`), { status: 401 });
+    }
+    projected[column] = row[column as keyof Build];
+  }
+  return projected;
+}
+
+function sendRows(
+  request: IncomingMessage,
+  response: ServerResponse,
+  rows: Record<string, unknown>[],
+  status = 200,
+) {
+  if (request.headers.accept?.includes("application/vnd.pgrst.object+json")) {
+    if (rows.length !== 1) {
+      return restError(
+        response,
+        406,
+        "PGRST116",
+        "JSON object requested, multiple (or no) rows returned",
+      );
+    }
+    return send(response, status, rows[0]);
+  }
+  return send(response, status, rows);
+}
+
+function sortRows(rows: Build[], params: URLSearchParams): Build[] {
+  const order = params.get("order");
+  if (!order) return rows;
+  const [column, direction] = order.split(".");
+  const sign = direction === "desc" ? -1 : 1;
+  return [...rows].sort((a, b) => {
+    const left = String(a[column as keyof Build]);
+    const right = String(b[column as keyof Build]);
+    return left < right ? -sign : left > right ? sign : 0;
+  });
+}
+
+function isGuitarType(value: unknown): value is Build["guitar_type"] {
+  return value === "classical" || value === "steel_string";
+}
+
+/** One step change, as update_build_step applies it. Throws a message on bad input. */
+function applyStepChange(build: Build, key: string, change: Record<string, unknown>) {
+  if (!/^[A-Za-z0-9]{1,64}$/.test(key)) throw new Error("Invalid step key");
+  const index = build.sequence_state.findIndex((entry) => entry.key === key);
+  const stored = index >= 0 ? (build.sequence_state[index] as Record<string, unknown>) : {};
+  const entry = {
+    key,
+    completed: stored.completed === true,
+    notes: typeof stored.notes === "string" ? stored.notes : "",
+    photos: Array.isArray(stored.photos) ? [...stored.photos] : [],
+    measurements: Array.isArray(stored.measurements) ? [...stored.measurements] : [],
+  } as {
+    key: string;
+    completed: boolean;
+    notes: string;
+    photos: unknown[];
+    measurements: Record<string, unknown>[];
+  };
+
+  switch (change.op) {
+    case "set_completed":
+      if (typeof change.completed !== "boolean") throw new Error("completed must be a boolean");
+      entry.completed = change.completed;
+      break;
+    case "set_notes":
+      if (typeof change.notes !== "string") throw new Error("notes must be text");
+      entry.notes = change.notes;
+      break;
+    case "add_photos": {
+      const photos = change.photos;
+      if (!Array.isArray(photos) || photos.length === 0)
+        throw new Error("photos must be a non-empty list");
+      for (const photo of photos as Record<string, unknown>[]) {
+        const name = String(photo.name);
+        if (
+          !/^[0-9]{1,16}_[A-Za-z0-9]{1,32}\.[A-Za-z0-9]{1,16}$/.test(name) ||
+          !String(photo.url).endsWith(`/${build.id}/${key}/${name}`)
+        ) {
+          throw new Error("Invalid photo");
+        }
+        entry.photos.push({ url: photo.url, name: photo.name });
+      }
+      break;
+    }
+    case "remove_photo":
+      entry.photos = entry.photos.filter((p) => (p as { name?: unknown }).name !== change.name);
+      break;
+    case "add_measurement": {
+      const m = change.measurement as Record<string, unknown> | undefined;
+      const description = typeof m?.description === "string" ? m.description.trim() : "";
+      if (!m || typeof m.id !== "string" || !description || typeof m.frequency !== "number") {
+        throw new Error("Invalid measurement");
+      }
+      if (entry.measurements.some((other) => other.id === m.id))
+        throw new Error("Duplicate measurement");
+      entry.measurements.push({ ...m, description });
+      break;
+    }
+    case "set_measurement_description": {
+      const description = typeof change.description === "string" ? change.description.trim() : "";
+      if (!description) throw new Error("Invalid description");
+      const target = entry.measurements.find((m) => m.id === change.id);
+      if (!target) throw new Error("Measurement not found");
+      entry.measurements = entry.measurements.map((m) =>
+        m === target ? { ...m, description } : m,
+      );
+      break;
+    }
+    case "remove_measurement":
+      entry.measurements = entry.measurements.filter((m) => m.id !== change.id);
+      break;
+    default:
+      throw new Error("Unknown operation");
+  }
+  if (index >= 0) build.sequence_state[index] = entry;
+  else build.sequence_state.push(entry);
+  build.updated_at = new Date().toISOString();
+  return entry;
+}
+
+// ---------------------------------------------------------------------------
+// Storage (step-photos bucket)
+// ---------------------------------------------------------------------------
+
+const BUCKET = "step-photos";
+
+/** Whether `path` is <build id>/<step key>/<file> for a build the user owns. */
+function ownsPhotoPath(user: User | undefined, path: string): boolean {
+  const parts = path.split("/");
+  if (!user || parts.length !== 3 || !/^[A-Za-z0-9]{1,64}$/.test(parts[1] ?? "")) return false;
+  return builds.get(parts[0] ?? "")?.owner_id === user.id;
+}
+
+/** The file part of a multipart upload (storage-js sends Blobs as form data). */
+function filePart(raw: Buffer, contentType: string) {
+  const boundary = /boundary=(?:"([^"]+)"|([^;]+))/.exec(contentType);
+  if (!boundary) return { fileName: "", contentType, data: raw };
+  const text = raw.toString("latin1");
+  const marker = `--${boundary[1] ?? boundary[2]}`;
+  for (const part of text.split(marker)) {
+    const headerEnd = part.indexOf("\r\n\r\n");
+    if (headerEnd < 0) continue;
+    const headers = part.slice(0, headerEnd);
+    const fileName = /filename="([^"]*)"/.exec(headers)?.[1];
+    if (fileName === undefined) continue;
+    const type = /content-type:\s*([^\r\n]+)/i.exec(headers)?.[1] ?? "application/octet-stream";
+    const content = part.slice(headerEnd + 4, part.length - 2);
+    return { fileName, contentType: type.trim(), data: Buffer.from(content, "latin1") };
+  }
+  return { fileName: "", contentType: "application/octet-stream", data: Buffer.alloc(0) };
+}
+
+function storageError(response: ServerResponse, status: number, error: string, message: string) {
+  send(response, status, { statusCode: String(status), error, message });
+}
+
+async function handleBuilds(request: IncomingMessage, response: ServerResponse, url: URL) {
+  const viewer = bearerUser(request);
+  const params = url.searchParams;
+  switch (request.method) {
+    case "GET": {
+      if (config.failBuildList && params.has("order")) {
+        return restError(response, 500, "XX000", "fake-supabase: list failure");
+      }
+      const rows = sortRows(filterRows(readableBuilds(viewer), params), params);
+      return sendRows(
+        request,
+        response,
+        rows.map((row) => project(row, params)),
+      );
+    }
+    case "POST": {
+      if (config.buildInsertDelayMs > 0) await delay(config.buildInsertDelayMs);
+      const input = await body(request);
+      if (!viewer) return restError(response, 401, "42501", "permission denied for table builds");
+      if (config.failBuildInsert)
+        return restError(response, 500, "XX000", "fake-supabase: insert failure");
+      const allowed = ["name", "guitar_type", "bobo_neck"];
+      if (Object.keys(input).some((column) => !allowed.includes(column))) {
+        return restError(response, 401, "42501", "permission denied for table builds");
+      }
+      if (!isGuitarType(input.guitar_type)) {
+        return restError(response, 403, "42501", "new row violates row-level security policy");
+      }
+      if (typeof input.name !== "string" || !/\S/.test(input.name)) {
+        return restError(response, 400, "23514", "violates check constraint builds_name_not_blank");
+      }
+      const now = new Date().toISOString();
+      const build: Build = {
+        id: randomUUID(),
+        owner_id: viewer.id,
+        name: input.name,
+        guitar_type: input.guitar_type,
+        bobo_neck: input.bobo_neck === true,
+        sequence_state: [],
+        share_enabled: false,
+        created_at: now,
+        updated_at: now,
+      };
+      builds.set(build.id, build);
+      return sendRows(request, response, [project(build, params)], 201);
+    }
+    case "PATCH": {
+      const input = await body(request);
+      const allowed = ["guitar_type", "bobo_neck"];
+      if (!viewer || Object.keys(input).some((column) => !allowed.includes(column))) {
+        return restError(response, 401, "42501", "permission denied for table builds");
+      }
+      const rows = filterRows(readableBuilds(viewer), params).filter(
+        (b) => b.owner_id === viewer.id,
+      );
+      if ("guitar_type" in input && !isGuitarType(input.guitar_type)) {
+        return restError(response, 403, "42501", "new row violates row-level security policy");
+      }
+      for (const row of rows) {
+        if ("guitar_type" in input) row.guitar_type = input.guitar_type as Build["guitar_type"];
+        if ("bobo_neck" in input) row.bobo_neck = input.bobo_neck === true;
+        row.updated_at = new Date().toISOString();
+      }
+      return sendRows(
+        request,
+        response,
+        rows.map((row) => project(row, params)),
+      );
+    }
+    case "DELETE": {
+      if (config.failBuildDelete)
+        return restError(response, 500, "XX000", "fake-supabase: delete failure");
+      const rows = viewer
+        ? filterRows(readableBuilds(viewer), params).filter((b) => b.owner_id === viewer.id)
+        : [];
+      for (const row of rows) builds.delete(row.id);
+      return sendRows(
+        request,
+        response,
+        rows.map((row) => project(row, params)),
+      );
+    }
+    default:
+      return restError(response, 405, "PGRST000", "method not allowed");
+  }
+}
+
+async function handleStorage(request: IncomingMessage, response: ServerResponse, url: URL) {
+  const viewer = bearerUser(request);
+  const publicPrefix = `/storage/v1/object/public/${BUCKET}/`;
+  const objectPrefix = `/storage/v1/object/${BUCKET}/`;
+
+  if (
+    (request.method === "GET" || request.method === "HEAD") &&
+    url.pathname.startsWith(publicPrefix)
+  ) {
+    const stored = objects.get(decodeURIComponent(url.pathname.slice(publicPrefix.length)));
+    if (!stored) return storageError(response, 400, "not_found", "Object not found");
+    response.statusCode = 200;
+    response.setHeader("content-type", stored.contentType);
+    return response.end(request.method === "HEAD" ? undefined : stored.data);
+  }
+
+  if (request.method === "POST" && url.pathname.startsWith(objectPrefix)) {
+    const path = decodeURIComponent(url.pathname.slice(objectPrefix.length));
+    const part = filePart(await rawBody(request), request.headers["content-type"] ?? "");
+    if (config.uploadDelayMs > 0) await delay(config.uploadDelayMs);
+    if (config.failUploadsMatching && new RegExp(config.failUploadsMatching).test(part.fileName)) {
+      return storageError(response, 500, "internal", "fake-supabase: upload failure");
+    }
+    if (!part.contentType.startsWith("image/")) {
+      return storageError(
+        response,
+        415,
+        "invalid_mime_type",
+        `mime type ${part.contentType} is not supported`,
+      );
+    }
+    if (!ownsPhotoPath(viewer, path)) {
+      return storageError(
+        response,
+        403,
+        "Unauthorized",
+        "new row violates row-level security policy",
+      );
+    }
+    if (objects.has(path))
+      return storageError(response, 409, "Duplicate", "The resource already exists");
+    objects.set(path, {
+      ownerId: viewer?.id ?? "",
+      contentType: part.contentType,
+      data: part.data,
+    });
+    return send(response, 200, { Key: `${BUCKET}/${path}`, Id: randomUUID() });
+  }
+
+  if (request.method === "DELETE" && url.pathname === `/storage/v1/object/${BUCKET}`) {
+    const { prefixes } = await body(request);
+    const removed: { name: string; bucket_id: string }[] = [];
+    if (!config.failStorageRemove) {
+      for (const path of Array.isArray(prefixes) ? (prefixes as string[]) : []) {
+        if (objects.has(path) && ownsPhotoPath(viewer, path)) {
+          objects.delete(path);
+          removed.push({ name: path, bucket_id: BUCKET });
+        }
+      }
+    }
+    return send(response, 200, removed);
+  }
+
+  return storageError(
+    response,
+    404,
+    "not_found",
+    `fake-supabase: no storage handler for ${url.pathname}`,
+  );
 }
 
 const server = createServer(async (request, response) => {
@@ -154,6 +579,9 @@ const server = createServer(async (request, response) => {
   const route = `${request.method} ${url.pathname}`;
 
   try {
+    if (url.pathname === "/rest/v1/builds") return await handleBuilds(request, response, url);
+    if (url.pathname.startsWith("/storage/v1/")) return await handleStorage(request, response, url);
+
     switch (route) {
       case "POST /__test/reset":
         reset();
@@ -166,6 +594,60 @@ const server = createServer(async (request, response) => {
       case "POST /__test/config":
         config = { ...config, ...(await body(request)) };
         return send(response, 204);
+      case "POST /__test/builds": {
+        const input = await body(request);
+        const owner = users.get(String(input.ownerEmail).toLowerCase());
+        if (!owner) return send(response, 400, { message: "unknown owner" });
+        const created = String(input.created_at ?? new Date().toISOString());
+        const build: Build = {
+          id: String(input.id ?? randomUUID()),
+          owner_id: owner.id,
+          name: String(input.name),
+          guitar_type: (input.guitar_type ?? null) as Build["guitar_type"],
+          bobo_neck: input.bobo_neck !== false,
+          sequence_state: (input.sequence_state ?? []) as Build["sequence_state"],
+          share_enabled: false,
+          created_at: created,
+          updated_at: created,
+        };
+        builds.set(build.id, build);
+        return send(response, 201, build);
+      }
+      case "GET /__test/builds":
+        return send(response, 200, [...builds.values()]);
+      case "GET /__test/objects":
+        return send(response, 200, [...objects.keys()]);
+
+      case "POST /rest/v1/rpc/update_build_step": {
+        const viewer = bearerUser(request);
+        const input = await body(request);
+        const build = builds.get(String(input.p_build_id));
+        if (!viewer || !build || build.owner_id !== viewer.id) {
+          return restError(response, 404, "P0002", "Build not found");
+        }
+        if (config.failStepChanges)
+          return restError(response, 500, "XX000", "fake-supabase: step failure");
+        try {
+          const entry = applyStepChange(
+            build,
+            String(input.p_step_key),
+            (input.p_change ?? {}) as Record<string, unknown>,
+          );
+          return send(response, 200, entry);
+        } catch (error) {
+          return restError(response, 400, "22023", (error as Error).message);
+        }
+      }
+
+      case "POST /rest/v1/rpc/build_photo_paths": {
+        const viewer = bearerUser(request);
+        const input = await body(request);
+        const prefix = `${String(input.p_build_id)}/`;
+        const paths = [...objects.keys()]
+          .filter((path) => path.startsWith(prefix) && ownsPhotoPath(viewer, path))
+          .sort();
+        return send(response, 200, paths);
+      }
 
       case "POST /auth/v1/token": {
         const grant = url.searchParams.get("grant_type");

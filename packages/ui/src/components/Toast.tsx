@@ -110,8 +110,12 @@ export function ToastProvider({
   return (
     <ToastContext.Provider value={api}>
       {children}
+      {/* aria-live keeps the region out of the aria-hidden that modal dialogs apply to
+          the rest of the page, so a toast raised while a dialog is open is still
+          announced. "off" because each toast is its own alert or status live region. */}
       <section
         aria-label={regionLabel}
+        aria-live="off"
         className="pointer-events-none fixed top-4 right-4 left-4 z-[70] flex flex-col items-end gap-2 sm:left-auto sm:w-96"
       >
         {toasts.map((toast) => {

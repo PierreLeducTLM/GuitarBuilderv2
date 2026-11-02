@@ -4,9 +4,10 @@
 --
 -- Reproduces: the API roles, the auth schema with a minimal auth.users and the
 -- auth.uid()/auth.jwt()/auth.role() helpers that read request.jwt.claims, the
--- extensions schema, and Supabase's default privileges on the public schema (every
+-- extensions schema, Supabase's default privileges on the public schema (every
 -- API role gets every privilege on new tables and functions), so a migration that
--- forgets to revoke something fails here too.
+-- forgets to revoke something fails here too, and the storage tables that the
+-- step-photo policies apply to (copied from the Supabase image's storage schema).
 
 create role anon nologin noinherit;
 create role authenticated nologin noinherit;
@@ -69,3 +70,72 @@ as $$
 $$;
 
 grant execute on function auth.uid(), auth.role(), auth.jwt() to anon, authenticated, service_role;
+
+-- Storage: the bucket and object tables with row-level security and Supabase's
+-- grants (every API role has full table privileges; policies decide). Direct deletes
+-- are refused unless storage.allow_delete_query is 'true', which is how the Storage
+-- API deletes objects, so tests must delete the same way.
+create schema storage;
+grant usage on schema storage to anon, authenticated, service_role;
+
+create table storage.buckets (
+  id text primary key,
+  name text not null,
+  owner uuid,
+  owner_id text,
+  public boolean default false,
+  avif_autodetection boolean default false,
+  file_size_limit bigint,
+  allowed_mime_types text[],
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table storage.objects (
+  id uuid primary key default gen_random_uuid(),
+  bucket_id text references storage.buckets (id),
+  name text,
+  owner uuid,
+  owner_id text,
+  metadata jsonb,
+  path_tokens text[] generated always as (string_to_array(name, '/')) stored,
+  version text,
+  user_metadata jsonb,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  last_accessed_at timestamptz default now(),
+  unique (bucket_id, name)
+);
+
+alter table storage.buckets enable row level security;
+alter table storage.objects enable row level security;
+grant all on table storage.buckets, storage.objects to anon, authenticated, service_role;
+
+create function storage.foldername(name text) returns text[]
+language plpgsql immutable
+as $$
+declare
+  _parts text[];
+begin
+  select string_to_array(name, '/') into _parts;
+  return _parts[1 : array_length(_parts, 1) - 1];
+end
+$$;
+
+create function storage.protect_delete() returns trigger
+language plpgsql
+as $$
+begin
+  if coalesce(current_setting('storage.allow_delete_query', true), 'false') != 'true' then
+    raise exception 'Direct deletion from storage tables is not allowed. Use the Storage API instead.'
+      using errcode = '42501';
+  end if;
+  return null;
+end;
+$$;
+
+create trigger protect_objects_delete
+  before delete on storage.objects
+  for each statement execute function storage.protect_delete();
+
+grant execute on all functions in schema storage to anon, authenticated, service_role;

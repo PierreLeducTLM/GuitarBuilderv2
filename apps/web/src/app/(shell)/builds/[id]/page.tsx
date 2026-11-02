@@ -1,14 +1,17 @@
-import { getTranslations } from "next-intl/server";
-import { SectionPlaceholder } from "@/components/shell/SectionPlaceholder";
+import { redirect } from "next/navigation";
+import { BuildDetail } from "@/components/builds/BuildDetail";
+import { getBuild } from "@/lib/builds/queries";
+import { DEFAULT_ROUTE, SIGN_IN_ROUTE } from "@/lib/routes";
+import { getShellSession } from "@/lib/session";
 
+/**
+ * guitar-builds: Build Deep Links and Inaccessible Build Links. A link to a build that
+ * does not exist or that the user may not read goes back to the builds list.
+ */
 export default async function BuildDetailPage({ params }: PageProps<"/builds/[id]">) {
-  const [{ id }, t] = await Promise.all([params, getTranslations("sections")]);
-  return (
-    <SectionPlaceholder id="builds">
-      <p className="flex flex-wrap items-baseline gap-2 text-fg-dim">
-        <span>{t("buildId")}</span>
-        <span className="font-mono text-fg">{id}</span>
-      </p>
-    </SectionPlaceholder>
-  );
+  const [{ id }, session] = await Promise.all([params, getShellSession()]);
+  if (!session) redirect(SIGN_IN_ROUTE);
+  const build = await getBuild(id);
+  if (!build) redirect(DEFAULT_ROUTE);
+  return <BuildDetail key={build.id} build={build} canEdit={build.ownerId === session.userId} />;
 }

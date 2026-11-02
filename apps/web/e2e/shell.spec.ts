@@ -134,8 +134,13 @@ test.describe("navigation", () => {
   });
 
   test("highlights Builds for a build detail URL", async ({ page }) => {
-    await signIn(page, LUTHIER, "/builds/7f3c-example");
-    await expect(page.getByText("7f3c-example")).toBeVisible();
+    const build = await fakeSupabase.seedBuild({
+      ownerEmail: LUTHIER.email,
+      name: "Highlighted",
+      guitar_type: "classical",
+    });
+    await signIn(page, LUTHIER, `/builds/${build.id}`);
+    await expect(page.getByRole("heading", { level: 1, name: "Highlighted" })).toBeVisible();
     await expect(mainNav(page).locator("[aria-current=page]")).toHaveCount(1);
     await expect(mainNav(page).locator("[aria-current=page]")).toHaveText(en.nav.builds);
   });

@@ -14,7 +14,7 @@ This repository is a rewrite of [the original app](https://github.com/PierreLedu
 | Path | What it holds |
 |---|---|
 | `openspec/specs/` | The behavior of every capability, in [OpenSpec](https://github.com/Fission-AI/OpenSpec) format. This is the source of truth. |
-| `apps/web/` | The Next.js app (App Router): shell, sign-in, sections |
+| `apps/web/` | The Next.js app (App Router): shell, sign-in, builds and the build sequence; other sections are placeholders |
 | `packages/ui/` | Oscilloscope design tokens (`src/tokens/themes.ts`), Tailwind theme and components |
 | `packages/db/` | Database types for the Supabase schema |
 | `packages/dsp/` | Signal processing shared by the acoustic features (pure TypeScript) |
@@ -34,8 +34,8 @@ Requirements: Node.js 22.18 or later and pnpm 10 (`corepack enable` picks the ve
 
 ```sh
 pnpm install
-supabase start                                  # local Postgres, Auth and API; prints the URL and anon key
-cp apps/web/.env.example apps/web/.env.local    # then paste the API URL and anon key
+supabase start                                  # local Postgres, Auth, API and Storage; prints the URL and keys
+cp apps/web/.env.example apps/web/.env.local    # then paste the API URL and publishable key
 pnpm dev                                        # http://localhost:3000
 ```
 
@@ -58,11 +58,20 @@ Run from the repository root.
 
 ### Database tests
 
-The pgTAP files live in `supabase/tests/database`. In CI they run with `supabase db start` and `supabase test db`. Locally, `pnpm test:db` runs them without Docker: it starts a throwaway Postgres cluster, loads a small shim of the Supabase pieces the migrations use (`scripts/test-db/supabase-shim.sql`), applies the migrations, runs the files with `prove`, then a two-session race test for the first-admin rule. It needs the Postgres 16 server binaries (`PG_BIN`, default `/usr/lib/postgresql/16/bin`), Perl's `prove`, and [pgTAP](https://pgtap.org) installed into that Postgres (`make && make install` from the [PGXN release](https://pgxn.org/dist/pgtap/)).
+The pgTAP files live in `supabase/tests/database`. In CI they run with `supabase db start` and `supabase test db`. Locally, `pnpm test:db` runs them without Docker: it starts a throwaway Postgres cluster, loads a small shim of the Supabase pieces the migrations use (`scripts/test-db/supabase-shim.sql`), applies the migrations, runs the files with `prove`, then a two-session race test for the first-admin rule. The shim includes the Supabase `storage` tables, grants and delete protection that the step-photo rules apply to, copied from the Supabase image. It needs the Postgres 16 server binaries (`PG_BIN`, default `/usr/lib/postgresql/16/bin`), Perl's `prove`, and [pgTAP](https://pgtap.org) installed into that Postgres (`make && make install` from the [PGXN release](https://pgxn.org/dist/pgtap/)). With Docker and the Supabase CLI, `supabase db start` followed by `supabase test db` runs the same files against the real image, as CI does.
 
 ### End-to-end tests
 
-`pnpm test:e2e` builds the app into `apps/web/.next-e2e` with test configuration, starts it with a small fake of the Supabase Auth and REST endpoints (`apps/web/e2e/fake-supabase.ts`), and runs the specs on a desktop and a phone viewport. `@playwright/test` is pinned to the version of the installed browsers; run `pnpm --filter @gb/web exec playwright install chromium` once on a new machine, or set `PW_CHROMIUM_EXECUTABLE` to a Chromium binary.
+`pnpm test:e2e` builds the app into `apps/web/.next-e2e` with test configuration, starts it with a small fake of the Supabase endpoints the app calls (`apps/web/e2e/fake-supabase.ts`: Auth, the builds and profiles REST calls, the step-change and photo-path functions, and Storage upload, remove and public read), and runs the specs on a desktop and a phone viewport. `@playwright/test` is pinned to the version of the installed browsers; run `pnpm --filter @gb/web exec playwright install chromium` once on a new machine, or set `PW_CHROMIUM_EXECUTABLE` to a Chromium binary.
+
+## Step photos
+
+Photos attached to build steps live in the public Storage bucket `step-photos`, created by the migration `supabase/migrations/20261102120000_builds_and_steps.sql`. Each file is stored as `<build id>/<step key>/<upload time>_<random>.<extension>`:
+- anyone with a photo's URL can open it, so the public build story can show it;
+- only the build's owner can upload, list or delete its files, and nobody can list the bucket anonymously;
+- the bucket accepts images only.
+
+The app sets no size limit of its own, but the project-wide upload limit in Supabase (Storage settings, 50 MB by default) still applies; a larger file fails like any other upload. Deleting a build removes its photo files first.
 
 ## Authentication settings
 

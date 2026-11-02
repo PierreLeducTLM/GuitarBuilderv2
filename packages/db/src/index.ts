@@ -1,4 +1,24 @@
-export type { Database, Json, Tables, TablesInsert, TablesUpdate } from "./database.types.ts";
+export type {
+  CompositeTypes,
+  Database,
+  Enums,
+  Json,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "./database.types.ts";
+export {
+  type GuitarType,
+  guitarTypes,
+  type SpectrumRecord,
+  STEP_PHOTOS_BUCKET,
+  type StepChange,
+  type StepEntry,
+  type StepMeasurement,
+  type StepPhoto,
+  stepPhotoPath,
+  toGuitarType,
+} from "./steps.ts";
 
 /** The two roles of user-auth. A missing or unreadable profile counts as `user`. */
 export const appRoles = ["user", "admin"] as const;

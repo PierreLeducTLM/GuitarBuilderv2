@@ -20,6 +20,7 @@ export {
 } from "./components/Field.tsx";
 export { IconButton, type IconButtonProps } from "./components/IconButton.tsx";
 export { LedProgress, type LedProgressProps, litSegments } from "./components/LedProgress.tsx";
+export { Lightbox, type LightboxProps } from "./components/Lightbox.tsx";
 export { Menu, MenuContent, MenuItem, MenuTrigger } from "./components/Menu.tsx";
 export { Card, Panel, type PanelProps } from "./components/Panel.tsx";
 export {

@@ -34,6 +34,10 @@
   --color-danger-soft: var(--gb-danger-soft);
   --color-info-ink: var(--gb-info-ink);
   --color-info-soft: var(--gb-info-soft);
+  --color-variant-ink: var(--gb-variant-ink);
+  --color-variant-soft: var(--gb-variant-soft);
+  --color-blank-ink: var(--gb-blank-ink);
+  --color-blank-soft: var(--gb-blank-soft);
   --color-focus: var(--gb-focus);
   --color-overlay: var(--gb-overlay);
 
