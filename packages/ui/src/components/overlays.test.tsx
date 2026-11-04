@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConfirmDialog, type ConfirmSeverity } from "./ConfirmDialog.tsx";
+import { DialogFrame } from "./Dialog.tsx";
 import { TextInputDialog } from "./TextInputDialog.tsx";
 import { ToastProvider, useToast } from "./Toast.tsx";
 import { Tooltip } from "./Tooltip.tsx";
@@ -242,5 +243,47 @@ describe("Tooltip", () => {
     await screen.findByRole("tooltip");
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
+  });
+});
+
+const Frame = ({ dismissOnOutsideClick }: { dismissOnOutsideClick?: boolean }) => {
+  const [open, setOpen] = useState(true);
+  return (
+    <>
+      <span data-testid="frame-state">{open ? "open" : "closed"}</span>
+      <DialogFrame
+        open={open}
+        onOpenChange={setOpen}
+        title="Frequency Detector"
+        closeLabel="Close"
+        size="xl"
+        {...(dismissOnOutsideClick === undefined ? {} : { dismissOnOutsideClick })}
+      >
+        content
+      </DialogFrame>
+    </>
+  );
+};
+
+describe("DialogFrame", () => {
+  it("closes on an outside click by default", async () => {
+    const user = userEvent.setup();
+    render(<Frame />);
+    await user.click(screen.getByTestId("dialog-backdrop"));
+    expect(screen.getByTestId("frame-state").textContent).toBe("closed");
+  });
+
+  it("can ignore outside clicks while still closing with its close button", async () => {
+    const user = userEvent.setup();
+    render(<Frame dismissOnOutsideClick={false} />);
+    await user.click(screen.getByTestId("dialog-backdrop"));
+    expect(screen.getByTestId("frame-state").textContent).toBe("open");
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.getByTestId("frame-state").textContent).toBe("closed");
+  });
+
+  it("fills a phone's screen at the extra-large size", () => {
+    render(<Frame />);
+    expect(screen.getByRole("dialog").className).toContain("max-sm:inset-0");
   });
 });
