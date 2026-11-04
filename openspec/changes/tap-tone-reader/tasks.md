@@ -140,7 +140,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - the script regenerates byte-identical files;
   - a unit test gives the expected taps, peaks and roles for each fixture;
   - the measured time is recorded in the PR (if it misses the budget, move the generator into a module worker before continuing)
-- [ ] 7.3 Write `apps/web/e2e/tap-tone.spec.ts`:
+- [x] 7.3 Write `apps/web/e2e/tap-tone.spec.ts`:
   - record `body.wav` through the fake microphone on a build step; see Air, Top and Back; drag Top; confirm; save "Box closed"; reload; see the roles line;
   - upload `taps.wav` and `clipped.wav` ("Clipped", "2 of 3 taps used");
   - a `.flac` refused;

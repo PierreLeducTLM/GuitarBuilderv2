@@ -80,7 +80,12 @@ export interface StoredBuild {
     completed?: boolean;
     notes?: string;
     photos?: { url: string; name: string }[];
-    measurements?: { id: string; description: string; frequency: number }[];
+    measurements?: {
+      id: string;
+      description: string;
+      frequency: number;
+      roles?: Record<string, { frequency: number; origin: string }>;
+    }[];
   }[];
   created_at: string;
   updated_at: string;

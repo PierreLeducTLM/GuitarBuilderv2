@@ -66,6 +66,15 @@ export const FIXTURES: Readonly<Record<string, Fixture>> = {
     rumble: 0.05,
     loudTap: { onset: 1.6, gain: 3 },
   },
+  "mobile.wav": {
+    seconds: 4,
+    onsets: [0.5, 1.6, 2.75],
+    modes: [
+      { frequency: 134.8, amplitude: 0.3, tau: 0.12 },
+      { frequency: 182.5, amplitude: 0.2, tau: 0.12 },
+    ],
+  },
+  "silence.wav": { seconds: 3, onsets: [], modes: [] },
   "body.wav": {
     seconds: 5,
     onsets: [1, 2.2, 3.4],
