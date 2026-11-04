@@ -4,6 +4,7 @@ import {
   averageSpectrum,
   noteLabel,
   recomputeTake,
+  resultFromRecord,
   runTake,
   spectrumPoints,
   type TakeInput,
@@ -128,5 +129,26 @@ describe("excluding taps", () => {
     const none = recomputeTake(cache, [1, 2, 3]);
     expect(none.used).toEqual([]);
     expect(none.record).toBeNull();
+  });
+});
+
+describe("reopening a saved record", () => {
+  it("re-detects the peaks with spectral Q and note, without taps or the mobile exclusion", () => {
+    const { result } = runTake(input(threeTaps));
+    const record = result.record;
+    if (!record) throw new Error("expected a record");
+    const reopened = resultFromRecord(record);
+    expect(reopened.taps).toEqual([]);
+    expect(reopened.used).toEqual([]);
+    expect(reopened.record).toBe(record);
+    expect(reopened.peaks).toEqual(result.peaks);
+    expect(reopened.roles).toBeNull();
+  });
+
+  it("keeps a 134.8 Hz peak that a phone would have dropped", () => {
+    const signal = recording(2, [{ onset: 24000, amplitude: 0.3, tau: 0.1, frequency: 134.8 }]);
+    const record = runTake(input(signal)).result.record;
+    if (!record) throw new Error("expected a record");
+    expect(resultFromRecord(record).peaks).toHaveLength(1);
   });
 });

@@ -24,6 +24,7 @@ export {
 export {
   analyzeTake,
   recomputeTake,
+  resultFromRecord,
   runTake,
   type TakeAnalysis,
   type TakeCache,

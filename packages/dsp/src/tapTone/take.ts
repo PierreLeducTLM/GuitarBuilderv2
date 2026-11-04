@@ -3,7 +3,7 @@ import { type BodyResonances, identifyBodyResonances } from "./body.ts";
 import { TAP_WINDOW_SAMPLES } from "./constants.ts";
 import { noteLabel } from "./note.ts";
 import { detectPeaks, type Peak } from "./peaks.ts";
-import { recordFromPoints, type TapToneRecord } from "./record.ts";
+import { pointsFromRecord, recordFromPoints, type TapToneRecord } from "./record.ts";
 import { averageSpectrum, type SpectrumPoint, spectrumPoints, tapPower } from "./spectrum.ts";
 import { detectTaps, type Tap } from "./taps.ts";
 
@@ -42,6 +42,22 @@ export type TakeAnalysis = { readonly cache: TakeCache; readonly result: TakeRes
 
 const TAPS_PER_STEP = 4;
 
+const peaksWithQ = (points: readonly SpectrumPoint[], mobile: boolean): readonly TakePeak[] =>
+  detectPeaks(points, { mobile }).map((peak) => ({
+    ...peak,
+    spectralQ: spectralQ(points, peak),
+    note: noteLabel(peak.frequency),
+  }));
+
+export const resultFromRecord = (record: TapToneRecord): TakeResult => ({
+  taps: [],
+  used: [],
+  points: pointsFromRecord(record),
+  peaks: peaksWithQ(pointsFromRecord(record), false),
+  record,
+  roles: null,
+});
+
 export const recomputeTake = (cache: TakeCache, excluded: readonly number[]): TakeResult => {
   const used = cache.taps
     .filter((tap) => tap.rejection === null && !excluded.includes(tap.number))
@@ -51,11 +67,7 @@ export const recomputeTake = (cache: TakeCache, excluded: readonly number[]): Ta
     return { taps: cache.taps, used, points: [], peaks: [], record: null, roles: null };
   }
   const points = spectrumPoints(averageSpectrum(powers), cache.sampleRate);
-  const peaks = detectPeaks(points, { mobile: cache.mobile }).map((peak) => ({
-    ...peak,
-    spectralQ: spectralQ(points, peak),
-    note: noteLabel(peak.frequency),
-  }));
+  const peaks = peaksWithQ(points, cache.mobile);
   return {
     taps: cache.taps,
     used,
