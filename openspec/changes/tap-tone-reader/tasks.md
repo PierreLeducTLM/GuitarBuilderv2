@@ -99,7 +99,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - the stop at 10.0 s;
   - the microphone released on stop and cancel;
   - the audio context closed
-- [ ] 6.3 Build the waveform with tap markers (used, excluded, rejected; toggling; reasons; keyboard). Verify component tests:
+- [x] 6.3 Build the waveform with tap markers (used, excluded, rejected; toggling; reasons; keyboard). Verify component tests:
   - "2 of 3 taps used" after excluding tap 2;
   - a rejected tap shows "Clipped" and cannot be included;
   - Space on a focused marker toggles it, with the announcement

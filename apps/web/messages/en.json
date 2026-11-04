@@ -358,5 +358,32 @@
     "TunePlay": "Tune and play",
     "AssessAcoustic": "Assess acoustic function",
     "OptimiseAcoustic": "Optimise acoustic parameters"
+  },
+  "tapTone": {
+    "spectrum": {
+      "caption": "Frequency Spectrum",
+      "hint": "Click on a peak to select",
+      "label": "Frequency spectrum. Peaks: {peaks}",
+      "noPeaks": "Frequency spectrum, no peak detected",
+      "frequency": "{frequency} Hz",
+      "assignRole": "Drag to move the {role} label"
+    },
+    "roles": {
+      "air": "Air",
+      "top": "Top",
+      "back": "Back"
+    },
+    "taps": {
+      "count": "{used} of {total} taps used",
+      "tap": "Tap {number}",
+      "excludedNow": "Tap {number} excluded",
+      "includedNow": "Tap {number} included",
+      "waveformLabel": "Recording of {seconds} s with {total} taps",
+      "seconds": "{seconds} s",
+      "clipped": "Clipped",
+      "tooClose": "Too close to another tap",
+      "cutOff": "Cut off by the end of the recording",
+      "noneUsable": "None of the taps can be used"
+    }
   }
 }

@@ -358,5 +358,32 @@
     "TunePlay": "Accorder et jouer",
     "AssessAcoustic": "Évaluer le comportement acoustique",
     "OptimiseAcoustic": "Optimiser les paramètres acoustiques"
+  },
+  "tapTone": {
+    "spectrum": {
+      "caption": "Spectre de fréquences",
+      "hint": "Cliquez sur un pic pour le sélectionner",
+      "label": "Spectre de fréquences. Pics : {peaks}",
+      "noPeaks": "Spectre de fréquences, aucun pic détecté",
+      "frequency": "{frequency} Hz",
+      "assignRole": "Faites glisser pour déplacer l'étiquette {role}"
+    },
+    "roles": {
+      "air": "Air",
+      "top": "Table",
+      "back": "Fond"
+    },
+    "taps": {
+      "count": "{used} frappes utilisées sur {total}",
+      "tap": "Frappe {number}",
+      "excludedNow": "Frappe {number} exclue",
+      "includedNow": "Frappe {number} incluse",
+      "waveformLabel": "Enregistrement de {seconds} s avec {total} frappes",
+      "seconds": "{seconds} s",
+      "clipped": "Saturée",
+      "tooClose": "Trop proche d'une autre frappe",
+      "cutOff": "Coupée par la fin de l'enregistrement",
+      "noneUsable": "Aucune frappe n'est exploitable"
+    }
   }
 }
