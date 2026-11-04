@@ -154,7 +154,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
 
 ## 8. Documentation and integration
 
-- [ ] 8.1 Update `docs/rewrite/README.md` (the sub-bin decision reversed on 2026-11-04, the tap-tone open questions answered) and `docs/rewrite/legacy-findings/tap-tone-capture.md`. In the root `README.md`, note the fake-microphone fixtures and how to regenerate them. Verify the documented command runs as written
+- [x] 8.1 Update `docs/rewrite/README.md` (the sub-bin decision reversed on 2026-11-04, the tap-tone open questions answered) and `docs/rewrite/legacy-findings/tap-tone-capture.md`. In the root `README.md`, note the fake-microphone fixtures and how to regenerate them. Verify the documented command runs as written
 - [ ] 8.2 Run `pnpm check`, `pnpm build`, the database tests, `pnpm test:e2e` and `openspec validate --strict`. Verify all pass
 
 ## Workflow follow-up

@@ -40,6 +40,18 @@
 - The microphone is opened only on explicit Start Recording and released on stop or cancel. No issue found.
 
 ## Open questions for the owner
+
+Answered on 2026-11-04 by the `tap-tone-reader` change:
+- **Calibration and tap trigger:** taps are detected after recording. There is no calibration step; decay Q measures the background noise from the silence before the first tap.
+- **Sub-bin refinement:** yes, a parabola on dB levels.
+- **Mobile exclusion:** kept for every touch device, and not re-applied when a saved spectrum is reopened.
+- **Free frequency selection:** no. Only detected peaks can be selected.
+- **Warnings:** taps that clip, overlap or are cut off are rejected with their reason, and "No tap detected" replaces the silent "—".
+- **File rate:** files are resampled to 48 kHz.
+- **Graph range:** the graph now spans -100 to 0 dB.
+- **Export file name:** it stays the same for every caller.
+
+The original questions:
 - Should microphone calibration and spectral gating (a5dfaec) or an automatic tap/onset trigger come back? Neither exists today.
 - Should peaks get sub-bin refinement, e.g. parabolic interpolation on dB: `delta = 0.5*(a-c)/(a-2b+c)`, `f = (k+delta)*df`? Bin spacing is 2.93 Hz. Wood moduli scale with f^2, so a 1.5 Hz error at a 90 Hz cross-grain mode is about a 3.3% error in E_C.
 - Should the 132-138 Hz exclusion apply only to Android (as the comment says), or to all touch devices (as the code does)? Should it be re-applied when reopening saved spectra?
