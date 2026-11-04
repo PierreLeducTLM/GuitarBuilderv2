@@ -13,6 +13,7 @@ export {
   reattachRole,
 } from "./tapTone/body.ts";
 export type { DecayIsolation, DecayPeak, NeighbourPeak } from "./tapTone/decay/band.ts";
+export type { CombinedReason } from "./tapTone/decay/combine.ts";
 export type {
   DecayInterval,
   DecayLine,
@@ -20,6 +21,12 @@ export type {
   TapDecayReason,
   TapFit,
 } from "./tapTone/decay/fit.ts";
+export {
+  type DecayMarkers,
+  type DecaySeries,
+  inspectDecay,
+  type SeriesPoint,
+} from "./tapTone/decay/inspect.ts";
 export {
   type IsolatedResonance,
   isolateResonance,

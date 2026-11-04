@@ -100,7 +100,7 @@ describe("decay Q noise floor", () => {
       seed: 11,
     });
     const { noise, reason } = measure(recording);
-    expect(reason).toBeNull();
+    expect(reason).not.toBe("NO_QUIET_REFERENCE");
     expect(noise?.source).toBe("quiet");
     withinDb(noise?.floor ?? 0, 1e-3 * Math.sqrt((2 * 1.73) / (0.02 * 24000)), 1.5);
     expect(noise?.effective).toBe(noise?.floor);

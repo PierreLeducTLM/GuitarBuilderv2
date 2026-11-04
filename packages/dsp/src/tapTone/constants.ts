@@ -69,3 +69,7 @@ export const DECAY_DB_PER_NEPER = 8.6859;
 export const DECAY_MIN_RANGE_DB = 10;
 export const DECAY_MAX_RESIDUAL_DB = 1;
 export const DECAY_HALF_RATIO = { min: 0.7, max: 1.43 } as const;
+export const DECAY_MIN_VALID_TAPS = 3;
+export const DECAY_MAX_SPREAD = 0.15;
+export const DECAY_DISPLAY_BUCKETS = 400;
+export const DECAY_DISPLAY_POINTS = 800;
