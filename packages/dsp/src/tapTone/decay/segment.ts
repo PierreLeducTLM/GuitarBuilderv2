@@ -18,3 +18,16 @@ export const tapSegment = (input: {
     end: Math.min(nextLimit, input.length, input.onset + DECAY_SEGMENT_MAX_SAMPLES),
   };
 };
+
+export const quietStretches = (input: {
+  onsets: readonly number[];
+  length: number;
+}): readonly SampleRange[] => {
+  if (input.onsets.length === 0) return [];
+  const first = input.onsets[0] ?? 0;
+  const last = input.onsets.at(-1) ?? 0;
+  return [
+    { start: 0, end: first - DECAY_NEXT_TAP_MARGIN_SAMPLES },
+    { start: last + DECAY_SEGMENT_MAX_SAMPLES, end: input.length },
+  ].filter((stretch) => stretch.end > stretch.start);
+};

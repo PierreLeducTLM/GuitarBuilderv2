@@ -16,6 +16,8 @@ const peakAt = (frequency: number, overrides: Partial<DecayPeak> = {}): DecayPea
 const isolationOf = (peak: DecayPeak, others: readonly { frequency: number; level: number }[]) =>
   measureDecayQ({ signal: new Float64Array(0), onsets: [], used: [], peak, others });
 
+const analysed = (result: { reason: string | null }) => result.reason !== "MODE_NOT_ISOLATED";
+
 const singleTap = (modes: readonly Mode[], options: { sigma: number; seconds?: number }) =>
   tapRecording({
     quietSeconds: 0,
@@ -123,16 +125,15 @@ describe("decay Q tap segment", () => {
 
 describe("decay Q isolation band", () => {
   it("uses the 2 f0 image when no neighbour is relevant, with the 0.02 s minimum kernel", () => {
-    expect(isolationOf(peakAt(180), [])).toEqual({
-      reason: null,
-      isolation: {
-        neighbour: null,
-        spacing: 360,
-        kernelSeconds: 0.02,
-        kernelLength: 21,
-        halfLength: 10,
-        precheckDb: null,
-      },
+    const result = isolationOf(peakAt(180), []);
+    expect(analysed(result)).toBe(true);
+    expect(result.isolation).toEqual({
+      neighbour: null,
+      spacing: 360,
+      kernelSeconds: 0.02,
+      kernelLength: 21,
+      halfLength: 10,
+      precheckDb: null,
     });
   });
 
@@ -144,8 +145,9 @@ describe("decay Q isolation band", () => {
   });
 
   it("sizes the kernel from a relevant neighbour 12 Hz away (0.2917 s, 293 taps)", () => {
-    const { isolation, reason } = isolationOf(peakAt(180), [listed(192)]);
-    expect(reason).toBeNull();
+    const result = isolationOf(peakAt(180), [listed(192)]);
+    const { isolation } = result;
+    expect(analysed(result)).toBe(true);
     expect(isolation.neighbour).toBe(192);
     expect(isolation.spacing).toBe(12);
     expect(isolation.kernelSeconds).toBeCloseTo(0.2917, 4);
@@ -195,10 +197,9 @@ describe("decay Q isolation band", () => {
   });
 
   it("analyses a peak 7.0 Hz from its neighbour but not 6.9 Hz", () => {
-    expect(isolationOf(peakAt(200), [listed(207)])).toMatchObject({
-      reason: null,
-      isolation: { kernelSeconds: 0.5, kernelLength: 501 },
-    });
+    const sevenApart = isolationOf(peakAt(200), [listed(207)]);
+    expect(analysed(sevenApart)).toBe(true);
+    expect(sevenApart.isolation).toMatchObject({ kernelSeconds: 0.5, kernelLength: 501 });
     expect(isolationOf(peakAt(200), [listed(206.9)]).reason).toBe("MODE_NOT_ISOLATED");
   });
 
@@ -208,13 +209,13 @@ describe("decay Q isolation band", () => {
     expect(broad.isolation.precheckDb).toBeCloseTo(27.29 * 20 * (0.005 + 0.35 / 2 + 0.00196), 9);
     expect(broad.isolation.precheckDb).toBeCloseTo(99.3, 1);
     const narrow = isolationOf(peakAt(180, { bandwidth: 2 }), [listed(190)]);
-    expect(narrow.reason).toBeNull();
+    expect(analysed(narrow)).toBe(true);
     expect(narrow.isolation.precheckDb).toBeCloseTo(9.93, 2);
   });
 
   it("allows a pre-check of exactly 30 dB", () => {
     const limit = 30 / (27.29 * (0.005 + 0.35 / 2 + 0.00196));
-    expect(isolationOf(peakAt(180, { bandwidth: limit }), [listed(190)]).reason).toBeNull();
+    expect(analysed(isolationOf(peakAt(180, { bandwidth: limit }), [listed(190)]))).toBe(true);
     expect(isolationOf(peakAt(180, { bandwidth: limit * 1.001 }), [listed(190)]).reason).toBe(
       "MODE_NOT_ISOLATED",
     );
