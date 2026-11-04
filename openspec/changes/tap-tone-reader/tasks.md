@@ -84,7 +84,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
 
 ## 6. The dialog (`apps/web`)
 
-- [ ] 6.1 Write the reducer in `src/lib/tap-tone/machine.ts` (dialog with takes, per-take states, run ids, used taps, selection, manual roles). Verify unit tests:
+- [x] 6.1 Write the reducer in `src/lib/tap-tone/machine.ts` (dialog with takes, per-take states, run ids, used taps, selection, manual roles). Verify unit tests:
   - every transition per take;
   - switching takes disabled while recording;
   - late results from a cancelled or superseded run ignored;
