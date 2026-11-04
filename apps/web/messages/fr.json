@@ -222,7 +222,8 @@
       "graphLabel": "Spectre de {description}, pic à {frequency} Hz",
       "frequencyAxis": "Fréquence (Hz)",
       "levelAxis": "Niveau (dB)",
-      "peakMarker": "{frequency} Hz"
+      "peakMarker": "{frequency} Hz",
+      "role": "{role} {frequency} Hz"
     }
   },
   "steps": {

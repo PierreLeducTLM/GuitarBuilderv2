@@ -29,7 +29,7 @@ describe("SpectrumGraph", () => {
     const svg = renderGraph();
     const db = [...svg.querySelectorAll("[data-grid=db]")].map((label) => label.textContent);
     const hz = [...svg.querySelectorAll("[data-grid=hz]")].map((label) => label.textContent);
-    expect(db).toEqual(["-20", "-40", "-60", "-80", "-100"]);
+    expect(db).toEqual(["0", "-20", "-40", "-60", "-80", "-100"]);
     expect(hz).toEqual(["100", "250", "500", "750", "1000", "1500", "2000"]);
   });
 

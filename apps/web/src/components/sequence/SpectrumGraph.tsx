@@ -30,7 +30,7 @@ export interface SpectrumGraphProps {
 }
 
 /**
- * build-sequence: Spectrum Graph. Linear 20-2000 Hz across, -100 to -20 dB up, labelled
+ * build-sequence: Spectrum Graph. Linear 20-2000 Hz across, -100 to 0 dB up, labelled
  * grid lines every 20 dB and at 100, 250, 500, 750, 1000, 1500 and 2000 Hz, and a dashed
  * marker at the peak.
  */

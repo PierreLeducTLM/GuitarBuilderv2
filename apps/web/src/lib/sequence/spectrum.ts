@@ -1,17 +1,17 @@
 // Coordinates of the spectrum graph (build-sequence: Spectrum Graph). A point at
 // frequency f (Hz) and level dB (decibels) sits at x = (f - 20) / 1980 of the plot
-// width from the left and y = (-20 - dB) / 80 of the plot height from the top, with
-// dB clamped to [-100, -20].
+// width from the left and y = -dB / 100 of the plot height from the top, with dB
+// clamped to [-100, 0].
 import type { SpectrumRecord } from "@gb/db";
 
 export const SPECTRUM_MIN_HZ = 20;
 export const SPECTRUM_MAX_HZ = 2000;
 export const SPECTRUM_MIN_DB = -100;
-export const SPECTRUM_MAX_DB = -20;
+export const SPECTRUM_MAX_DB = 0;
 /** Labelled vertical grid lines, Hz. */
 export const SPECTRUM_GRID_HZ = [100, 250, 500, 750, 1000, 1500, 2000] as const;
 /** Labelled horizontal grid lines, every 20 dB. */
-export const SPECTRUM_GRID_DB = [-20, -40, -60, -80, -100] as const;
+export const SPECTRUM_GRID_DB = [0, -20, -40, -60, -80, -100] as const;
 
 /** Horizontal position of a frequency, as a fraction of the plot width. */
 export function spectrumX(frequency: number): number {

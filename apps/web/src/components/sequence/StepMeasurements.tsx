@@ -9,6 +9,8 @@ import type { StepStore } from "@/lib/sequence/store";
 import type { StepKey } from "@/lib/sequence/template";
 import { SpectrumGraph } from "./SpectrumGraph";
 
+const ROLE_ORDER = ["air", "top", "back"] as const;
+
 export interface StepMeasurementsProps {
   stepKey: StepKey;
   measurements: StepMeasurement[];
@@ -22,6 +24,7 @@ export interface StepMeasurementsProps {
  */
 export function StepMeasurements({ stepKey, measurements, store, canEdit }: StepMeasurementsProps) {
   const t = useTranslations("sequence.measurement");
+  const tRoles = useTranslations("tapTone.roles");
   const tDialog = useTranslations("dialog");
   const format = useFormatter();
   const prompt = usePrompt();
@@ -43,6 +46,16 @@ export function StepMeasurements({ stepKey, measurements, store, canEdit }: Step
       id: measurement.id,
       description,
     });
+  }
+
+  function rolesLine({ roles }: StepMeasurement) {
+    const parts = ROLE_ORDER.flatMap((name) => {
+      const role = roles?.[name];
+      return role
+        ? [t("role", { role: tRoles(name), frequency: format.number(role.frequency, "decimal1") })]
+        : [];
+    });
+    return parts.join(" · ");
   }
 
   async function remove(measurement: StepMeasurement) {
@@ -92,6 +105,11 @@ export function StepMeasurements({ stepKey, measurements, store, canEdit }: Step
                 <span className="font-mono text-sm font-bold text-amber-ink">
                   {t("peak", { frequency })}
                 </span>
+                {rolesLine(measurement) ? (
+                  <span data-roles className="font-mono text-sm text-teal-ink">
+                    {rolesLine(measurement)}
+                  </span>
+                ) : null}
               </div>
               {canEdit ? (
                 <IconButton

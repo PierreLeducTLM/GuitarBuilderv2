@@ -1,7 +1,14 @@
 // A build's step state and the figures derived from it (build-sequence: Step State
 // Loading, Ready Steps, Hidden Step Data; guitar-builds: Build Summary Strip;
 // build-story-sharing: Story Progress).
-import type { SpectrumRecord, StepEntry, StepMeasurement, StepPhoto } from "@gb/db";
+import type {
+  BodyRole,
+  MeasurementRoles,
+  SpectrumRecord,
+  StepEntry,
+  StepMeasurement,
+  StepPhoto,
+} from "@gb/db";
 import { isStepKey, type StepKey } from "./template";
 import type { DisplayGraph } from "./variant";
 
@@ -52,6 +59,40 @@ function toSpectrum(value: unknown): SpectrumRecord | null {
   return { frequencies, magnitudes, magnitudesDb, sampleRate, fftSize, binWidth };
 }
 
+const ROLE_NAMES = ["air", "top", "back"] as const;
+
+const isOptionalNumber = (value: unknown): value is number | null =>
+  value === null || typeof value === "number";
+
+function toRole(value: unknown): BodyRole | null {
+  if (
+    !isRecord(value) ||
+    typeof value.frequency !== "number" ||
+    typeof value.level !== "number" ||
+    !isOptionalNumber(value.spectralQ) ||
+    !isOptionalNumber(value.decayQ) ||
+    (value.origin !== "auto" && value.origin !== "user")
+  ) {
+    return null;
+  }
+  return {
+    frequency: value.frequency,
+    level: value.level,
+    spectralQ: value.spectralQ,
+    decayQ: value.decayQ,
+    origin: value.origin,
+  };
+}
+
+function toRoles(value: unknown): MeasurementRoles | null {
+  if (!isRecord(value)) return null;
+  const entries = ROLE_NAMES.flatMap((name) => {
+    const role = toRole(value[name]);
+    return role ? [[name, role] as const] : [];
+  });
+  return entries.length > 0 ? Object.fromEntries(entries) : null;
+}
+
 function toMeasurement(value: unknown): StepMeasurement | null {
   if (!isRecord(value)) return null;
   const spectrum = toSpectrum(value.spectrum);
@@ -64,12 +105,14 @@ function toMeasurement(value: unknown): StepMeasurement | null {
   ) {
     return null;
   }
+  const roles = toRoles(value.roles);
   return {
     id: value.id,
     timestamp: value.timestamp,
     description: value.description,
     frequency: value.frequency,
     spectrum,
+    ...(roles ? { roles } : {}),
   };
 }
 
