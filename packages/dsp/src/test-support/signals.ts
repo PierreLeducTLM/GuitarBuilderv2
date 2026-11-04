@@ -61,3 +61,20 @@ export const withTaps = (
       );
     }, x),
   );
+
+export const pointsFromDb = (
+  levels: readonly number[],
+  options: { firstBin: number; binWidth: number },
+) =>
+  levels.map((db, i) => ({
+    frequency: (options.firstBin + i) * options.binWidth,
+    magnitude: 10 ** (db / 20),
+    db,
+  }));
+
+export const spikes = (options: {
+  count: number;
+  floor: number;
+  at: Readonly<Record<number, number>>;
+}): readonly number[] =>
+  Array.from({ length: options.count }, (_, i) => options.at[i] ?? options.floor);

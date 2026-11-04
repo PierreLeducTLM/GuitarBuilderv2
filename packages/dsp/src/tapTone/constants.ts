@@ -18,3 +18,10 @@ export const TAP_WINDOW_LEAD_SAMPLES = 8192;
 
 export const MIN_FREQUENCY = 30;
 export const MAX_FREQUENCY = 1000;
+
+export const PEAK_FLOOR_DB = -60;
+export const PEAK_PROMINENCE_DB = 3;
+export const PEAK_NEIGHBOURHOOD_HZ = 30;
+export const PEAK_RANGE_DB = 35;
+export const MAX_PEAKS = 10;
+export const MOBILE_EXCLUSION_HZ = { from: 132, to: 138 } as const;

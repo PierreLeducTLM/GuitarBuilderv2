@@ -26,7 +26,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
 
 ## 2. Peaks, Q and roles (`packages/dsp`)
 
-- [ ] 2.1 Implement `tapTone/peaks.ts`: candidates with the 30 Hz prominence neighbourhood, parabolic refinement, ranking, the 35 dB and top-10 limits, the mobile exclusion and `nearestPeak`. Verify unit tests:
+- [x] 2.1 Implement `tapTone/peaks.ts`: candidates with the 30 Hz prominence neighbourhood, parabolic refinement, ranking, the 35 dB and top-10 limits, the mobile exclusion and `nearestPeak`. Verify unit tests:
   - the worked example (d = 0.125, 181.82373046875 Hz, −19.875 dB) and the clamp at ±0.5;
   - damped tones at 93.1, 181.73, 182.3 and 250.7 Hz (τ 0.05–0.4 s) refined within 0.2 Hz;
   - ripple rejected;
