@@ -40,7 +40,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - a single damped tone gives a spectral Q within 20% of π·f·τ for τ from 10 to 100 ms, and is capped below it for long decays (the tap window's resolution; decay Q covers those);
   - no crossing within 50 Hz gives none;
   - BW below 0.1 Hz gives none
-- [ ] 2.3 Implement `tapTone/body.ts` (candidates, assignment, reliability, `reattachManualRoles`). Verify unit tests for every scenario of the delta:
+- [x] 2.3 Implement `tapTone/body.ts` (candidates, assignment, reliability, `reattachManualRoles`). Verify unit tests for every scenario of the delta:
   - typical body;
   - 110/150/212/262 Hz;
   - weak peak;

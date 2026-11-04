@@ -6,6 +6,12 @@ export const DSP_PACKAGE_NAME = "@gb/dsp";
 export { applyBiquad, type BiquadCoefficients, biquadHighPass } from "./biquad.ts";
 export { type ComplexSignal, fft, inverseFft, realSpectrum } from "./fft.ts";
 export { type SpectralQ, spectralQ } from "./tapTone/bandwidthQ.ts";
+export {
+  type BodyResonance,
+  type BodyResonances,
+  identifyBodyResonances,
+  reattachRole,
+} from "./tapTone/body.ts";
 export { detectPeaks, nearestPeak, type Peak } from "./tapTone/peaks.ts";
 export {
   averageSpectrum,

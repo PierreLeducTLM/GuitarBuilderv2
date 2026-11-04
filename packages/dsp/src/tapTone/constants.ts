@@ -29,3 +29,17 @@ export const MOBILE_EXCLUSION_HZ = { from: 132, to: 138 } as const;
 export const Q_BANDWIDTH_DB = 3;
 export const Q_SEARCH_HZ = 50;
 export const Q_MIN_BANDWIDTH_HZ = 0.1;
+
+export const BODY_BAND_HZ = { from: 60, to: 400 } as const;
+export const BODY_LOCAL_MAX_POINTS = 3;
+export const BODY_RANGE_DB = 30;
+export const BODY_PROMINENCE_DB = 6;
+export const BODY_PROMINENCE_POINTS = 6;
+export const AIR_RANGE_HZ = { from: 70, to: 130 } as const;
+export const TOP_MIN_HZ = 140;
+export const TOP_MIN_AIR_RATIO = 1.4;
+export const TOP_MAX_HZ = 300;
+export const BACK_MIN_ABOVE_TOP_HZ = 15;
+export const BACK_MAX_HZ = 400;
+export const BODY_SPLIT_HZ = 15;
+export const ROLE_REATTACH_HZ = 3;
