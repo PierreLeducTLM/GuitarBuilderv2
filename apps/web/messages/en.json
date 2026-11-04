@@ -385,6 +385,44 @@
       "tooClose": "Too close to another tap",
       "cutOff": "Cut off by the end of the recording",
       "noneUsable": "None of the taps can be used"
+    },
+    "detected": {
+      "heading": "Detected Frequency",
+      "level": "Peak Level",
+      "note": "Note",
+      "spectralQ": "Spectral Q",
+      "decayQ": "Decay Q",
+      "current": "Current Value",
+      "none": "—",
+      "hz": "{frequency} Hz",
+      "db": "{level} dB",
+      "pending": "Measuring…"
+    },
+    "peaks": {
+      "heading": "Detected Peaks",
+      "item": "{frequency} Hz",
+      "highest": "{frequency} Hz (highest)"
+    },
+    "rolesPanel": {
+      "heading": "Body resonances",
+      "notIdentified": "Not identified",
+      "setByYou": "set by you",
+      "move": "Move {role}",
+      "clear": "Clear {role}",
+      "moving": "Choose a peak for {role}",
+      "value": "{frequency} Hz"
+    },
+    "qReasons": {
+      "spectral": "The peak is too broad or merges with a neighbour",
+      "noRecording": "Needs the recording; record the take again to measure it",
+      "MODE_NOT_ISOLATED": "Another resonance is too close to this one to measure its decay on its own.",
+      "NO_QUIET_REFERENCE": "The recording has no silent moment to measure background noise. Leave about one second of silence before the first tap.",
+      "NOT_ENOUGH_DECAY": "This resonance does not ring far enough above the background noise to measure its decay.",
+      "DECAY_CUT_OFF": "The next tap or the end of the recording came before this resonance had died away. Leave more time between taps.",
+      "NO_DECAY": "The level of this resonance does not fall after the tap.",
+      "NOT_EXPONENTIAL": "The ring-down does not follow one smooth decay, usually because two resonances are beating together.",
+      "TOO_FEW_VALID_TAPS": "Fewer than 3 usable taps. Record more taps.",
+      "TAPS_INCONSISTENT": "The taps give very different decay values, so no single value can be trusted. Tap the same spot the same way each time."
     }
   }
 }

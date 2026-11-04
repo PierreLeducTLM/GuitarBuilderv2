@@ -385,6 +385,44 @@
       "tooClose": "Trop proche d'une autre frappe",
       "cutOff": "Coupée par la fin de l'enregistrement",
       "noneUsable": "Aucune frappe n'est exploitable"
+    },
+    "detected": {
+      "heading": "Fréquence détectée",
+      "level": "Niveau du pic",
+      "note": "Note",
+      "spectralQ": "Q spectral",
+      "decayQ": "Q de décroissance",
+      "current": "Valeur actuelle",
+      "none": "—",
+      "hz": "{frequency} Hz",
+      "db": "{level} dB",
+      "pending": "Mesure en cours…"
+    },
+    "peaks": {
+      "heading": "Pics détectés",
+      "item": "{frequency} Hz",
+      "highest": "{frequency} Hz (le plus fort)"
+    },
+    "rolesPanel": {
+      "heading": "Résonances de la caisse",
+      "notIdentified": "Non identifiée",
+      "setByYou": "défini par vous",
+      "move": "Déplacer {role}",
+      "clear": "Effacer {role}",
+      "moving": "Choisissez un pic pour {role}",
+      "value": "{frequency} Hz"
+    },
+    "qReasons": {
+      "spectral": "Le pic est trop large ou se confond avec un voisin",
+      "noRecording": "Il faut l'enregistrement : refaites la prise pour le mesurer",
+      "MODE_NOT_ISOLATED": "Une autre résonance est trop proche de celle-ci pour mesurer sa décroissance seule.",
+      "NO_QUIET_REFERENCE": "L'enregistrement n'a aucun moment de silence pour mesurer le bruit de fond. Laissez environ une seconde de silence avant la première frappe.",
+      "NOT_ENOUGH_DECAY": "Cette résonance ne ressort pas assez du bruit de fond pour mesurer sa décroissance.",
+      "DECAY_CUT_OFF": "La frappe suivante ou la fin de l'enregistrement est arrivée avant que cette résonance s'éteigne. Laissez plus de temps entre les frappes.",
+      "NO_DECAY": "Le niveau de cette résonance ne diminue pas après la frappe.",
+      "NOT_EXPONENTIAL": "La décroissance ne suit pas une courbe régulière, souvent parce que deux résonances battent ensemble.",
+      "TOO_FEW_VALID_TAPS": "Moins de 3 frappes exploitables. Enregistrez davantage de frappes.",
+      "TAPS_INCONSISTENT": "Les frappes donnent des valeurs de décroissance très différentes : aucune valeur unique n'est fiable. Frappez au même endroit, de la même façon."
     }
   }
 }
