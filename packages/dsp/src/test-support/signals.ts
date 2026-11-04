@@ -26,3 +26,38 @@ export const sine = (options: {
     (_, n) => amplitude * Math.sin((2 * Math.PI * frequency * n) / sampleRate),
   );
 };
+
+export const gaussianNoise = (options: {
+  length: number;
+  rms: number;
+  seed: number;
+}): Float64Array => {
+  const next = seededRandom(options.seed);
+  return Float64Array.from({ length: options.length }, () => {
+    const u = Math.max(next(), Number.EPSILON);
+    const v = next();
+    return options.rms * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  });
+};
+
+export type DecayingTone = {
+  readonly onset: number;
+  readonly amplitude: number;
+  readonly tau: number;
+  readonly frequency: number;
+};
+
+export const withTaps = (
+  base: Float64Array,
+  taps: readonly DecayingTone[],
+  sampleRate = 48000,
+): Float64Array =>
+  base.map((x, n) =>
+    taps.reduce((total, tap) => {
+      if (n < tap.onset) return total;
+      const t = (n - tap.onset) / sampleRate;
+      return (
+        total + tap.amplitude * Math.exp(-t / tap.tau) * Math.sin(2 * Math.PI * tap.frequency * t)
+      );
+    }, x),
+  );

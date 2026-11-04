@@ -12,7 +12,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - −10.9 dB at 15 Hz, +1.0 dB at 30 Hz and within 0.2 dB at 180 Hz for fc 30 Hz, Q 10^(1/20), fs 48 kHz;
   - the length is kept;
   - 15 Hz rumble is removed from a 180 Hz tone
-- [ ] 1.3 Implement `tapTone/constants.ts` and `tapTone/taps.ts` (block RMS, noise floor, onsets, debounce, the 50-tap cap, rejection reasons). Verify unit tests:
+- [x] 1.3 Implement `tapTone/constants.ts` and `tapTone/taps.ts` (block RMS, noise floor, onsets, debounce, the 50-tap cap, rejection reasons). Verify unit tests:
   - the three-tap scenario gives onsets 24000, 76800 and 132000;
   - a double hit 40 ms apart counts once;
   - silence gives no onset;
