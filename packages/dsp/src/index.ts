@@ -12,7 +12,9 @@ export {
   identifyBodyResonances,
   reattachRole,
 } from "./tapTone/body.ts";
+export { noteLabel } from "./tapTone/note.ts";
 export { detectPeaks, nearestPeak, type Peak } from "./tapTone/peaks.ts";
+export { pointsFromRecord, recordFromPoints, type TapToneRecord } from "./tapTone/record.ts";
 export {
   averageSpectrum,
   type SpectrumPoint,
@@ -20,4 +22,5 @@ export {
   tapPower,
 } from "./tapTone/spectrum.ts";
 export { detectTaps, type Tap, type TapRejection } from "./tapTone/taps.ts";
+export { encodeWav, wavFileName } from "./wav.ts";
 export { hann, type Window } from "./windows.ts";

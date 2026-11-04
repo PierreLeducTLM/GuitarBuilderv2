@@ -55,7 +55,7 @@ const onsetBlocks = (levels: readonly number[]): readonly number[] => {
       level >= threshold &&
       level >= TAP_RISE_RATIO * previous &&
       (last === undefined || b - last >= TAP_DEBOUNCE_BLOCKS);
-    return isOnset ? [...found, b] : found;
+    return isOnset ? found.concat(b) : found;
   }, []);
 };
 

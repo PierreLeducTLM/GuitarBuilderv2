@@ -48,7 +48,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - split peak;
   - Top without spectral Q;
   - a manual role kept within 3 Hz and cleared beyond it
-- [ ] 2.4 Implement `tapTone/note.ts`, `tapTone/record.ts` and `wav.ts`. Verify unit tests:
+- [x] 2.4 Implement `tapTone/note.ts`, `tapTone/record.ts` and `wav.ts`. Verify unit tests:
   - "F#3 −30 c" for 181.82 Hz and "F#3 −32 c" for 181.640625 Hz;
   - −0.2 c shows "+0 c";
   - record round-trips for 662-point and 331-point records;
