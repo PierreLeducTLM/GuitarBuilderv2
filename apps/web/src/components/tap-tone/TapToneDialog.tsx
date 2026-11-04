@@ -275,6 +275,7 @@ export function TapToneDialog(props: TapToneDialogProps) {
       description={props.label}
       closeLabel={tDialog("close")}
       size="xl"
+      layer="top"
       dismissOnOutsideClick={false}
       footer={
         <>

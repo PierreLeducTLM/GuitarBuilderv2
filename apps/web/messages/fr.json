@@ -223,7 +223,9 @@
       "frequencyAxis": "Fréquence (Hz)",
       "levelAxis": "Niveau (dB)",
       "peakMarker": "{frequency} Hz",
-      "role": "{role} {frequency} Hz"
+      "role": "{role} {frequency} Hz",
+      "addAnalysis": "Ajouter une analyse",
+      "defaultDescription": "Analyse de résonance"
     }
   },
   "steps": {

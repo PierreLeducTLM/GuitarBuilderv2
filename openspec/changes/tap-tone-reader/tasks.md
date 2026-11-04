@@ -132,7 +132,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
 
 ## 7. Build steps and end-to-end
 
-- [ ] 7.1 Add "Add Analysis" (Instrument mode) to `StepMeasurements` for owners: the description prompt, then `add_measurement` with roles when present. Add the roles line to the list, and the −100..0 dB axis to `SpectrumGraph`. Teach `apps/web/e2e/fake-supabase.ts` the record and role checks. Verify:
+- [x] 7.1 Add "Add Analysis" (Instrument mode) to `StepMeasurements` for owners: the description prompt, then `add_measurement` with roles when present. Add the roles line to the list, and the −100..0 dB axis to `SpectrumGraph`. Teach `apps/web/e2e/fake-supabase.ts` the record and role checks. Verify:
   - the existing step-dialog tests still pass;
   - a legacy measurement shows no roles line;
   - the administrator's read-only view has no "Add Analysis"
