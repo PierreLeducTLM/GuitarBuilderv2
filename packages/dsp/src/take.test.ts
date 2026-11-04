@@ -8,6 +8,7 @@ import {
   runTake,
   spectrumPoints,
   type TakeInput,
+  takeDecayQ,
   tapPower,
 } from "./index.ts";
 import { type DecayingTone, gaussianNoise, withTaps } from "./test-support/signals.ts";
@@ -150,5 +151,53 @@ describe("reopening a saved record", () => {
     const record = runTake(input(signal)).result.record;
     if (!record) throw new Error("expected a record");
     expect(resultFromRecord(record).peaks).toHaveLength(1);
+  });
+});
+
+describe("decay Q of a take's peak", () => {
+  it("measures the selected peak across the used taps", () => {
+    const { cache, result } = runTake(input(threeTaps));
+    const top = result.peaks[0];
+    if (!top) throw new Error("expected a peak");
+    const decay = takeDecayQ(cache, result, top);
+    expect(decay.used).toBe(3);
+    expect(Math.abs((decay.q ?? 0) / (Math.PI * 190 * 0.12) - 1)).toBeLessThan(0.02);
+  });
+
+  it("uses only the taps still used and treats the other peaks as neighbours", () => {
+    const { cache } = runTake(input(threeTaps));
+    const without3 = recomputeTake(cache, [3]);
+    const top = without3.peaks[0];
+    if (!top) throw new Error("expected a peak");
+    const decay = takeDecayQ(cache, without3, top);
+    expect(decay.used).toBe(2);
+    expect(decay.reason).toBe("TOO_FEW_VALID_TAPS");
+    expect(decay.isolation.neighbour).toBeCloseTo(95, 0);
+  });
+
+  it("takes the noise floor from the silence before the first tap", () => {
+    const { cache, result } = runTake(input(threeTaps));
+    const top = result.peaks[0];
+    if (!top) throw new Error("expected a peak");
+    expect(takeDecayQ(cache, result, top).noise?.source).toBe("quiet");
+  });
+
+  it("ends each ring-down at the next tap, so slow decays between close taps are cut off", () => {
+    const clickThenRing = (onset: number) => [
+      { onset, amplitude: 0.5, tau: 0.004, frequency: 700 },
+      { onset, amplitude: 0.1, tau: 1, frequency: 190 },
+    ];
+    const slow = recording(5, [36000, 72000, 108000].flatMap(clickThenRing));
+    const { cache, result } = runTake(input(slow));
+    const ring = result.peaks.find((peak) => Math.abs(peak.frequency - 190) < 1);
+    if (!ring) throw new Error("expected the 190 Hz mode");
+    expect(result.used).toEqual([1, 2, 3]);
+    expect(takeDecayQ(cache, result, ring).reason).toBe("DECAY_CUT_OFF");
+  });
+
+  it("measures a body role that is not among the listed peaks", () => {
+    const { cache, result } = runTake(input(threeTaps));
+    const decay = takeDecayQ(cache, result, { frequency: 95, level: -30, spectralQ: null });
+    expect(Math.abs((decay.q ?? 0) / (Math.PI * 95 * 0.15) - 1)).toBeLessThan(0.02);
   });
 });

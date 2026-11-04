@@ -52,6 +52,7 @@ export {
 } from "./tapTone/spectrum.ts";
 export {
   analyzeTake,
+  type DecayTarget,
   recomputeTake,
   resultFromRecord,
   runTake,
@@ -61,6 +62,7 @@ export {
   type TakeMode,
   type TakePeak,
   type TakeResult,
+  takeDecayQ,
 } from "./tapTone/take.ts";
 export { detectTaps, type Tap, type TapRejection } from "./tapTone/taps.ts";
 export { encodeWav, wavFileName } from "./wav.ts";
