@@ -4,7 +4,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
 
 ## 1. Signal processing foundations (`packages/dsp`)
 
-- [ ] 1.1 Implement `fft.ts` (iterative radix-2 FFT with cached tables, inverse, `realSpectrum`) and `windows.ts` (`hann` with its sum). Verify unit tests:
+- [x] 1.1 Implement `fft.ts` (iterative radix-2 FFT with cached tables, inverse, `realSpectrum`) and `windows.ts` (`hann` with its sum). Verify unit tests:
   - the FFT matches a direct DFT on random input of sizes 8 to 4096;
   - the inverse returns the input within 1e-12;
   - a full-scale 375 Hz sine in a 32768-point Hann window reads 1.0 within 0.001 at bin 256
