@@ -50,6 +50,9 @@ importers:
       '@gb/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@gb/dsp':
+        specifier: workspace:*
+        version: link:../../packages/dsp
       '@gb/ui':
         specifier: workspace:*
         version: link:../../packages/ui

@@ -114,10 +114,10 @@ describe("tap detection", () => {
   });
 
   it("uses at most the first 50 taps", () => {
-    const taps = Array.from({ length: 60 }, (_, i) => tap({ onset: 24000 + i * 28800, tau: 0.05 }));
-    const found = onsets(recording({ seconds: 37, taps }));
+    const taps = Array.from({ length: 60 }, (_, i) => tap({ onset: 24000 + i * 6000, tau: 0.004 }));
+    const found = onsets(recording({ seconds: 8, taps }));
     expect(found).toHaveLength(50);
-    expect(found[49]).toBe(24000 + 49 * 28800);
+    expect(found[49]).toBe(24000 + 49 * 6000);
   });
 });
 

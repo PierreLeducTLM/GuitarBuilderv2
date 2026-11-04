@@ -9,7 +9,7 @@ const toInt16 = (x: number) => {
 export const encodeWav = (
   channels: readonly (Float32Array | Float64Array)[],
   sampleRate: number,
-): Uint8Array => {
+): Uint8Array<ArrayBuffer> => {
   const channelCount = channels.length;
   const frames = channels[0]?.length ?? 0;
   const dataBytes = frames * channelCount * BYTES_PER_SAMPLE;

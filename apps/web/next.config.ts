@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // The end-to-end tests build into their own directory (see playwright.config.ts).
   distDir: process.env.NEXT_DIST_DIR || ".next",
-  transpilePackages: ["@gb/ui", "@gb/db"],
+  transpilePackages: ["@gb/ui", "@gb/db", "@gb/dsp"],
   turbopack: { root: workspaceRoot },
   outputFileTracingRoot: workspaceRoot,
   async headers() {
