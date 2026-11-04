@@ -63,6 +63,7 @@ export {
   type TakePeak,
   type TakeResult,
   takeDecayQ,
+  takeDecaySeries,
 } from "./tapTone/take.ts";
 export { detectTaps, type Tap, type TapRejection } from "./tapTone/taps.ts";
 export { encodeWav, wavFileName } from "./wav.ts";

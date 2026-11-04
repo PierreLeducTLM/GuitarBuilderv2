@@ -1,7 +1,8 @@
 import { type SpectralQ, spectralQ } from "./bandwidthQ.ts";
 import { type BodyResonances, identifyBodyResonances } from "./body.ts";
 import { TAP_WINDOW_SAMPLES } from "./constants.ts";
-import { measureDecayQ, type PeakDecay } from "./decay/measure.ts";
+import { type DecaySeries, inspectDecay } from "./decay/inspect.ts";
+import { type DecayInput, measureDecayQ, type PeakDecay } from "./decay/measure.ts";
 import { noteLabel } from "./note.ts";
 import { detectPeaks, type Peak } from "./peaks.ts";
 import { pointsFromRecord, recordFromPoints, type TapToneRecord } from "./record.ts";
@@ -88,20 +89,33 @@ export type DecayTarget = {
 
 const SAME_PEAK_HZ = 0.5;
 
+const decayInput = (cache: TakeCache, result: TakeResult, target: DecayTarget): DecayInput => ({
+  signal: cache.signal,
+  onsets: cache.taps.map((tap) => tap.onset),
+  used: cache.taps.filter((tap) => result.used.includes(tap.number)).map((tap) => tap.onset),
+  peak: {
+    frequency: target.frequency,
+    level: target.level,
+    bandwidth: target.spectralQ?.bandwidth ?? null,
+  },
+  others: result.peaks
+    .filter((peak) => Math.abs(peak.frequency - target.frequency) > SAME_PEAK_HZ)
+    .map((peak) => ({ frequency: peak.frequency, level: peak.level })),
+});
+
 export const takeDecayQ = (cache: TakeCache, result: TakeResult, target: DecayTarget): PeakDecay =>
-  measureDecayQ({
-    signal: cache.signal,
-    onsets: cache.taps.map((tap) => tap.onset),
-    used: cache.taps.filter((tap) => result.used.includes(tap.number)).map((tap) => tap.onset),
-    peak: {
-      frequency: target.frequency,
-      level: target.level,
-      bandwidth: target.spectralQ?.bandwidth ?? null,
-    },
-    others: result.peaks
-      .filter((peak) => Math.abs(peak.frequency - target.frequency) > SAME_PEAK_HZ)
-      .map((peak) => ({ frequency: peak.frequency, level: peak.level })),
-  });
+  measureDecayQ(decayInput(cache, result, target));
+
+export const takeDecaySeries = (
+  cache: TakeCache,
+  result: TakeResult,
+  target: DecayTarget,
+  tapNumber: number,
+): DecaySeries | null => {
+  const tap = cache.taps.find((t) => t.number === tapNumber);
+  if (!tap) return null;
+  return inspectDecay({ ...decayInput(cache, result, target), tap: tap.onset });
+};
 
 export function* analyzeTake(input: TakeInput): Generator<void, TakeAnalysis, void> {
   const taps = detectTaps({ filtered: input.filtered, raw: input.raw });

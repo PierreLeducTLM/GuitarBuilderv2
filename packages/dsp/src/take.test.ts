@@ -9,6 +9,7 @@ import {
   spectrumPoints,
   type TakeInput,
   takeDecayQ,
+  takeDecaySeries,
   tapPower,
 } from "./index.ts";
 import { type DecayingTone, gaussianNoise, withTaps } from "./test-support/signals.ts";
@@ -199,5 +200,28 @@ describe("decay Q of a take's peak", () => {
     const { cache, result } = runTake(input(threeTaps));
     const decay = takeDecayQ(cache, result, { frequency: 95, level: -30, spectralQ: null });
     expect(Math.abs((decay.q ?? 0) / (Math.PI * 95 * 0.15) - 1)).toBeLessThan(0.02);
+  });
+});
+
+describe("ring-down series of a take's peak", () => {
+  it("draws one used tap's isolated response, envelope and fit", () => {
+    const { cache, result } = runTake(input(threeTaps));
+    const top = result.peaks[0];
+    if (!top) throw new Error("expected a peak");
+    const series = takeDecaySeries(cache, result, top, 2);
+    expect(series?.decay.onset).toBe(76800);
+    expect(takeDecaySeries(cache, result, top, 3)?.decay.onset).toBe(132000);
+    expect(takeDecaySeries(cache, result, top, 9)).toBeNull();
+    expect(series?.response.length).toBeLessThanOrEqual(800);
+    expect(series?.envelope.length).toBeGreaterThan(0);
+    expect(series?.fit.length).toBeGreaterThan(0);
+  });
+
+  it("has nothing to draw for a tap that is not used", () => {
+    const { cache } = runTake(input(threeTaps));
+    const without2 = recomputeTake(cache, [2]);
+    const top = without2.peaks[0];
+    if (!top) throw new Error("expected a peak");
+    expect(takeDecaySeries(cache, without2, top, 2)).toBeNull();
   });
 });
