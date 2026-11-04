@@ -8,7 +8,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - the FFT matches a direct DFT on random input of sizes 8 to 4096;
   - the inverse returns the input within 1e-12;
   - a full-scale 375 Hz sine in a 32768-point Hann window reads 1.0 within 0.001 at bin 256
-- [ ] 1.2 Implement `biquad.ts` (cookbook high-pass, direct form I). Verify unit tests:
+- [x] 1.2 Implement `biquad.ts` (cookbook high-pass, direct form I). Verify unit tests:
   - −10.9 dB at 15 Hz, +1.0 dB at 30 Hz and within 0.2 dB at 180 Hz for fc 30 Hz, Q 10^(1/20), fs 48 kHz;
   - the length is kept;
   - 15 Hz rumble is removed from a 180 Hz tone
