@@ -103,7 +103,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - "2 of 3 taps used" after excluding tap 2;
   - a rejected tap shows "Clipped" and cannot be included;
   - Space on a focused marker toggles it, with the announcement
-- [ ] 6.4 Build the spectrum graph (−100..0 dB, markers, hover, snap, click) with draggable role labels, and the oscilloscope. Verify component tests:
+- [x] 6.4 Build the spectrum graph (−100..0 dB, markers, hover, snap, click) with draggable role labels, and the oscilloscope. Verify component tests:
   - grid labels;
   - 175 Hz snapping to 181.8 Hz;
   - a click at 300 Hz selecting the nearest peak;
