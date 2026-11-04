@@ -71,4 +71,44 @@ describe("useTakeAnalysis", () => {
     await flush();
     expect(dispatch).toHaveBeenCalledWith({ type: "analysisFailed", run: 4 });
   });
+
+  it("treats a single sample as audio that cannot be analysed", async () => {
+    vi.useFakeTimers();
+    const dispatch = vi.fn();
+    const { result } = renderHook(() => useTakeAnalysis(dispatch));
+    act(() =>
+      result.current.analyse({
+        run: 5,
+        audio: audioOf(Float64Array.of(0.5)),
+        mode: "plate",
+        mobile: false,
+      }),
+    );
+    await flush();
+    expect(dispatch.mock.calls).toEqual([[{ type: "analysisFailed", run: 5 }]]);
+  });
+
+  it("does not report the failure of an abandoned run", async () => {
+    vi.useFakeTimers();
+    const dispatch = vi.fn();
+    const { result } = renderHook(() => useTakeAnalysis(dispatch));
+    act(() =>
+      result.current.analyse({
+        run: 8,
+        audio: audioOf(new Float64Array(0)),
+        mode: "plate",
+        mobile: false,
+      }),
+    );
+    act(() =>
+      result.current.analyse({
+        run: 9,
+        audio: audioOf(tapped([24000])),
+        mode: "plate",
+        mobile: false,
+      }),
+    );
+    await flush();
+    expect(dispatch.mock.calls.map(([event]) => event.run)).toEqual([9]);
+  });
 });
