@@ -25,3 +25,7 @@ export const PEAK_NEIGHBOURHOOD_HZ = 30;
 export const PEAK_RANGE_DB = 35;
 export const MAX_PEAKS = 10;
 export const MOBILE_EXCLUSION_HZ = { from: 132, to: 138 } as const;
+
+export const Q_BANDWIDTH_DB = 3;
+export const Q_SEARCH_HZ = 50;
+export const Q_MIN_BANDWIDTH_HZ = 0.1;

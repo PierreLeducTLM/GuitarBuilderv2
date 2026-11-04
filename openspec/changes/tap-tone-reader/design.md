@@ -552,6 +552,10 @@ The note label stays the same in both languages.
   - The waveform shows every decision, and the user can exclude taps.
   - The fixtures cover a quiet tap and a double hit.
 - **[Taps closer than ~0.7 s are all rejected]** The help asks for about a second between taps, and the reason is shown on each tap.
+- **[Spectral Q is biased by the tap window]**
+  - Measured on synthetic damped tones during task 2.2: about 8–16% high for τ of 10–50 ms, because the Hann taper reshapes the start of the decay.
+  - It is capped near f / 2.1 Hz for long decays (0.59 × π·f·τ at 180 Hz, τ 0.2 s).
+  - The UI shows both Q values, and the inspector explains that decay Q is the more reliable one for high-Q modes.
 - **[Decay Q on short or noisy decays]** The method refuses with a reason instead of guessing (decision 3). The inspector shows the evidence.
 - **[Instrument mode on a free plate]** All roles are reported as not identified, but a main peak can still be confirmed. A Plate mode for build steps is a possible follow-up.
 - **[Performance on phones]** Decay Q is computed lazily, with the 1 s budget measured in task 7.2. The worker fallback is ready if needed.

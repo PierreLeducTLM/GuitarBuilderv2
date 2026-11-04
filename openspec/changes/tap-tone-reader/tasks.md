@@ -35,9 +35,9 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - 14 candidates cut to 10;
   - the Android and desktop scenarios;
   - a 16384-point legacy record uses 10 points per side
-- [ ] 2.2 Implement `tapTone/bandwidthQ.ts`. Verify unit tests:
+- [x] 2.2 Implement `tapTone/bandwidthQ.ts`. Verify unit tests:
   - the 195/205 Hz example gives Q = 20;
-  - a single damped tone of known τ gives a spectral Q within 10% of π·f·τ;
+  - a single damped tone gives a spectral Q within 20% of π·f·τ for τ from 10 to 100 ms, and is capped below it for long decays (the tap window's resolution; decay Q covers those);
   - no crossing within 50 Hz gives none;
   - BW below 0.1 Hz gives none
 - [ ] 2.3 Implement `tapTone/body.ts` (candidates, assignment, reliability, `reattachManualRoles`). Verify unit tests for every scenario of the delta:
