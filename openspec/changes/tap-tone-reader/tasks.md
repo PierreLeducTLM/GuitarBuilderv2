@@ -60,7 +60,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
 - [x] 3.2 Implement the quiet stretches, the noise floor and the tap-tail fallback. Verify unit tests T16, T11, T11b and T11c, and the 0.79 s quiet-stretch example
 - [x] 3.3 Implement the fit interval, the dB line fit, the half-slope ratio and the ordered quality checks with their reason codes. Verify unit tests T1, T1b, T2, T2b, T2c, T4, T4b, T5, T6, T6b, T7 and T12
 - [x] 3.4 Implement combining across taps (at least 3 valid, median, MAD/median ≤ 0.15, the most frequent reason with its tie order) and the inspector series (400 min/max buckets, the strided envelope, the fit curve, the markers). Verify unit tests T8, T9, T10, T10b and T17. Add T18 (200-seed Monte Carlo) as a nightly test that does not run in `pnpm check`
-- [ ] 3.5 Implement the `analyzeTake` generator and `recompute`, with decay Q computed lazily and memoized per (tap, peak). Verify unit tests:
+- [x] 3.5 Implement the `analyzeTake` generator and `recompute`, with decay Q computed lazily and memoized per (tap, peak). Verify unit tests:
   - the generator and its synchronous runner give the same result;
   - `taps.wav`-like input gives the expected taps and peaks;
   - toggling a tap reruns only averaging, peaks and roles;
@@ -90,7 +90,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - late results from a cancelled or superseded run ignored;
   - a Re-record clears only its own take;
   - Confirm enabled only when the mode has something to return
-- [ ] 6.2 Implement `audio.ts` and the `useAudioInputs`, `useRecorder`, `usePlayback` and `useTakeAnalysis` hooks. Verify component tests with mocked media APIs:
+- [x] 6.2 Implement `audio.ts` and the `useAudioInputs`, `useRecorder`, `usePlayback` and `useTakeAnalysis` hooks. Verify component tests with mocked media APIs:
   - opening calls only `enumerateDevices`;
   - the exact `getUserMedia` constraints;
   - the `MediaRecorder` type order with 100 ms chunks;
