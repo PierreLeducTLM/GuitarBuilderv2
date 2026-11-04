@@ -118,6 +118,7 @@ export function StepDialog({ buildId, stepKey, states, store, canEdit, onClose }
         </h3>
         <StepMeasurements
           stepKey={stepKey}
+          stepLabel={label}
           measurements={state.measurements}
           store={store}
           canEdit={canEdit}

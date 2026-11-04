@@ -222,7 +222,10 @@
       "graphLabel": "Spectre de {description}, pic à {frequency} Hz",
       "frequencyAxis": "Fréquence (Hz)",
       "levelAxis": "Niveau (dB)",
-      "peakMarker": "{frequency} Hz"
+      "peakMarker": "{frequency} Hz",
+      "role": "{role} {frequency} Hz",
+      "addAnalysis": "Ajouter une analyse",
+      "defaultDescription": "Analyse de résonance"
     }
   },
   "steps": {
@@ -358,5 +361,146 @@
     "TunePlay": "Accorder et jouer",
     "AssessAcoustic": "Évaluer le comportement acoustique",
     "OptimiseAcoustic": "Optimiser les paramètres acoustiques"
+  },
+  "tapTone": {
+    "spectrum": {
+      "caption": "Spectre de fréquences",
+      "hint": "Cliquez sur un pic pour le sélectionner",
+      "label": "Spectre de fréquences. Pics : {peaks}",
+      "noPeaks": "Spectre de fréquences, aucun pic détecté",
+      "frequency": "{frequency} Hz",
+      "assignRole": "Faites glisser pour déplacer l'étiquette {role}"
+    },
+    "roles": {
+      "air": "Air",
+      "top": "Table",
+      "back": "Fond"
+    },
+    "taps": {
+      "count": "{used} frappes utilisées sur {total}",
+      "tap": "Frappe {number}",
+      "excludedNow": "Frappe {number} exclue",
+      "includedNow": "Frappe {number} incluse",
+      "waveformLabel": "Enregistrement de {seconds} s avec {total} frappes",
+      "seconds": "{seconds} s",
+      "clipped": "Saturée",
+      "tooClose": "Trop proche d'une autre frappe",
+      "cutOff": "Coupée par la fin de l'enregistrement",
+      "noneUsable": "Aucune frappe n'est exploitable"
+    },
+    "detected": {
+      "heading": "Fréquence détectée",
+      "level": "Niveau du pic",
+      "note": "Note",
+      "spectralQ": "Q spectral",
+      "decayQ": "Q de décroissance",
+      "current": "Valeur actuelle",
+      "none": "—",
+      "hz": "{frequency} Hz",
+      "db": "{level} dB",
+      "pending": "Mesure en cours…"
+    },
+    "peaks": {
+      "heading": "Pics détectés",
+      "item": "{frequency} Hz",
+      "highest": "{frequency} Hz (le plus fort)"
+    },
+    "rolesPanel": {
+      "heading": "Résonances de la caisse",
+      "notIdentified": "Non identifiée",
+      "setByYou": "défini par vous",
+      "move": "Déplacer {role}",
+      "clear": "Effacer {role}",
+      "moving": "Choisissez un pic pour {role}",
+      "value": "{frequency} Hz"
+    },
+    "qReasons": {
+      "spectral": "Le pic est trop large ou se confond avec un voisin",
+      "noRecording": "Il faut l'enregistrement : refaites la prise pour le mesurer",
+      "MODE_NOT_ISOLATED": "Une autre résonance est trop proche de celle-ci pour mesurer sa décroissance seule.",
+      "NO_QUIET_REFERENCE": "L'enregistrement n'a aucun moment de silence pour mesurer le bruit de fond. Laissez environ une seconde de silence avant la première frappe.",
+      "NOT_ENOUGH_DECAY": "Cette résonance ne ressort pas assez du bruit de fond pour mesurer sa décroissance.",
+      "DECAY_CUT_OFF": "La frappe suivante ou la fin de l'enregistrement est arrivée avant que cette résonance s'éteigne. Laissez plus de temps entre les frappes.",
+      "NO_DECAY": "Le niveau de cette résonance ne diminue pas après la frappe.",
+      "NOT_EXPONENTIAL": "La décroissance ne suit pas une courbe régulière, souvent parce que deux résonances battent ensemble.",
+      "TOO_FEW_VALID_TAPS": "Moins de 3 frappes exploitables. Enregistrez davantage de frappes.",
+      "TAPS_INCONSISTENT": "Les frappes donnent des valeurs de décroissance très différentes : aucune valeur unique n'est fiable. Frappez au même endroit, de la même façon."
+    },
+    "title": "Détecteur de fréquence",
+    "stepLabel": "Analyse pour {step}",
+    "plateLabel": "Mesure de la plaque",
+    "help": {
+      "label": "Comment mesurer",
+      "heading": "Instructions :",
+      "instrument1": "Étouffez les cordes.",
+      "instrument2": "Attendez une seconde avant la première frappe.",
+      "instrument3": "Frappez le chevalet fermement 3 à 5 fois, à environ une seconde d'intervalle.",
+      "instrument4": "Arrêtez l'enregistrement.",
+      "instrument5": "Vérifiez les frappes détectées et les étiquettes Air, Table et Fond.",
+      "instrument6": "Cliquez sur un pic pour choisir une autre fréquence.",
+      "plate1": "Choisissez le mode à mesurer et tenez la plaque comme indiqué.",
+      "plate2": "Attendez une seconde, puis frappez 3 à 5 fois, à environ une seconde d'intervalle.",
+      "plate3": "Arrêtez l'enregistrement et vérifiez les frappes détectées.",
+      "plate4": "Cliquez sur un pic pour choisir une autre fréquence."
+    },
+    "takes": {
+      "label": "Mode de la plaque",
+      "longitudinal": "Longitudinal (f_L)",
+      "crossGrain": "Travers (f_C)",
+      "diagonal": "Diagonale (f_LC)",
+      "value": "{take} {frequency} Hz",
+      "empty": "{take} —"
+    },
+    "guidance": {
+      "longitudinal": "Tenez la plaque délicatement à 22,4 % de sa longueur depuis une extrémité, près d'un grand côté. Frappez le milieu de la plaque.",
+      "crossGrain": "Tenez la plaque délicatement à 22,4 % de sa largeur depuis un grand côté, près d'un petit côté. Frappez le milieu de la plaque.",
+      "diagonal": "Tenez la plaque délicatement au milieu d'un petit côté. Frappez près d'un coin du côté opposé."
+    },
+    "capture": {
+      "inputDevice": "Entrée audio",
+      "unnamedInput": "Microphone {number}",
+      "start": "Démarrer l'enregistrement",
+      "stop": "Arrêter l'enregistrement",
+      "maxHint": "10 secondes au maximum",
+      "or": "ou",
+      "upload": "Importer un fichier audio",
+      "recording": "Enregistrement...",
+      "elapsed": "{elapsed} s / {max} s",
+      "analyzing": "Analyse..."
+    },
+    "actions": {
+      "play": "Écouter",
+      "stopPlayback": "Arrêter",
+      "download": "Télécharger l'audio",
+      "rerecord": "Réenregistrer",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
+    },
+    "errors": {
+      "microphone": "Impossible d'accéder au microphone. Vérifiez les autorisations.",
+      "processing": "Erreur lors du traitement de l'audio. Veuillez réessayer.",
+      "noTap": "Aucune frappe détectée. Frappez la pièce fermement et réessayez.",
+      "unsupported": "Format audio non pris en charge. Formats acceptés : WAV, MP3, OGG",
+      "decode": "Impossible de décoder le fichier audio : {reason}",
+      "export": "Erreur lors de la création du fichier audio",
+      "playback": "Erreur lors de la lecture de l'audio"
+    },
+    "inspector": {
+      "heading": "Inspecteur de pic",
+      "summary": "Q de décroissance {q} sur {valid} frappes utilisées sur {used}",
+      "refused": "{valid} frappes exploitables sur {used}",
+      "notIsolated": "{neighbour} Hz, à {spacing} Hz ; au moins 7,0 Hz nécessaires",
+      "tapsLabel": "Décroissance de la frappe",
+      "graphLabel": "Décroissance de la frappe {number} à {frequency} Hz",
+      "tap": "Frappe",
+      "decayQ": "Q de décroissance",
+      "tau": "τ",
+      "range": "Plage",
+      "ms": "{ms} ms",
+      "db": "{db} dB",
+      "excluded": "exclu (contact de la frappe et bords du filtre)",
+      "fitEnds": "fin de l'ajustement",
+      "noise": "bruit de fond"
+    }
   }
 }

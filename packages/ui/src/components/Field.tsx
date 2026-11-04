@@ -1,5 +1,11 @@
 import { CircleAlert } from "lucide-react";
-import { type InputHTMLAttributes, type ReactNode, type Ref, useId } from "react";
+import {
+  type InputHTMLAttributes,
+  type ReactNode,
+  type Ref,
+  type SelectHTMLAttributes,
+  useId,
+} from "react";
 import { cx } from "../cx.ts";
 
 export interface FieldControlProps {
@@ -94,6 +100,43 @@ export function TextField({
           />
           {unit ? <span className="font-mono text-sm text-fg-dim">{unit}</span> : null}
         </div>
+      )}
+    </Field>
+  );
+}
+
+export interface SelectFieldProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "id"> {
+  label: ReactNode;
+  hint?: ReactNode;
+  error?: ReactNode;
+  ref?: Ref<HTMLSelectElement>;
+  fieldClassName?: string;
+}
+
+/** A labelled native select: accessible everywhere and native on phones. */
+export function SelectField({
+  label,
+  hint,
+  error,
+  className,
+  fieldClassName,
+  children,
+  ...selectProps
+}: SelectFieldProps) {
+  return (
+    <Field label={label} hint={hint} error={error} className={fieldClassName}>
+      {(control) => (
+        <select
+          className={cx(
+            "min-h-12 rounded-xl border bg-panel px-3.5 text-base text-fg outline-none transition-[border-color,box-shadow] duration-150 focus:border-amber focus:shadow-[0_0_0_3px_var(--gb-glow-amber)] disabled:cursor-not-allowed disabled:opacity-55",
+            error ? "border-danger-ink" : "border-line",
+            className,
+          )}
+          {...control}
+          {...selectProps}
+        >
+          {children}
+        </select>
       )}
     </Field>
   );

@@ -222,7 +222,10 @@
       "graphLabel": "Spectrum of {description}, peak at {frequency} Hz",
       "frequencyAxis": "Frequency (Hz)",
       "levelAxis": "Level (dB)",
-      "peakMarker": "{frequency} Hz"
+      "peakMarker": "{frequency} Hz",
+      "role": "{role} {frequency} Hz",
+      "addAnalysis": "Add Analysis",
+      "defaultDescription": "Resonance Analysis"
     }
   },
   "steps": {
@@ -358,5 +361,146 @@
     "TunePlay": "Tune and play",
     "AssessAcoustic": "Assess acoustic function",
     "OptimiseAcoustic": "Optimise acoustic parameters"
+  },
+  "tapTone": {
+    "spectrum": {
+      "caption": "Frequency Spectrum",
+      "hint": "Click on a peak to select",
+      "label": "Frequency spectrum. Peaks: {peaks}",
+      "noPeaks": "Frequency spectrum, no peak detected",
+      "frequency": "{frequency} Hz",
+      "assignRole": "Drag to move the {role} label"
+    },
+    "roles": {
+      "air": "Air",
+      "top": "Top",
+      "back": "Back"
+    },
+    "taps": {
+      "count": "{used} of {total} taps used",
+      "tap": "Tap {number}",
+      "excludedNow": "Tap {number} excluded",
+      "includedNow": "Tap {number} included",
+      "waveformLabel": "Recording of {seconds} s with {total} taps",
+      "seconds": "{seconds} s",
+      "clipped": "Clipped",
+      "tooClose": "Too close to another tap",
+      "cutOff": "Cut off by the end of the recording",
+      "noneUsable": "None of the taps can be used"
+    },
+    "detected": {
+      "heading": "Detected Frequency",
+      "level": "Peak Level",
+      "note": "Note",
+      "spectralQ": "Spectral Q",
+      "decayQ": "Decay Q",
+      "current": "Current Value",
+      "none": "—",
+      "hz": "{frequency} Hz",
+      "db": "{level} dB",
+      "pending": "Measuring…"
+    },
+    "peaks": {
+      "heading": "Detected Peaks",
+      "item": "{frequency} Hz",
+      "highest": "{frequency} Hz (highest)"
+    },
+    "rolesPanel": {
+      "heading": "Body resonances",
+      "notIdentified": "Not identified",
+      "setByYou": "set by you",
+      "move": "Move {role}",
+      "clear": "Clear {role}",
+      "moving": "Choose a peak for {role}",
+      "value": "{frequency} Hz"
+    },
+    "qReasons": {
+      "spectral": "The peak is too broad or merges with a neighbour",
+      "noRecording": "Needs the recording; record the take again to measure it",
+      "MODE_NOT_ISOLATED": "Another resonance is too close to this one to measure its decay on its own.",
+      "NO_QUIET_REFERENCE": "The recording has no silent moment to measure background noise. Leave about one second of silence before the first tap.",
+      "NOT_ENOUGH_DECAY": "This resonance does not ring far enough above the background noise to measure its decay.",
+      "DECAY_CUT_OFF": "The next tap or the end of the recording came before this resonance had died away. Leave more time between taps.",
+      "NO_DECAY": "The level of this resonance does not fall after the tap.",
+      "NOT_EXPONENTIAL": "The ring-down does not follow one smooth decay, usually because two resonances are beating together.",
+      "TOO_FEW_VALID_TAPS": "Fewer than 3 usable taps. Record more taps.",
+      "TAPS_INCONSISTENT": "The taps give very different decay values, so no single value can be trusted. Tap the same spot the same way each time."
+    },
+    "title": "Frequency Detector",
+    "stepLabel": "Analysis for {step}",
+    "plateLabel": "Plate measurement",
+    "help": {
+      "label": "How to measure",
+      "heading": "Instructions:",
+      "instrument1": "Damp the strings.",
+      "instrument2": "Wait a second before the first tap.",
+      "instrument3": "Tap the bridge firmly 3 to 5 times, about a second apart.",
+      "instrument4": "Stop the recording.",
+      "instrument5": "Check the detected taps and the Air, Top and Back labels.",
+      "instrument6": "Click a peak to select a different frequency.",
+      "plate1": "Choose the mode to measure and hold the plate as shown.",
+      "plate2": "Wait a second, then tap 3 to 5 times, about a second apart.",
+      "plate3": "Stop the recording and check the detected taps.",
+      "plate4": "Click a peak to select a different frequency."
+    },
+    "takes": {
+      "label": "Plate mode",
+      "longitudinal": "Longitudinal (f_L)",
+      "crossGrain": "Cross-grain (f_C)",
+      "diagonal": "Diagonal (f_LC)",
+      "value": "{take} {frequency} Hz",
+      "empty": "{take} —"
+    },
+    "guidance": {
+      "longitudinal": "Hold the plate lightly at 22.4% of its length from one end, near a long edge. Tap the middle of the plate.",
+      "crossGrain": "Hold the plate lightly at 22.4% of its width from a long edge, near a short end. Tap the middle of the plate.",
+      "diagonal": "Hold the plate lightly at the middle of one short end. Tap near a corner of the opposite end."
+    },
+    "capture": {
+      "inputDevice": "Input device",
+      "unnamedInput": "Microphone {number}",
+      "start": "Start Recording",
+      "stop": "Stop Recording",
+      "maxHint": "Max 10 seconds",
+      "or": "or",
+      "upload": "Upload Audio File",
+      "recording": "Recording...",
+      "elapsed": "{elapsed}s / {max}s",
+      "analyzing": "Analyzing..."
+    },
+    "actions": {
+      "play": "Play",
+      "stopPlayback": "Stop",
+      "download": "Download Audio",
+      "rerecord": "Re-record",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "microphone": "Unable to access microphone. Please check permissions.",
+      "processing": "Error processing audio. Please try again.",
+      "noTap": "No tap detected. Tap the part firmly and try again.",
+      "unsupported": "Unsupported audio format. Supported formats: WAV, MP3, OGG",
+      "decode": "Failed to decode audio file: {reason}",
+      "export": "Error generating audio file",
+      "playback": "Error playing audio"
+    },
+    "inspector": {
+      "heading": "Peak inspector",
+      "summary": "Decay Q {q} from {valid} of {used} taps",
+      "refused": "{valid} of {used} taps usable",
+      "notIsolated": "{neighbour} Hz, {spacing} Hz away; at least 7.0 Hz needed",
+      "tapsLabel": "Ring-down of tap",
+      "graphLabel": "Ring-down of tap {number} at {frequency} Hz",
+      "tap": "Tap",
+      "decayQ": "Decay Q",
+      "tau": "τ",
+      "range": "Range",
+      "ms": "{ms} ms",
+      "db": "{db} dB",
+      "excluded": "excluded (tap contact and filter edges)",
+      "fitEnds": "fit ends here",
+      "noise": "noise floor"
+    }
   }
 }

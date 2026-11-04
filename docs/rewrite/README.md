@@ -191,7 +191,7 @@ The migration itself is specified in [`legacy-data-migration`](../../openspec/sp
   - the tap-tone dialog uses a fixed Hamming window, 2/N scaling, no sub-bin interpolation and a 10-bin prominence;
   - the build analyzer uses a selectable window, coherent-gain dBFS and parabolic interpolation.
 
-  By owner decision the tap-tone dialog keeps nearest-bin peaks (2.93 Hz at 48 kHz) and gets no calibration; a shared engine is still worth building for the transform, windows and dB scale.
+  The 2026-11-01 decision kept nearest-bin peaks in the tap-tone dialog. It was reversed on 2026-11-04 (see "Third round" below): the reader now refines every peak with a parabola on a 1.46 Hz grid. A shared engine is in `packages/dsp`.
 - **Generate the step template from one source.** It is duplicated in 4 places in legacy. The template's keys, labels, arrows and variant applicability in `build-sequence` are complete enough to generate it.
 - **Enforce access rules on the server first.** Most legacy security holes come from relying on the UI.
 
@@ -222,6 +222,19 @@ How the decisions were interpreted, in case any of these is not what you meant:
 | Should the heel bolt-bar steps apply only with a BOBO neck? | Yes. | `build-sequence`, `build-story-sharing` |
 | Is the missing component → assembly wiring intended? | No, so it was added. | `build-sequence` |
 | Who writes the French step labels? | Claude. | `build-sequence` |
+
+### Third round (2026-11-04)
+
+The tap-tone dialog becomes a reader modelled on the workflow of Rick Molloy's Resonance Reader. It is built clean-room: its code is licensed for viewing only and was not used. The change is `openspec/changes/tap-tone-reader`.
+
+| Question | Decision | Specs changed |
+|---|---|---|
+| Bring back sub-bin interpolation? | Yes. This reverses the 2026-11-01 "No". Every peak is refined with a parabola on dB levels. | `tap-tone-capture` |
+| Add an automatic tap trigger? | Yes. Taps are detected after recording; each can be excluded, and clipped, overlapping or cut-off taps are rejected with a reason. | `tap-tone-capture` |
+| How should the wood calculator measure its three frequencies? | Plate mode: one take per mode (Longitudinal, Cross-grain, Diagonal) in one session. | `tap-tone-capture` (the calculator follows in `wood-panel-calculator`) |
+| What should a build step measure? | Instrument mode: Air, Top and Back, using the build analyzer's identification rules. | `tap-tone-capture`, `build-sequence` |
+| Measure Q from the ring-down? | Yes. Decay Q sits next to spectral Q, with a peak inspector; it is refused with a reason when the evidence is weak. | `tap-tone-capture` |
+| Keep the build's Enhanced FFT Analyzer? | No. It is retired, and the 35 legacy saved FFT results are not imported. | follows in `retire-build-analyzer` |
 
 Please review these, because they are content choices rather than code facts:
 - **Resonance identification parameters.**

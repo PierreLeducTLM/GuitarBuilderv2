@@ -64,6 +64,21 @@ The pgTAP files live in `supabase/tests/database`. In CI they run with `supabase
 
 `pnpm test:e2e` builds the app into `apps/web/.next-e2e` with test configuration, starts it with a small fake of the Supabase endpoints the app calls (`apps/web/e2e/fake-supabase.ts`: Auth, the builds and profiles REST calls, the step-change and photo-path functions, and Storage upload, remove and public read), and runs the specs on a desktop and a phone viewport. `@playwright/test` is pinned to the version of the installed browsers; run `pnpm --filter @gb/web exec playwright install chromium` once on a new machine, or set `PW_CHROMIUM_EXECUTABLE` to a Chromium binary.
 
+The tap-tone specs (`apps/web/e2e/tap-tone*.spec.ts`) use synthetic recordings in `apps/web/e2e/fixtures/`. Chromium plays `body.wav` or `silence.wav` as the microphone (`--use-file-for-fake-audio-capture`), and the other files are uploaded:
+- `taps.wav`: three plate taps;
+- `clipped.wav`: the same with tap 2 clipped;
+- `mobile.wav`: the 134.8 Hz phone artifact.
+
+The files are generated deterministically, so regenerating them gives identical bytes:
+
+```bash
+pnpm --filter @gb/web fixtures:tap-tone
+```
+
+## Mutation tests
+
+`@gb/dsp` runs Stryker through its command runner (the Vitest plugin does not support Vitest 5 yet): `pnpm --filter @gb/dsp mutation`, or `pnpm --filter @gb/dsp exec stryker run --mutate "src/tapTone/peaks.ts"` for one file. The decay Q Monte Carlo check (T18) runs only with `DSP_NIGHTLY=1 pnpm --filter @gb/dsp test`.
+
 ## Step photos
 
 Photos attached to build steps live in the public Storage bucket `step-photos`, created by the migration `supabase/migrations/20261102120000_builds_and_steps.sql`. Each file is stored as `<build id>/<step key>/<upload time>_<random>.<extension>`:

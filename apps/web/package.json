@@ -10,11 +10,13 @@
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "fixtures:tap-tone": "node scripts/tap-tone-fixtures.ts"
   },
   "dependencies": {
     "@dagrejs/dagre": "3.1.1",
     "@gb/db": "workspace:*",
+    "@gb/dsp": "workspace:*",
     "@gb/ui": "workspace:*",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",

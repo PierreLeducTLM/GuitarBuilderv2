@@ -17,3 +17,6 @@ supabase/.branches/
 .next-e2e/
 next-env.d.ts
 .env.local
+.stryker-tmp*/
+packages/*/reports/
+.vitest/

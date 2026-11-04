@@ -32,6 +32,20 @@ export interface SpectrumRecord {
   binWidth: number;
 }
 
+/** An identified body resonance of a step measurement (tap-tone-capture Instrument mode). */
+export interface BodyRole {
+  /** Hz, 30 to 1000. */
+  frequency: number;
+  /** dB. */
+  level: number;
+  spectralQ: number | null;
+  decayQ: number | null;
+  /** Found automatically, or set by the user. */
+  origin: "auto" | "user";
+}
+
+export type MeasurementRoles = Partial<Record<"air" | "top" | "back", BodyRole>>;
+
 /** A tap-tone measurement attached to a step (build-sequence: Step Measurement Record). */
 export interface StepMeasurement {
   id: string;
@@ -41,6 +55,8 @@ export interface StepMeasurement {
   /** Accepted peak frequency, Hz. */
   frequency: number;
   spectrum: SpectrumRecord;
+  /** Absent on measurements without identified body roles, including older ones. */
+  roles?: MeasurementRoles;
 }
 
 /** One step's stored state, as returned by update_build_step. */

@@ -15,6 +15,8 @@ export {
   Field,
   type FieldControlProps,
   type FieldProps,
+  SelectField,
+  type SelectFieldProps,
   TextField,
   type TextFieldProps,
 } from "./components/Field.tsx";
@@ -42,5 +44,6 @@ export {
   type ToastType,
   useToast,
 } from "./components/Toast.tsx";
+export { Tooltip, type TooltipProps } from "./components/Tooltip.tsx";
 export { TraceMark, type TraceMarkProps } from "./components/TraceMark.tsx";
 export { cx } from "./cx.ts";

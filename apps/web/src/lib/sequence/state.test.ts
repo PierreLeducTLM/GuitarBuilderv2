@@ -139,3 +139,42 @@ describe("progress and next up", () => {
     expect(latestMeasurement(steelBobo, {})).toBeNull();
   });
 });
+
+describe("stored body roles", () => {
+  const stored = (roles: unknown) =>
+    mergeStepState([
+      {
+        key: "TapTestPanels",
+        completed: false,
+        notes: "",
+        photos: [],
+        measurements: [
+          { ...measurement("m1", 1, 196.94), ...(roles === undefined ? {} : { roles }) },
+        ],
+      },
+    ]).TapTestPanels?.measurements[0];
+
+  it("keeps the Air, Top and Back roles of a measurement", () => {
+    const top = { frequency: 196.94, level: -21.3, spectralQ: 31.2, decayQ: null, origin: "user" };
+    const air = { frequency: 98.41, level: -18, spectralQ: null, decayQ: 40.5, origin: "auto" };
+    expect(stored({ top, air })?.roles).toEqual({ top, air });
+  });
+
+  it("skips a malformed role and keeps the others", () => {
+    const back = { frequency: 247.5, level: -25, spectralQ: 20, decayQ: 30, origin: "auto" };
+    expect(
+      stored({
+        back,
+        top: { frequency: "196", level: -20, spectralQ: 1, decayQ: 1, origin: "auto" },
+        air: { frequency: 98, level: -20, spectralQ: 1, decayQ: 1, origin: "guess" },
+        side: back,
+      })?.roles,
+    ).toEqual({ back });
+  });
+
+  it("leaves measurements without roles, or with none valid, without a roles field", () => {
+    expect(stored(undefined)).not.toHaveProperty("roles");
+    expect(stored({ top: "x" })).not.toHaveProperty("roles");
+    expect(stored("roles")).not.toHaveProperty("roles");
+  });
+});

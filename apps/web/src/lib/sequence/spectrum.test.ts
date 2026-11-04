@@ -8,12 +8,13 @@ describe("spectrum graph coordinates", () => {
     expect(spectrumX(1010)).toBeCloseTo(0.5);
   });
 
-  it("maps -20 dB to the top and -100 dB to the bottom, clamping beyond", () => {
-    expect(spectrumY(-20)).toBe(0);
-    expect(spectrumY(-100)).toBe(1);
-    expect(spectrumY(-60)).toBe(0.5);
-    expect(spectrumY(-120)).toBe(1);
+  it("maps 0 dB to the top and -100 dB to the bottom, clamping beyond", () => {
     expect(spectrumY(0)).toBe(0);
+    expect(spectrumY(-100)).toBe(1);
+    expect(spectrumY(-50)).toBe(0.5);
+    expect(spectrumY(-20)).toBe(0.2);
+    expect(spectrumY(-120)).toBe(1);
+    expect(spectrumY(3)).toBe(0);
   });
 
   it("plots points in ascending frequency and only within 20-2000 Hz", () => {
@@ -27,8 +28,8 @@ describe("spectrum graph coordinates", () => {
     });
     expect(points.map((p) => [Number(p.x.toFixed(4)), p.y])).toEqual([
       [0.25, 1],
-      [0.5, 0.5],
-      [1, 0],
+      [0.5, 0.6],
+      [1, 0.2],
     ]);
   });
 });

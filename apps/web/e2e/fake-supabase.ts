@@ -341,9 +341,17 @@ function applyStepChange(build: Build, key: string, change: Record<string, unkno
     case "add_measurement": {
       const m = change.measurement as Record<string, unknown> | undefined;
       const description = typeof m?.description === "string" ? m.description.trim() : "";
-      if (!m || typeof m.id !== "string" || !description || typeof m.frequency !== "number") {
+      if (
+        !m ||
+        typeof m.id !== "string" ||
+        !description ||
+        typeof m.frequency !== "number" ||
+        !isObject(m.spectrum) ||
+        !rolesAreValid(m.roles)
+      ) {
         throw new Error("Invalid measurement");
       }
+      if (!spectrumRecordIsValid(m.spectrum)) throw new Error("Invalid spectrum");
       if (entry.measurements.some((other) => other.id === m.id))
         throw new Error("Duplicate measurement");
       entry.measurements.push({ ...m, description });
@@ -369,6 +377,63 @@ function applyStepChange(build: Build, key: string, change: Record<string, unkno
   else build.sequence_state.push(entry);
   build.updated_at = new Date().toISOString();
   return entry;
+}
+
+// Mirrors public.spectrum_record_is_valid and public.measurement_roles_are_valid
+// (supabase/migrations/20261104120000_spectrum_record_checks.sql).
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function numbers(value: unknown): number[] | null {
+  return Array.isArray(value) && value.every((x) => typeof x === "number") ? value : null;
+}
+
+function spectrumRecordIsValid(record: Record<string, unknown>): boolean {
+  const frequencies = numbers(record.frequencies);
+  const magnitudes = numbers(record.magnitudes);
+  const magnitudesDb = numbers(record.magnitudesDb);
+  const { sampleRate, fftSize, binWidth } = record;
+  if (!frequencies || !magnitudes || !magnitudesDb) return false;
+  if (
+    typeof sampleRate !== "number" ||
+    typeof fftSize !== "number" ||
+    typeof binWidth !== "number"
+  ) {
+    return false;
+  }
+  const n = frequencies.length;
+  return (
+    n >= 1 &&
+    n <= 1024 &&
+    magnitudes.length === n &&
+    magnitudesDb.length === n &&
+    frequencies.every((f, i) => f > 0 && f <= 2000 && (i === 0 || f > (frequencies[i - 1] ?? 0))) &&
+    magnitudes.every((m) => m >= 0) &&
+    sampleRate > 0 &&
+    Number.isInteger(Math.log2(fftSize)) &&
+    fftSize <= 32768 &&
+    Math.abs(binWidth - sampleRate / fftSize) <= 1e-9 * binWidth
+  );
+}
+
+function rolesAreValid(roles: unknown): boolean {
+  if (roles === undefined || roles === null) return true;
+  if (!isObject(roles)) return false;
+  const optionalQ = (q: unknown) => q === null || (typeof q === "number" && q > 0);
+  return Object.entries(roles).every(
+    ([name, role]) =>
+      ["air", "top", "back"].includes(name) &&
+      isObject(role) &&
+      Object.keys(role).sort().join(",") === "decayQ,frequency,level,origin,spectralQ" &&
+      typeof role.frequency === "number" &&
+      role.frequency >= 30 &&
+      role.frequency <= 1000 &&
+      typeof role.level === "number" &&
+      optionalQ(role.spectralQ) &&
+      optionalQ(role.decayQ) &&
+      (role.origin === "auto" || role.origin === "user"),
+  );
 }
 
 // ---------------------------------------------------------------------------

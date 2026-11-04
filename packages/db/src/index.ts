@@ -8,8 +8,10 @@ export type {
   TablesUpdate,
 } from "./database.types.ts";
 export {
+  type BodyRole,
   type GuitarType,
   guitarTypes,
+  type MeasurementRoles,
   type SpectrumRecord,
   STEP_PHOTOS_BUCKET,
   type StepChange,
