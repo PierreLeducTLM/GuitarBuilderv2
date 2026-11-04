@@ -24,11 +24,19 @@ export type Tap = {
 
 type Samples = Float64Array | Float32Array;
 
+const sumOfSquares = (samples: Samples) => {
+  let total = 0;
+  for (const x of samples) total += x * x;
+  return total;
+};
+
 const blockLevels = (signal: Samples): readonly number[] =>
-  Array.from({ length: Math.floor(signal.length / TAP_BLOCK_SAMPLES) }, (_, b) => {
-    const block = signal.subarray(b * TAP_BLOCK_SAMPLES, (b + 1) * TAP_BLOCK_SAMPLES);
-    return Math.sqrt(block.reduce((total, x) => total + x * x, 0) / TAP_BLOCK_SAMPLES);
-  });
+  Array.from({ length: Math.floor(signal.length / TAP_BLOCK_SAMPLES) }, (_, b) =>
+    Math.sqrt(
+      sumOfSquares(signal.subarray(b * TAP_BLOCK_SAMPLES, (b + 1) * TAP_BLOCK_SAMPLES)) /
+        TAP_BLOCK_SAMPLES,
+    ),
+  );
 
 const percentile = (values: readonly number[], fraction: number) => {
   const sorted = [...values].sort((a, b) => a - b);
