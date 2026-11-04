@@ -109,7 +109,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - a click at 300 Hz selecting the nearest peak;
   - dragging "Top" onto 204.6 Hz assigns it;
   - dropping it away from any peak returns it
-- [ ] 6.5 Build the panels: Detected Frequency with spectral and decay Q and their reasons, Current Value, the roles panel (Move, Clear, "set by you", "Not identified") and the peak inspector (ring-down, envelope, fit, interval, per-tap Q, median). Verify component tests:
+- [x] 6.5 Build the panels: Detected Frequency with spectral and decay Q and their reasons, Current Value, the roles panel (Move, Clear, "set by you", "Not identified") and the peak inspector (ring-down, envelope, fit, interval, per-tap Q, median). Verify component tests:
   - "Compare with the existing value";
   - "Saved spectrum has no decay Q";
   - the keyboard Move path;

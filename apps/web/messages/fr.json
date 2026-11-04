@@ -482,6 +482,23 @@
       "decode": "Impossible de décoder le fichier audio : {reason}",
       "export": "Erreur lors de la création du fichier audio",
       "playback": "Erreur lors de la lecture de l'audio"
+    },
+    "inspector": {
+      "heading": "Inspecteur de pic",
+      "summary": "Q de décroissance {q} sur {valid} frappes utilisées sur {used}",
+      "refused": "{valid} frappes exploitables sur {used}",
+      "notIsolated": "{neighbour} Hz, à {spacing} Hz ; au moins 7,0 Hz nécessaires",
+      "tapsLabel": "Décroissance de la frappe",
+      "graphLabel": "Décroissance de la frappe {number} à {frequency} Hz",
+      "tap": "Frappe",
+      "decayQ": "Q de décroissance",
+      "tau": "τ",
+      "range": "Plage",
+      "ms": "{ms} ms",
+      "db": "{db} dB",
+      "excluded": "exclu (contact de la frappe et bords du filtre)",
+      "fitEnds": "fin de l'ajustement",
+      "noise": "bruit de fond"
     }
   }
 }

@@ -482,6 +482,23 @@
       "decode": "Failed to decode audio file: {reason}",
       "export": "Error generating audio file",
       "playback": "Error playing audio"
+    },
+    "inspector": {
+      "heading": "Peak inspector",
+      "summary": "Decay Q {q} from {valid} of {used} taps",
+      "refused": "{valid} of {used} taps usable",
+      "notIsolated": "{neighbour} Hz, {spacing} Hz away; at least 7.0 Hz needed",
+      "tapsLabel": "Ring-down of tap",
+      "graphLabel": "Ring-down of tap {number} at {frequency} Hz",
+      "tap": "Tap",
+      "decayQ": "Decay Q",
+      "tau": "τ",
+      "range": "Range",
+      "ms": "{ms} ms",
+      "db": "{db} dB",
+      "excluded": "excluded (tap contact and filter edges)",
+      "fitEnds": "fit ends here",
+      "noise": "noise floor"
     }
   }
 }
