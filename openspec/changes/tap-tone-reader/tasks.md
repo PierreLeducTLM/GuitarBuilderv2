@@ -68,7 +68,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
 
 ## 4. Database
 
-- [ ] 4.1 Add a migration with `public.spectrum_record_is_valid(jsonb)` and `public.measurement_roles_are_valid(jsonb)`, and redefine `update_build_step` so that `add_measurement` calls both and copies `roles` field by field. Write `supabase/tests/database/10_spectrum_records.test.sql`:
+- [x] 4.1 Add a migration with `public.spectrum_record_is_valid(jsonb)` and `public.measurement_roles_are_valid(jsonb)`, and redefine `update_build_step` so that `add_measurement` calls both and copies `roles` field by field. Write `supabase/tests/database/10_spectrum_records.test.sql`:
   - 662-point and 331-point records valid;
   - each shape rule refused (unequal lengths, 0 and 1025 points, unsorted or out-of-range frequencies, a negative magnitude, fftSize 3 and 65536, a wrong binWidth, a non-numeric entry);
   - valid roles, and roles with "side", frequency 1500, spectralQ 0, origin "guess" or an extra key refused;
