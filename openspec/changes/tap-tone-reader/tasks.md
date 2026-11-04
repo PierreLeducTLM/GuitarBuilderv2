@@ -19,7 +19,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - a sample at 0.999 in the first 50 ms rejects as "Clipped";
   - onsets 400 ms apart reject the first as "Too close to another tap";
   - a tap 200 ms before the end rejects as "Cut off by the end of the recording"
-- [ ] 1.4 Implement `tapTone/spectrum.ts` (per-tap spectra with cached A_t², the power average over a used-tap set, the 30–1000 Hz points). Verify unit tests:
+- [x] 1.4 Implement `tapTone/spectrum.ts` (per-tap spectra with cached A_t², the power average over a used-tap set, the 30–1000 Hz points). Verify unit tests:
   - 662 points from 30.76171875 to 999.0234375 Hz;
   - the power average of two known taps;
   - re-averaging after excluding a tap equals a fresh average of the remaining taps, with no extra FFT

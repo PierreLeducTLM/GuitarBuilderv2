@@ -15,3 +15,6 @@ export const MIN_SAMPLES_AFTER_ONSET = 12000;
 
 export const TAP_WINDOW_SAMPLES = 32768;
 export const TAP_WINDOW_LEAD_SAMPLES = 8192;
+
+export const MIN_FREQUENCY = 30;
+export const MAX_FREQUENCY = 1000;
