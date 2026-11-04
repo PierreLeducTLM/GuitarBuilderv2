@@ -581,5 +581,5 @@ The note label stays the same in both languages.
 
 ## Open Questions
 
-- Is the 1 s performance budget met without a worker on a real mid-range phone? Task 7.2 measures it. The worker move doesn't change the specs or the tasks.
+- ~~Is the 1 s performance budget met without a worker?~~ Measured in task 7.2 on a 10 s, 8-tap Instrument recording with decay Q for the main peak and three roles. Headless Chromium with Pixel 7 emulation and 4× CPU throttling: about 145 ms of analysis plus 120 ms of decay Q, so about 0.27 s. Desktop: about 65 ms. The analysis stays on the main thread. Checking on a real phone remains a follow-up.
 - Should a black-box comparison against the public Resonance Reader, using our three fixtures, be kept as a manual check in the README? It doesn't affect the implementation.

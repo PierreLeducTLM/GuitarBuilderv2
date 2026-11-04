@@ -136,7 +136,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - the existing step-dialog tests still pass;
   - a legacy measurement shows no roles line;
   - the administrator's read-only view has no "Add Analysis"
-- [ ] 7.2 Add the fixture generator script and the three WAV fixtures (`taps.wav`, `body.wav`, `clipped.wav`). Measure `analyzeTake` plus decay Q on a 10 s, 8-tap recording in a mobile-emulated Chromium, against the 1 s budget of design decision 2. Verify:
+- [x] 7.2 Add the fixture generator script and the three WAV fixtures (`taps.wav`, `body.wav`, `clipped.wav`). Measure `analyzeTake` plus decay Q on a 10 s, 8-tap recording in a mobile-emulated Chromium, against the 1 s budget of design decision 2. Verify:
   - the script regenerates byte-identical files;
   - a unit test gives the expected taps, peaks and roles for each fixture;
   - the measured time is recorded in the PR (if it misses the budget, move the generator into a module worker before continuing)
