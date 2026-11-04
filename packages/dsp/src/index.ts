@@ -21,6 +21,17 @@ export {
   spectrumPoints,
   tapPower,
 } from "./tapTone/spectrum.ts";
+export {
+  analyzeTake,
+  recomputeTake,
+  runTake,
+  type TakeAnalysis,
+  type TakeCache,
+  type TakeInput,
+  type TakeMode,
+  type TakePeak,
+  type TakeResult,
+} from "./tapTone/take.ts";
 export { detectTaps, type Tap, type TapRejection } from "./tapTone/taps.ts";
 export { encodeWav, wavFileName } from "./wav.ts";
 export { hann, type Window } from "./windows.ts";
