@@ -47,6 +47,7 @@ describe("Detected Frequency panel", () => {
     expect(screen.getByRole("region", { name: "Current Value" }).textContent).toContain(
       "180.00 Hz",
     );
+    expect(screen.queryByText("The peak is too broad or merges with a neighbour")).toBeNull();
   });
 
   it("shows dashes and the reasons when values are missing", () => {
