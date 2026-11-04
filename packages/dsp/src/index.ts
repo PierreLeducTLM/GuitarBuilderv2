@@ -12,6 +12,19 @@ export {
   identifyBodyResonances,
   reattachRole,
 } from "./tapTone/body.ts";
+export type { DecayIsolation, DecayPeak, NeighbourPeak } from "./tapTone/decay/band.ts";
+export {
+  type IsolatedResonance,
+  isolateResonance,
+  type Samples,
+} from "./tapTone/decay/isolate.ts";
+export {
+  type DecayInput,
+  measureDecayQ,
+  type PeakDecay,
+  type PeakDecayReason,
+} from "./tapTone/decay/measure.ts";
+export { type SampleRange, tapSegment } from "./tapTone/decay/segment.ts";
 export { noteLabel } from "./tapTone/note.ts";
 export { detectPeaks, nearestPeak, type Peak } from "./tapTone/peaks.ts";
 export { pointsFromRecord, recordFromPoints, type TapToneRecord } from "./tapTone/record.ts";

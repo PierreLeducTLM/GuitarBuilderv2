@@ -78,3 +78,52 @@ export const spikes = (options: {
   at: Readonly<Record<number, number>>;
 }): readonly number[] =>
   Array.from({ length: options.count }, (_, i) => options.at[i] ?? options.floor);
+
+export type Mode = {
+  readonly frequency: number;
+  readonly amplitude: number;
+  readonly tau: number;
+};
+
+export const ringing = (modes: readonly Mode[], length: number, sampleRate = 48000) =>
+  Float64Array.from({ length }, (_, n) => {
+    const t = n / sampleRate;
+    return modes.reduce(
+      (total, mode) =>
+        total +
+        mode.amplitude * Math.exp(-t / mode.tau) * Math.sin(2 * Math.PI * mode.frequency * t),
+      0,
+    );
+  });
+
+export type RingingTap = {
+  readonly modes: readonly Mode[];
+  readonly seconds: number;
+};
+
+const NEXT_TAP_GAP = 480;
+
+export const tapRecording = (options: {
+  quietSeconds: number;
+  taps: readonly RingingTap[];
+  sigma: number;
+  seed: number;
+}): { readonly signal: Float64Array; readonly onsets: readonly number[] } => {
+  const sampleRate = 48000;
+  const lead =
+    options.quietSeconds > 0 ? Math.round(options.quietSeconds * sampleRate) + NEXT_TAP_GAP : 0;
+  const lengths = options.taps.map(
+    (tap, i) =>
+      Math.round(tap.seconds * sampleRate) + (i < options.taps.length - 1 ? NEXT_TAP_GAP : 0),
+  );
+  const onsets = lengths.map((_, i) => lead + lengths.slice(0, i).reduce((a, b) => a + b, 0));
+  const total = lead + lengths.reduce((a, b) => a + b, 0);
+  const signal = gaussianNoise({ length: total, rms: options.sigma, seed: options.seed });
+  options.taps.forEach((tap, i) => {
+    const onset = onsets[i] ?? 0;
+    ringing(tap.modes, lengths[i] ?? 0).forEach((x, n) => {
+      signal[onset + n] = (signal[onset + n] ?? 0) + x;
+    });
+  });
+  return { signal, onsets };
+};

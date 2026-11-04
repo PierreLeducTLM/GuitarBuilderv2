@@ -43,3 +43,16 @@ export const BACK_MIN_ABOVE_TOP_HZ = 15;
 export const BACK_MAX_HZ = 400;
 export const BODY_SPLIT_HZ = 15;
 export const ROLE_REATTACH_HZ = 3;
+
+export const DECAY_NEXT_TAP_MARGIN_SAMPLES = 480;
+export const DECAY_SEGMENT_MAX_SAMPLES = 144000;
+export const DECAY_NEIGHBOUR_RANGE_DB = 30;
+export const DECAY_KERNEL_SPACING_FACTOR = 3.5;
+export const DECAY_KERNEL_SECONDS = { min: 0.02, max: 0.5 } as const;
+export const DECAY_PRECHECK_DB_PER_HZ_SECOND = 27.29;
+export const DECAY_PRECHECK_GUARD_SECONDS = 0.005;
+export const DECAY_PRECHECK_SMOOTHER_SECONDS = 0.00196;
+export const DECAY_PRECHECK_MAX_DB = 30;
+export const DECAY_DECIMATION = 48;
+export const DECAY_SMOOTHER_STAGES = 4;
+export const DECAY_RATE = 1000;
