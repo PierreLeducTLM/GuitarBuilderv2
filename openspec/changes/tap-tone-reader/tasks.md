@@ -114,7 +114,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - "Saved spectrum has no decay Q";
   - the keyboard Move path;
   - the inspector shows the reason when decay Q is not determinable
-- [ ] 6.6 Assemble `TapToneDialog` for both modes:
+- [x] 6.6 Assemble `TapToneDialog` for both modes:
   - title, help tooltip and plate guidance;
   - the take selector;
   - idle, recording ("2.3s / 10s"), analyzing and results;
