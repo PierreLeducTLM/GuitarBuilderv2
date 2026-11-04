@@ -80,7 +80,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
 
 ## 5. UI kit (`packages/ui`)
 
-- [ ] 5.1 Add `@radix-ui/react-tooltip` pinned exactly (newest release at least two weeks old), and build `Tooltip` (hover, focus, tap toggles) and `SelectField`. Verify component tests: the tooltip opens on hover, on focus and on tap; the select keeps its label and value
+- [x] 5.1 Add `@radix-ui/react-tooltip` pinned exactly (newest release at least two weeks old), and build `Tooltip` (hover, focus, tap toggles) and `SelectField`. Verify component tests: the tooltip opens on hover, on focus and on tap; the select keeps its label and value
 
 ## 6. The dialog (`apps/web`)
 

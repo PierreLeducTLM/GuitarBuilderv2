@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Button } from "./Button.tsx";
-import { TextField } from "./Field.tsx";
+import { SelectField, TextField } from "./Field.tsx";
 import { IconButton } from "./IconButton.tsx";
 import { LedProgress, litSegments } from "./LedProgress.tsx";
 import { SegmentedControl } from "./SegmentedControl.tsx";
@@ -103,5 +103,50 @@ describe("LedProgress", () => {
     expect(litSegments(0, 132, 24)).toBe(0);
     expect(litSegments(200, 100, 24)).toBe(24);
     expect(litSegments(5, 0, 24)).toBe(0);
+  });
+});
+
+function DevicePicker() {
+  const [device, setDevice] = useState("usb");
+  return (
+    <SelectField
+      label="Input device"
+      hint="Used for the next recording"
+      value={device}
+      onChange={(event) => setDevice(event.target.value)}
+    >
+      <option value="built-in">Built-in microphone</option>
+      <option value="usb">USB microphone</option>
+    </SelectField>
+  );
+}
+
+describe("SelectField", () => {
+  it("is a native select named by its label and described by its hint", () => {
+    render(<DevicePicker />);
+    const select = screen.getByRole("combobox", { name: "Input device" });
+    expect(select.tagName).toBe("SELECT");
+    expect(select.getAttribute("aria-describedby")).toBeTruthy();
+    expect(screen.getByText("Used for the next recording").id).toBe(
+      select.getAttribute("aria-describedby"),
+    );
+  });
+
+  it("keeps the option the user chooses", async () => {
+    const user = userEvent.setup();
+    render(<DevicePicker />);
+    const select = screen.getByRole("combobox", { name: "Input device" });
+    expect((select as HTMLSelectElement).value).toBe("usb");
+    await user.selectOptions(select, "Built-in microphone");
+    expect((select as HTMLSelectElement).value).toBe("built-in");
+  });
+
+  it("can be disabled", () => {
+    render(
+      <SelectField label="Input device" disabled>
+        <option value="a">A</option>
+      </SelectField>,
+    );
+    expect(screen.getByRole("combobox", { name: "Input device" })).toHaveProperty("disabled", true);
   });
 });

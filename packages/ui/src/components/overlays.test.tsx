@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConfirmDialog, type ConfirmSeverity } from "./ConfirmDialog.tsx";
 import { TextInputDialog } from "./TextInputDialog.tsx";
 import { ToastProvider, useToast } from "./Toast.tsx";
+import { Tooltip } from "./Tooltip.tsx";
 
 function ConfirmHarness({
   onConfirm,
@@ -198,5 +199,48 @@ describe("Toast", () => {
     renderToasts();
     const region = screen.getByRole("region", { name: "Notifications" });
     expect(region.className).toContain("pointer-events-none");
+  });
+});
+
+const Help = () => (
+  <Tooltip content="Tap the bridge firmly">
+    <button type="button" aria-label="Help">
+      ?
+    </button>
+  </Tooltip>
+);
+
+describe("Tooltip", () => {
+  it("opens when the pointer rests on its trigger", async () => {
+    const user = userEvent.setup();
+    render(<Help />);
+    await user.hover(screen.getByRole("button", { name: "Help" }));
+    expect((await screen.findByRole("tooltip")).textContent).toContain("Tap the bridge firmly");
+  });
+
+  it("opens when its trigger gets keyboard focus", async () => {
+    const user = userEvent.setup();
+    render(<Help />);
+    await user.tab();
+    expect(await screen.findByRole("tooltip")).toBeTruthy();
+  });
+
+  it("toggles on a tap, for touch screens without hover", async () => {
+    const user = userEvent.setup();
+    render(<Help />);
+    const trigger = screen.getByRole("button", { name: "Help" });
+    await user.pointer({ keys: "[TouchA]", target: trigger });
+    expect(await screen.findByRole("tooltip")).toBeTruthy();
+    await user.pointer({ keys: "[TouchA]", target: trigger });
+    await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
+  });
+
+  it("closes on Escape", async () => {
+    const user = userEvent.setup();
+    render(<Help />);
+    await user.tab();
+    await screen.findByRole("tooltip");
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
   });
 });
