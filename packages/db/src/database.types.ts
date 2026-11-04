@@ -108,6 +108,8 @@ export type Database = {
       build_photo_paths: { Args: { p_build_id: string }; Returns: string[] };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_own_step_photo_path: { Args: { p_name: string }; Returns: boolean };
+      measurement_roles_are_valid: { Args: { p_roles: Json }; Returns: boolean };
+      spectrum_record_is_valid: { Args: { p_record: Json }; Returns: boolean };
       update_build_step: {
         Args: { p_build_id: string; p_change: Json; p_step_key: string };
         Returns: Json;

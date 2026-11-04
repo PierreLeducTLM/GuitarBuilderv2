@@ -76,7 +76,7 @@ Clean-room rule for every task: never open, paste or paraphrase the Resonance Re
   - function settings and grants.
 
   Verify with `supabase test db` (and `pnpm test:db` where pgTAP is installed)
-- [ ] 4.2 Add `BodyRole`, `MeasurementRoles` and `StepMeasurement.roles` to `packages/db/src/steps.ts`, and the function signatures to `database.types.ts`. Verify `pnpm --filter @gb/db test` and `pnpm typecheck` pass
+- [x] 4.2 Add `BodyRole`, `MeasurementRoles` and `StepMeasurement.roles` to `packages/db/src/steps.ts`, and the function signatures to `database.types.ts`. Verify `pnpm --filter @gb/db test` and `pnpm typecheck` pass
 
 ## 5. UI kit (`packages/ui`)
 
