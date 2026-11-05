@@ -150,7 +150,7 @@ export type Database = {
           sample_mass_g: number;
           sample_thickness_mm: number;
           sample_width_mm: number;
-          spectra?: Json;
+          spectra?: NonNullable<Json>;
           stiffness_parameter?: number;
           target_thickness_mm?: number | null;
           updated_at?: string;
@@ -173,7 +173,7 @@ export type Database = {
           sample_mass_g?: number;
           sample_thickness_mm?: number;
           sample_width_mm?: number;
-          spectra?: Json;
+          spectra?: NonNullable<Json>;
           stiffness_parameter?: number;
           target_thickness_mm?: number | null;
           updated_at?: string;
