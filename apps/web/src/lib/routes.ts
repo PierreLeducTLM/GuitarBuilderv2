@@ -21,9 +21,57 @@ export function sectionsFor(role: AppRole | null): Section[] {
   return sections.filter((section) => !section.adminOnly || role === "admin");
 }
 
+/** app-shell: Application Sections and URLs — the four destinations, in navigation order. */
+export const destinations = [
+  { id: "builds", href: "/builds", sections: [] },
+  {
+    id: "tools",
+    href: "/tools",
+    sections: [
+      { id: "woodPanels", href: "/wood-properties" },
+      { id: "simulator", href: "/simulator" },
+    ],
+  },
+  { id: "assistant", href: "/chat", sections: [] },
+  { id: "you", href: "/you", sections: [] },
+] as const;
+
+const adminEntries = [
+  { id: "references", href: "/references" },
+  { id: "admin", href: "/admin" },
+] as const;
+
+export type Destination = (typeof destinations)[number];
+export type DestinationId = Destination["id"];
+export type AdminEntry = (typeof adminEntries)[number];
+export type EntryId = DestinationId | Destination["sections"][number]["id"] | AdminEntry["id"];
+
+/** app-shell: Admin-Only Sections. Until the role is known, pass `null`: nothing is shown. */
+export function adminEntriesFor(role: AppRole | null): readonly AdminEntry[] {
+  return role === "admin" ? adminEntries : [];
+}
+
 /** app-shell: Navigation Entry Presentation — the entry whose URL prefix matches is active. */
 export function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+const holds = (destination: Destination, pathname: string) =>
+  [destination, ...destination.sections].some((entry) => isActive(pathname, entry.href));
+
+/** The bottom-tab-bar destination that holds `pathname`, or null (admin pages have no tab). */
+export function activeTab(pathname: string): DestinationId | null {
+  return destinations.find((destination) => holds(destination, pathname))?.id ?? null;
+}
+
+/** The most specific sidebar entry that holds `pathname`, or null. */
+export function activeEntry(pathname: string): EntryId | null {
+  const entries = [
+    ...destinations.flatMap((destination) => destination.sections),
+    ...destinations,
+    ...adminEntries,
+  ];
+  return entries.find((entry) => isActive(pathname, entry.href))?.id ?? null;
 }
 
 export type RouteKind =

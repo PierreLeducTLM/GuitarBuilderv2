@@ -1,5 +1,92 @@
 import { describe, expect, it } from "vitest";
-import { classifyPath, isActive, safeNextPath, sectionsFor, signInUrl } from "./routes";
+import {
+  activeEntry,
+  activeTab,
+  adminEntriesFor,
+  classifyPath,
+  destinations,
+  isActive,
+  safeNextPath,
+  sectionsFor,
+  signInUrl,
+} from "./routes";
+
+describe("destinations", () => {
+  it("are Builds, Tools, Assistant and You, in that order, with their URLs", () => {
+    expect(destinations.map((d) => [d.id, d.href])).toEqual([
+      ["builds", "/builds"],
+      ["tools", "/tools"],
+      ["assistant", "/chat"],
+      ["you", "/you"],
+    ]);
+  });
+
+  it("put Wood panels then Simulator under Tools, and nothing under the others", () => {
+    expect(destinations.map((d) => d.sections.map((s) => [s.id, s.href]))).toEqual([
+      [],
+      [
+        ["woodPanels", "/wood-properties"],
+        ["simulator", "/simulator"],
+      ],
+      [],
+      [],
+    ]);
+  });
+});
+
+describe("adminEntriesFor", () => {
+  it("gives administrators References then Admin", () => {
+    expect(adminEntriesFor("admin").map((e) => [e.id, e.href])).toEqual([
+      ["references", "/references"],
+      ["admin", "/admin"],
+    ]);
+  });
+
+  it("gives users, and visitors whose role is not known yet, nothing", () => {
+    expect(adminEntriesFor("user")).toEqual([]);
+    expect(adminEntriesFor(null)).toEqual([]);
+  });
+});
+
+describe("activeTab", () => {
+  it.each([
+    ["/builds", "builds"],
+    ["/builds/7f3c-example/steps/TopPanel", "builds"],
+    ["/tools", "tools"],
+    ["/wood-properties", "tools"],
+    ["/simulator", "tools"],
+    ["/chat", "assistant"],
+    ["/you", "you"],
+  ])("%s makes %s the active tab", (path, tab) => {
+    expect(activeTab(path)).toBe(tab);
+  });
+
+  it.each(["/references", "/admin", "/builds-archive", "/toolshed"])(
+    "%s activates no tab",
+    (path) => {
+      expect(activeTab(path)).toBeNull();
+    },
+  );
+});
+
+describe("activeEntry", () => {
+  it.each([
+    ["/builds/7f3c-example/steps/TopPanel", "builds"],
+    ["/tools", "tools"],
+    ["/wood-properties", "woodPanels"],
+    ["/simulator/run", "simulator"],
+    ["/chat", "assistant"],
+    ["/you", "you"],
+    ["/references", "references"],
+    ["/admin", "admin"],
+  ])("%s makes %s the active sidebar entry", (path, entry) => {
+    expect(activeEntry(path)).toBe(entry);
+  });
+
+  it("is null outside every entry", () => {
+    expect(activeEntry("/story/abc")).toBeNull();
+  });
+});
 
 describe("sectionsFor", () => {
   it("lists the four regular sections for users and while the role is unknown", () => {

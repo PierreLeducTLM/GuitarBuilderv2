@@ -4,7 +4,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
 ## 1. Routes and the navigation model (`apps/web/src/lib/routes.ts`)
 
-- [ ] 1.1 Replace the flat `sections` list with `destinations` (Builds, Tools with Wood panels and Simulator, Assistant, You; References and Admin flagged `adminOnly`), and add `activeTab(pathname)` and `activeEntry(pathname)` (design decision 4). Verify unit tests for:
+- [x] 1.1 Replace the flat `sections` list with `destinations` (Builds, Tools with Wood panels and Simulator, Assistant, You; References and Admin flagged `adminOnly`), and add `activeTab(pathname)` and `activeEntry(pathname)` (design decision 4). Verify unit tests for:
   - the order and URLs of Application Sections and URLs;
   - `/builds/x/steps/TopPanel` making Builds active;
   - `/wood-properties` making the Tools tab and the Wood panels entry active;
