@@ -1,7 +1,6 @@
 {
   "app": {
     "title": "Constructeur de Guitare",
-    "subtitle": "Suivez et analysez vos projets de construction de guitare",
     "documentTitle": "Application de suivi de construction de guitare",
     "description": "Construisez, mesurez et harmonisez vos instruments.",
     "loading": "Chargement...",
@@ -10,19 +9,9 @@
   "nav": {
     "label": "Navigation",
     "builds": "Constructions",
-    "chat": "Chat",
     "simulator": "Simulateur",
-    "woodProperties": "Propriétés Bois",
     "references": "Références",
     "admin": "Admin",
-    "short": {
-      "builds": "Constructions",
-      "chat": "Chat",
-      "simulator": "Simulateur",
-      "woodProperties": "Bois",
-      "references": "Réfs",
-      "admin": "Admin"
-    },
     "adminOnly": "Réservé aux administrateurs",
     "tools": "Outils",
     "assistant": "Assistant",
@@ -47,10 +36,6 @@
     "signedInAs": "Connecté en tant que",
     "signOut": "Déconnexion",
     "signOutFailed": "Échec de la déconnexion",
-    "openMenu": "Ouvrir le menu",
-    "closeMenu": "Fermer le menu",
-    "menuTitle": "Menu",
-    "preferences": "Préférences",
     "skipToContent": "Aller au contenu"
   },
   "theme": {

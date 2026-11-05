@@ -11,7 +11,7 @@ const renderSidebar = (props: Partial<Props> = {}, locale?: "en" | "fr") =>
   renderWithIntl(
     <Sidebar
       pathname="/builds"
-      role="user"
+      userRole="user"
       email="luthier@example.com"
       recentBuilds={[]}
       {...props}
@@ -30,7 +30,7 @@ const links = () =>
 
 describe("Sidebar", () => {
   it("lists title, Builds, Tools with its sections, Assistant, the admin entries and the account, in order", () => {
-    renderSidebar({ role: "admin" });
+    renderSidebar({ userRole: "admin" });
     expect(links()).toEqual([
       ["Guitar Builder", "/builds"],
       ["Builds", "/builds"],
@@ -99,13 +99,13 @@ describe("Sidebar", () => {
   });
 
   it("shows no admin entries to a regular user", () => {
-    renderSidebar({ role: "user" });
+    renderSidebar({ userRole: "user" });
     expect(screen.queryByRole("link", { name: "References" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Admin" })).toBeNull();
   });
 
   it("marks the admin entries for their accent and leaves the others unmarked", () => {
-    renderSidebar({ role: "admin" });
+    renderSidebar({ userRole: "admin" });
     expect(screen.getByRole("link", { name: "References" }).dataset.admin).toBe("true");
     expect(screen.getByRole("link", { name: "Admin" }).dataset.admin).toBe("true");
     expect(screen.getByRole("link", { name: "Assistant" }).dataset.admin).toBeUndefined();
@@ -121,7 +121,7 @@ describe("Sidebar", () => {
     ["/admin", "Admin"],
     ["/you", "luthier@example.com"],
   ])("on %s highlights only %s", (pathname, entry) => {
-    renderSidebar({ pathname, role: "admin" });
+    renderSidebar({ pathname, userRole: "admin" });
     const current = within(sidebar())
       .getAllByRole("link")
       .filter((link) => link.getAttribute("aria-current") === "page");
@@ -131,8 +131,8 @@ describe("Sidebar", () => {
   });
 
   it("groups the admin entries under Administration, for administrators only", () => {
-    renderSidebar({ role: "admin" });
-    const group = screen.getByRole("group", { name: "Administration" });
+    renderSidebar({ userRole: "admin" });
+    const group = screen.getByRole("list", { name: "Administration" });
     expect(
       within(group)
         .getAllByRole("link")
@@ -141,8 +141,8 @@ describe("Sidebar", () => {
   });
 
   it("has no Administration group for a regular user", () => {
-    renderSidebar({ role: "user" });
-    expect(screen.queryByRole("group", { name: "Administration" })).toBeNull();
+    renderSidebar({ userRole: "user" });
+    expect(screen.queryByRole("list", { name: "Administration" })).toBeNull();
   });
 
   it("describes the account entry as the account", () => {

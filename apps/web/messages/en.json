@@ -1,7 +1,6 @@
 {
   "app": {
     "title": "Guitar Builder",
-    "subtitle": "Track and analyze your guitar building projects",
     "documentTitle": "Guitar Build Tracking App",
     "description": "Build, measure and voice your instruments.",
     "loading": "Loading...",
@@ -10,19 +9,9 @@
   "nav": {
     "label": "Navigation",
     "builds": "Builds",
-    "chat": "Chat",
     "simulator": "Simulator",
-    "woodProperties": "Wood Props",
     "references": "References",
     "admin": "Admin",
-    "short": {
-      "builds": "Builds",
-      "chat": "Chat",
-      "simulator": "Simulator",
-      "woodProperties": "Wood",
-      "references": "Refs",
-      "admin": "Admin"
-    },
     "adminOnly": "Administrators only",
     "tools": "Tools",
     "assistant": "Assistant",
@@ -47,10 +36,6 @@
     "signedInAs": "Signed in as",
     "signOut": "Sign Out",
     "signOutFailed": "Failed to sign out",
-    "openMenu": "Open menu",
-    "closeMenu": "Close menu",
-    "menuTitle": "Menu",
-    "preferences": "Preferences",
     "skipToContent": "Skip to content"
   },
   "theme": {

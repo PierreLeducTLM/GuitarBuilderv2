@@ -1,25 +1,7 @@
 import type { AppRole } from "@gb/db";
 
-/** app-shell: Application Sections and URLs, in navigation order. */
-export const sections = [
-  { id: "builds", href: "/builds", adminOnly: false },
-  { id: "chat", href: "/chat", adminOnly: false },
-  { id: "simulator", href: "/simulator", adminOnly: false },
-  { id: "woodProperties", href: "/wood-properties", adminOnly: false },
-  { id: "references", href: "/references", adminOnly: true },
-  { id: "admin", href: "/admin", adminOnly: true },
-] as const;
-
-export type Section = (typeof sections)[number];
-export type SectionId = Section["id"];
-
 export const DEFAULT_ROUTE = "/builds";
 export const SIGN_IN_ROUTE = "/sign-in";
-
-/** Sections the given role may see. Until the role is known, pass `null`: admin entries stay hidden. */
-export function sectionsFor(role: AppRole | null): Section[] {
-  return sections.filter((section) => !section.adminOnly || role === "admin");
-}
 
 /** app-shell: Application Sections and URLs — the four destinations, in navigation order. */
 export const destinations = [

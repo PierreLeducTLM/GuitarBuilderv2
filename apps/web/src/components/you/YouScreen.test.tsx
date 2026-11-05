@@ -36,12 +36,12 @@ describe("YouScreen", () => {
     expect(screen.getByRole("group", { name: "Language" })).toBeTruthy();
     expect(screen.getByRole("group", { name: "Theme" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Sign Out" })).toBeTruthy();
-    expect(screen.queryByRole("group", { name: "Administration" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Administration" })).toBeNull();
   });
 
   it("gives an administrator References and Admin under Administration, above Sign Out", () => {
     renderYou("admin");
-    const group = screen.getByRole("group", { name: "Administration" });
+    const group = screen.getByRole("region", { name: "Administration" });
     const links = within(group).getAllByRole("link");
     expect(links.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
       ["References", "/references"],
@@ -77,7 +77,7 @@ describe("YouScreen", () => {
     renderYou("admin", "fr");
     expect(screen.getByRole("heading", { level: 1, name: "Vous" })).toBeTruthy();
     expect(screen.getByText("Connecté en tant que")).toBeTruthy();
-    expect(screen.getByRole("group", { name: "Administration" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Administration" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Déconnexion" })).toBeTruthy();
   });
 });

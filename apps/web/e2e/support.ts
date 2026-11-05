@@ -98,6 +98,7 @@ export interface SeedBuild {
   guitar_type?: "classical" | "steel_string" | null;
   bobo_neck?: boolean;
   created_at?: string;
+  updated_at?: string;
   sequence_state?: Record<string, unknown>[];
   id?: string;
 }

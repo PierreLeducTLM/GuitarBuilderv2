@@ -45,8 +45,10 @@ export function YouScreen({ email, role }: { email: string; role: AppRole }) {
       </section>
 
       {admin.length > 0 ? (
-        <div role="group" aria-label={t("you.administration")} className="flex flex-col gap-2">
-          <h2 className="text-base font-semibold text-fg">{t("you.administration")}</h2>
+        <section aria-labelledby="you-administration" className="flex flex-col gap-2">
+          <h2 id="you-administration" className="text-base font-semibold text-fg">
+            {t("you.administration")}
+          </h2>
           {admin.map((entry) => {
             const Icon = entryIcons[entry.id];
             return (
@@ -61,7 +63,7 @@ export function YouScreen({ email, role }: { email: string; role: AppRole }) {
               </Link>
             );
           })}
-        </div>
+        </section>
       ) : null}
 
       <div>

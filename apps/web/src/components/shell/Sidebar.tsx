@@ -16,7 +16,7 @@ import { entryIcons } from "./navigation";
 
 export interface SidebarProps {
   pathname: string;
-  role: AppRole;
+  userRole: AppRole;
   email: string;
   /** The user's recent builds, most recent first, listed under Builds. */
   recentBuilds: readonly RecentBuild[];
@@ -60,10 +60,10 @@ function Entry({
  * app-shell: Desktop Sidebar. From 1024 px it is the navigation: title, destinations
  * with their sections and the recent builds, admin entries, and the account entry.
  */
-export function Sidebar({ pathname, role, email, recentBuilds }: SidebarProps) {
+export function Sidebar({ pathname, userRole, email, recentBuilds }: SidebarProps) {
   const t = useTranslations();
   const active = activeEntry(pathname);
-  const admin = adminEntriesFor(role);
+  const admin = adminEntriesFor(userRole);
   const viewedBuild = recentBuilds.find((build) => isActive(pathname, `/builds/${build.id}`));
   const [builds, tools, assistant] = destinations;
   return (
@@ -138,22 +138,22 @@ export function Sidebar({ pathname, role, email, recentBuilds }: SidebarProps) {
           current={active === assistant.id}
         />
         {admin.length > 0 ? (
-          <div
-            role="group"
+          <ul
             aria-label={t("you.administration")}
             className="flex flex-col gap-0.5 border-t border-line pt-4"
           >
             {admin.map((entry) => (
-              <Entry
-                key={entry.id}
-                id={entry.id}
-                href={entry.href}
-                label={t(`nav.${entry.id}`)}
-                current={active === entry.id}
-                admin
-              />
+              <li key={entry.id} className="flex flex-col">
+                <Entry
+                  id={entry.id}
+                  href={entry.href}
+                  label={t(`nav.${entry.id}`)}
+                  current={active === entry.id}
+                  admin
+                />
+              </li>
             ))}
-          </div>
+          </ul>
         ) : null}
       </nav>
 

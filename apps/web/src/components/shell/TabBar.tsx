@@ -1,5 +1,4 @@
 import { cx } from "@gb/ui";
-import type { Route } from "next";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { activeTab, destinations } from "@/lib/routes";
@@ -27,7 +26,7 @@ export function TabBar({ pathname }: { pathname: string }) {
           return (
             <li key={destination.id} className="flex">
               <Link
-                href={destination.href as Route}
+                href={destination.href}
                 aria-current={current ? "page" : undefined}
                 className={cx(
                   "flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-2xs transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus",

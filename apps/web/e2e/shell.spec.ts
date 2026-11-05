@@ -12,11 +12,17 @@ import {
   signIn,
 } from "./support";
 
-const mainNav = (page: Page) =>
-  page.getByRole("banner").getByRole("navigation", { name: en.nav.label });
+const sidebar = (page: Page) => page.getByRole("complementary");
+const mainNav = (page: Page) => sidebar(page).getByRole("navigation", { name: en.nav.label });
 
 async function navLabels(page: Page) {
   return mainNav(page).getByRole("link").allTextContents();
+}
+
+/** Opens the You page from the sidebar's account entry. */
+async function openYou(page: Page, email = LUTHIER.email) {
+  await sidebar(page).getByRole("link", { name: email }).click();
+  await expect(page).toHaveURL(/\/you$/);
 }
 
 test.beforeEach(async () => {
@@ -26,8 +32,8 @@ test.beforeEach(async () => {
 test.describe("signing in", () => {
   test("returns to the requested section", async ({ page }) => {
     await signIn(page, LUTHIER, "/chat");
-    await expect(page.getByRole("heading", { level: 1, name: en.nav.chat })).toBeVisible();
-    await expect(mainNav(page).getByRole("link", { name: en.nav.chat })).toHaveAttribute(
+    await expect(page.getByRole("heading", { level: 1, name: en.nav.assistant })).toBeVisible();
+    await expect(mainNav(page).getByRole("link", { name: en.nav.assistant })).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -113,16 +119,28 @@ test.describe("signing up", () => {
 });
 
 test.describe("navigation", () => {
-  test("lists the four regular sections for a user, with icons", async ({ page }) => {
+  test("shows the sidebar with Builds, Tools and its sections, and Assistant, with icons", async ({
+    page,
+  }) => {
     await signIn(page, LUTHIER);
     expect(await navLabels(page)).toEqual([
       en.nav.builds,
-      en.nav.chat,
+      en.nav.tools,
+      en.nav.woodPanels,
       en.nav.simulator,
-      en.nav.woodProperties,
+      en.nav.assistant,
     ]);
-    await expect(mainNav(page).locator("svg")).toHaveCount(4);
+    await expect(mainNav(page).locator("svg")).toHaveCount(5);
+    await expect(sidebar(page).getByRole("link", { name: LUTHIER.email })).toBeVisible();
     await expect(page.getByRole("contentinfo")).toHaveCount(0);
+  });
+
+  test("has no tab bar, menu button or header on a wide screen", async ({ page }) => {
+    await signIn(page, LUTHIER);
+    await expect(page.getByRole("navigation", { name: en.nav.label })).toHaveCount(1);
+    await expect(page.getByRole("banner")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /menu/i })).toHaveCount(0);
+    await expect(page.locator("[data-admin]")).toHaveCount(0);
   });
 
   test("moves between sections and highlights the active one", async ({ page }) => {
@@ -131,9 +149,26 @@ test.describe("navigation", () => {
     await expect(page).toHaveURL(/\/simulator$/);
     await expect(page.getByRole("heading", { level: 1, name: en.nav.simulator })).toBeVisible();
     await expect(mainNav(page).locator("[aria-current=page]")).toHaveText(en.nav.simulator);
+
+    await mainNav(page).getByRole("link", { name: en.nav.tools }).click();
+    await expect(page).toHaveURL(/\/tools$/);
+    await expect(page.getByRole("heading", { level: 1, name: en.tools.title })).toBeVisible();
+    await expect(mainNav(page).locator("[aria-current=page]")).toHaveText(en.nav.tools);
   });
 
-  test("highlights Builds for a build detail URL", async ({ page }) => {
+  test("opens a tool from the Tools page and returns to it", async ({ page }) => {
+    await signIn(page, LUTHIER, "/tools");
+    await page
+      .getByRole("main")
+      .getByRole("link", { name: new RegExp(en.nav.woodPanels) })
+      .click();
+    await expect(page).toHaveURL(/\/wood-properties$/);
+    await expect(page.getByRole("heading", { level: 1, name: en.wood.title })).toBeVisible();
+    await page.getByRole("main").getByRole("link", { name: en.nav.tools }).click();
+    await expect(page).toHaveURL(/\/tools$/);
+  });
+
+  test("highlights the build being viewed among the recent builds", async ({ page }) => {
     const build = await fakeSupabase.seedBuild({
       ownerEmail: LUTHIER.email,
       name: "Highlighted",
@@ -142,7 +177,32 @@ test.describe("navigation", () => {
     await signIn(page, LUTHIER, `/builds/${build.id}`);
     await expect(page.getByRole("heading", { level: 1, name: "Highlighted" })).toBeVisible();
     await expect(mainNav(page).locator("[aria-current=page]")).toHaveCount(1);
-    await expect(mainNav(page).locator("[aria-current=page]")).toHaveText(en.nav.builds);
+    await expect(mainNav(page).locator("[aria-current=page]")).toHaveText("Highlighted");
+  });
+
+  test("lists the five most recently changed builds, most recent first", async ({ page }) => {
+    for (let day = 1; day <= 7; day += 1) {
+      await fakeSupabase.seedBuild({
+        ownerEmail: LUTHIER.email,
+        name: `Build ${day}`,
+        created_at: "2026-09-01T12:00:00.000Z",
+        updated_at: `2026-10-0${day}T12:00:00.000Z`,
+      });
+    }
+    await fakeSupabase.seedBuild({ ownerEmail: ADMIN.email, name: "Admin build" });
+    await signIn(page, LUTHIER);
+    await expect(
+      mainNav(page).getByRole("list", { name: en.nav.recentBuilds }).getByRole("link"),
+    ).toHaveText(["Build 7", "Build 6", "Build 5", "Build 4", "Build 3"]);
+  });
+
+  test("lists only an administrator's own builds among the recent builds", async ({ page }) => {
+    const other = await fakeSupabase.seedBuild({ ownerEmail: LUTHIER.email, name: "Not mine" });
+    await fakeSupabase.seedBuild({ ownerEmail: ADMIN.email, name: "Mine" });
+    await signIn(page, ADMIN, `/builds/${other.id}`);
+    await expect(
+      mainNav(page).getByRole("list", { name: en.nav.recentBuilds }).getByRole("link"),
+    ).toHaveText(["Mine"]);
   });
 
   test("redirects unknown URLs to Builds without a history entry", async ({ page }) => {
@@ -157,24 +217,31 @@ test.describe("navigation", () => {
 
   test("goes to Builds from the title", async ({ page }) => {
     await signIn(page, LUTHIER, "/chat");
-    await page
-      .getByRole("banner")
-      .getByRole("link", { name: new RegExp(en.app.title) })
-      .click();
+    await sidebar(page).getByRole("link", { name: en.app.title }).click();
     await expect(page).toHaveURL(/\/builds$/);
   });
+});
 
-  test("shows the header with title, subtitle, switchers and user button, and no tab bar", async ({
-    page,
-  }) => {
+test.describe("You page", () => {
+  test("shows the account and the preferences", async ({ page }) => {
     await signIn(page, LUTHIER);
-    const header = page.getByRole("banner").first();
-    await expect(header.getByText(en.app.subtitle)).toBeVisible();
-    await expect(header.getByRole("radio", { name: en.language.frName })).toBeVisible();
-    await expect(header.getByRole("radio", { name: en.theme.dark })).toBeVisible();
-    await expect(header.getByRole("button", { name: new RegExp(LUTHIER.email) })).toBeVisible();
-    await expect(page.getByRole("link", { name: en.nav.woodProperties }).last()).toBeVisible();
-    await expect(page.locator("[data-admin]")).toHaveCount(0);
+    await openYou(page);
+    await expect(page.getByRole("heading", { level: 1, name: en.you.title })).toBeVisible();
+    await expect(page.getByText(en.shell.signedInAs)).toBeVisible();
+    await expect(page.getByRole("main").getByText(LUTHIER.email)).toBeVisible();
+    await expect(page.getByRole("radio", { name: en.language.frName })).toBeVisible();
+    await expect(page.getByRole("radio", { name: en.theme.dark })).toBeVisible();
+    await expect(sidebar(page).getByRole("link", { name: LUTHIER.email })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  test("changes the theme", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await signIn(page, LUTHIER, "/you");
+    await page.getByRole("radio", { name: en.theme.dark }).check();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   });
 });
 
@@ -191,13 +258,16 @@ test.describe("admin-only sections", () => {
     }
   });
 
-  test("are listed last for administrators, in the admin accent", async ({ page }) => {
+  test("are listed last for administrators, in the admin accent, and on the You page", async ({
+    page,
+  }) => {
     await signIn(page, ADMIN);
     expect(await navLabels(page)).toEqual([
       en.nav.builds,
-      en.nav.chat,
+      en.nav.tools,
+      en.nav.woodPanels,
       en.nav.simulator,
-      en.nav.woodProperties,
+      en.nav.assistant,
       en.nav.references,
       en.nav.admin,
     ]);
@@ -205,19 +275,20 @@ test.describe("admin-only sections", () => {
       mainNav(page)
         .getByRole("link", { name })
         .evaluate((element) => getComputedStyle(element).color);
-    const regular = await color(en.nav.chat);
+    const regular = await color(en.nav.assistant);
     expect(await color(en.nav.references)).not.toBe(regular);
     expect(await color(en.nav.admin)).toBe(await color(en.nav.references));
 
-    // Even at the narrowest desktop width, all six entries fit and the title is whole.
+    await openYou(page, ADMIN.email);
+    const group = page.getByRole("main").getByRole("region", { name: en.you.administration });
+    await expect(group.getByRole("link")).toHaveText([en.nav.references, en.nav.admin]);
+
+    // At the narrowest desktop width every entry is reachable and the title is whole.
     await page.setViewportSize({ width: 1024, height: 700 });
-    for (const text of [en.app.title, en.app.subtitle]) {
-      const truncated = await page
-        .getByRole("banner")
-        .getByText(text, { exact: true })
-        .evaluate((element) => element.scrollWidth > element.clientWidth);
-      expect(truncated, text).toBe(false);
-    }
+    const truncated = await sidebar(page)
+      .getByText(en.app.title, { exact: true })
+      .evaluate((element) => element.scrollWidth > element.clientWidth);
+    expect(truncated).toBe(false);
     await expect(mainNav(page).getByRole("link", { name: en.nav.admin })).toBeInViewport();
   });
 
@@ -242,22 +313,13 @@ test.describe("public story route", () => {
   });
 });
 
-test.describe("user menu and sign-out", () => {
-  test("shows who is signed in and closes on an outside click", async ({ page }) => {
+test.describe("sign-out", () => {
+  test("signs out from the You page to the sign-in screen, which stays after a reload", async ({
+    page,
+  }) => {
     await signIn(page, LUTHIER);
-    const button = page.getByRole("button", { name: new RegExp(LUTHIER.email) });
-    await expect(button).toContainText(en.shell.signedInAs);
-    await button.click();
-    await expect(page.getByRole("menuitem", { name: en.shell.signOut })).toBeVisible();
-    await page.mouse.click(640, 600);
-    await expect(page.getByRole("menuitem", { name: en.shell.signOut })).toHaveCount(0);
-    await expect(page).toHaveURL(/\/builds$/);
-  });
-
-  test("signs out to the sign-in screen, which stays after a reload", async ({ page }) => {
-    await signIn(page, LUTHIER);
-    await page.getByRole("button", { name: new RegExp(LUTHIER.email) }).click();
-    await page.getByRole("menuitem", { name: en.shell.signOut }).click();
+    await openYou(page);
+    await page.getByRole("button", { name: en.shell.signOut }).click();
     await expect(page).toHaveURL(/\/sign-in$/);
     await expect(page.getByRole("button", { name: en.auth.signIn, exact: true })).toBeVisible();
     await page.reload();
@@ -267,21 +329,20 @@ test.describe("user menu and sign-out", () => {
   });
 
   test("reports a failed sign-out and stays in the shell", async ({ page }) => {
-    await signIn(page, LUTHIER);
+    await signIn(page, LUTHIER, "/you");
     await fakeSupabase.configure({ failLogout: true });
-    await page.getByRole("button", { name: new RegExp(LUTHIER.email) }).click();
-    await page.getByRole("menuitem", { name: en.shell.signOut }).click();
+    await page.getByRole("button", { name: en.shell.signOut }).click();
     await expect(errorToast(page).filter({ hasText: en.shell.signOutFailed })).toBeVisible();
-    await expect(page).toHaveURL(/\/builds$/);
+    await expect(page).toHaveURL(/\/you$/);
     await page.reload();
-    await expect(page.getByRole("heading", { level: 1, name: en.nav.builds })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: en.you.title })).toBeVisible();
   });
 
   test("switches the whole shell to French", async ({ page }) => {
-    await signIn(page, LUTHIER);
+    await signIn(page, LUTHIER, "/you");
     await page.getByRole("radio", { name: en.language.frName }).check();
     await expect(mainNav(page).getByRole("link", { name: fr.nav.builds })).toBeVisible();
-    await page.getByRole("button", { name: new RegExp(LUTHIER.email) }).click();
-    await expect(page.getByRole("menuitem", { name: fr.shell.signOut })).toBeVisible();
+    await expect(mainNav(page).getByRole("link", { name: fr.nav.tools })).toBeVisible();
+    await expect(page.getByRole("button", { name: fr.shell.signOut })).toBeVisible();
   });
 });

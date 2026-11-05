@@ -8,7 +8,6 @@ import {
   isActive,
   parentOf,
   safeNextPath,
-  sectionsFor,
   signInUrl,
 } from "./routes";
 
@@ -99,25 +98,6 @@ describe("activeEntry", () => {
 
   it("is null outside every entry", () => {
     expect(activeEntry("/story/abc")).toBeNull();
-  });
-});
-
-describe("sectionsFor", () => {
-  it("lists the four regular sections for users and while the role is unknown", () => {
-    const ids = ["builds", "chat", "simulator", "woodProperties"];
-    expect(sectionsFor("user").map((s) => s.id)).toEqual(ids);
-    expect(sectionsFor(null).map((s) => s.id)).toEqual(ids);
-  });
-
-  it("adds References and Admin, in that order, for administrators", () => {
-    expect(sectionsFor("admin").map((s) => s.href)).toEqual([
-      "/builds",
-      "/chat",
-      "/simulator",
-      "/wood-properties",
-      "/references",
-      "/admin",
-    ]);
   });
 });
 

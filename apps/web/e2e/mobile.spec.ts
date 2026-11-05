@@ -1,83 +1,70 @@
 import { expect, type Page, test } from "@playwright/test";
-import { en, fr, LUTHIER, seedAccounts, signIn } from "./support";
+import { ADMIN, en, fr, LUTHIER, seedAccounts, signIn } from "./support";
 
-const tabBar = (page: Page) => page.getByRole("navigation", { name: en.nav.label }).last();
+const tabBar = (page: Page) => page.getByRole("navigation", { name: en.nav.label });
 
 test.beforeEach(async () => {
   await seedAccounts();
 });
 
 test.describe("phone layout @phone", () => {
-  test("uses a bottom tab bar instead of the header bar", async ({ page }) => {
-    await signIn(page, LUTHIER);
-    await expect(page.getByText(en.app.subtitle)).toBeHidden();
+  test("uses a four-tab bottom bar as the only navigation", async ({ page }) => {
+    await signIn(page, ADMIN);
+    await expect(page.getByRole("complementary")).toBeHidden();
     await expect(tabBar(page)).toBeVisible();
-    await tabBar(page).getByRole("link", { name: en.nav.woodProperties }).click();
-    await expect(page).toHaveURL(/\/wood-properties$/);
-    await expect(tabBar(page).locator("[aria-current=page]")).toHaveAccessibleName(
-      en.nav.woodProperties,
-    );
-
-    // The content leaves room for the bar.
-    const bar = await tabBar(page).boundingBox();
-    const padding = await page
-      .locator("main")
-      .evaluate((element) => Number.parseFloat(getComputedStyle(element).paddingBottom));
-    expect(padding).toBeGreaterThanOrEqual(bar?.height ?? Number.POSITIVE_INFINITY);
-  });
-
-  test("opens the slide-out menu with the account, sections and preferences", async ({ page }) => {
-    await signIn(page, LUTHIER);
-    await page.getByRole("button", { name: en.shell.openMenu }).click();
-    const menu = page.getByRole("dialog", { name: en.shell.menuTitle });
-    await expect(menu).toBeVisible();
-    await expect(menu.getByText(en.shell.signedInAs)).toBeVisible();
-    await expect(menu.getByText(LUTHIER.email)).toBeVisible();
-    await expect(menu.getByRole("link")).toHaveText([
+    await expect(tabBar(page).getByRole("link")).toHaveText([
       en.nav.builds,
-      en.nav.chat,
-      en.nav.simulator,
-      en.nav.woodProperties,
+      en.nav.tools,
+      en.nav.assistant,
+      en.nav.you,
     ]);
-    await expect(menu.getByRole("radio", { name: en.language.frName })).toBeVisible();
-    await expect(menu.getByRole("radio", { name: en.theme.dark })).toBeVisible();
-    await expect(menu.getByRole("button", { name: en.shell.signOut })).toBeVisible();
-    // The page behind is dimmed and does not scroll.
-    await expect(page.getByTestId("sheet-backdrop")).toBeVisible();
-    expect(await page.evaluate(() => getComputedStyle(document.body).overflow)).toBe("hidden");
-
-    await menu.getByRole("link", { name: en.nav.chat }).click();
-    await expect(page).toHaveURL(/\/chat$/);
-    await expect(menu).toBeHidden();
+    await expect(page.getByRole("button", { name: /menu/i })).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test("closes the menu from the close button or the backdrop without navigating", async ({
-    page,
-  }) => {
-    await signIn(page, LUTHIER, "/simulator");
-    await page.getByRole("button", { name: en.shell.openMenu }).click();
-    await page.getByRole("button", { name: en.shell.closeMenu }).click();
-    await expect(page.getByRole("dialog")).toBeHidden();
-
-    await page.getByRole("button", { name: en.shell.openMenu }).click();
-    await page.getByTestId("sheet-backdrop").click({ position: { x: 20, y: 300 } });
-    await expect(page.getByRole("dialog")).toBeHidden();
-    await expect(page).toHaveURL(/\/simulator$/);
-  });
-
-  test("changes the language from the menu", async ({ page }) => {
+  test("goes to a tool through Tools and back, keeping Tools highlighted", async ({ page }) => {
     await signIn(page, LUTHIER);
-    await page.getByRole("button", { name: en.shell.openMenu }).click();
-    await page.getByRole("dialog").getByRole("radio", { name: en.language.frName }).check();
+    await tabBar(page).getByRole("link", { name: en.nav.tools }).click();
+    await expect(page).toHaveURL(/\/tools$/);
+    await page
+      .getByRole("main")
+      .getByRole("link", { name: new RegExp(en.nav.woodPanels) })
+      .click();
+    await expect(page).toHaveURL(/\/wood-properties$/);
+    await expect(tabBar(page).locator("[aria-current=page]")).toHaveAccessibleName(en.nav.tools);
+    await page.getByRole("main").getByRole("link", { name: en.nav.tools }).click();
+    await expect(page).toHaveURL(/\/tools$/);
+  });
+
+  test("leaves room under long pages for the bar", async ({ page }) => {
+    await signIn(page, LUTHIER, "/wood-properties");
+    const bar = await tabBar(page).boundingBox();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    const last = page.getByRole("main").locator(":scope > *").last();
+    const box = await last.boundingBox();
+    expect(bar).not.toBeNull();
+    expect(box).not.toBeNull();
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(bar?.y ?? 0);
+  });
+
+  test("reaches the account, preferences, admin areas and sign-out under You", async ({ page }) => {
+    await signIn(page, ADMIN);
+    await tabBar(page).getByRole("link", { name: en.nav.you }).click();
+    await expect(page).toHaveURL(/\/you$/);
+    await expect(page.getByRole("main").getByText(ADMIN.email)).toBeVisible();
+    await expect(page.getByRole("radio", { name: en.theme.dark })).toBeVisible();
     await expect(
-      page.getByRole("dialog").getByRole("button", { name: fr.shell.signOut }),
-    ).toBeVisible();
+      page.getByRole("region", { name: en.you.administration }).getByRole("link"),
+    ).toHaveText([en.nav.references, en.nav.admin]);
+
+    await page.getByRole("radio", { name: en.language.frName }).check();
+    await expect(tabBar(page).getByRole("link", { name: fr.nav.you })).toBeVisible();
+    await page.getByRole("button", { name: fr.shell.signOut }).click();
+    await expect(page).toHaveURL(/\/sign-in$/);
   });
 
-  test("signs out from the menu", async ({ page }) => {
-    await signIn(page, LUTHIER);
-    await page.getByRole("button", { name: en.shell.openMenu }).click();
-    await page.getByRole("dialog").getByRole("button", { name: en.shell.signOut }).click();
-    await expect(page).toHaveURL(/\/sign-in$/);
+  test("shows no Administration group to a regular user", async ({ page }) => {
+    await signIn(page, LUTHIER, "/you");
+    await expect(page.getByRole("region", { name: en.you.administration })).toHaveCount(0);
   });
 });
