@@ -68,3 +68,5 @@ PGOPTIONS="-c client_min_messages=warning" \
 
 echo "test:db: running the first-admin race test"
 bash "$ROOT/scripts/test-db/first-admin-race.sh" "postgresql://postgres@/$DB?host=$WORK&port=$PORT"
+echo "test:db: running the default-panels race test"
+bash "$ROOT/scripts/test-db/default-panels-race.sh" "postgresql://postgres@/$DB?host=$WORK&port=$PORT"

@@ -20,7 +20,7 @@
   - the cascade with the user.
 
   Verify with `supabase test db` (CLI 2.122.0) and `pnpm test:db` where pgTAP is installed
-- [ ] 2.2 Add `public.default_wood_panels` and `public.load_default_wood_panels()` (decision 3) to the migration. Write `13_default_wood_panels.test.sql`:
+- [x] 2.2 Add `public.default_wood_panels` and `public.load_default_wood_panels()` (decision 3) to the migration. Write `13_default_wood_panels.test.sql`:
   - every user reads, and only administrators write;
   - copying into an empty library returns the count, and the copies are independent;
   - `null` for a non-empty library;
