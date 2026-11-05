@@ -105,7 +105,7 @@
 
 ## 8. Documentation and integration
 
-- [ ] 8.1 Update the root `README.md`:
+- [x] 8.1 Update the root `README.md`:
   - the Wood Props section and how the reference set is filled until `admin-console` lands (SQL as an administrator, or the import);
   - the PDF fonts and their licence.
 
