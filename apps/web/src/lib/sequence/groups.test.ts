@@ -53,7 +53,7 @@ describe("template groups", () => {
   });
 
   it("hold every template step", () => {
-    const ids = new Set(TEMPLATE_GROUPS.map((group) => group.id));
+    const ids = new Set<number>(TEMPLATE_GROUPS.map((group) => group.id));
     expect(TEMPLATE_STEPS.every((step) => ids.has(step.group))).toBe(true);
   });
 

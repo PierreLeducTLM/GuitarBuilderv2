@@ -15,17 +15,25 @@ export function SectionPlaceholder({ id, children }: { id: EntryId; children?: R
         back={parent ? { href: parent.href, label: t(`nav.${parent.id}`) } : undefined}
       />
       {children}
-      <Panel padding="none" className="overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="relative h-40 bg-inset [background-image:linear-gradient(var(--gb-grid)_1px,transparent_1px),linear-gradient(90deg,var(--gb-grid)_1px,transparent_1px)] [background-size:32px_32px]"
-        >
-          <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-amber-ink opacity-80 shadow-glow-amber" />
-        </div>
-        <p className="border-t border-line px-4 py-3 text-[0.9375rem] text-fg-dim">
-          {t("sections.placeholder")}
-        </p>
-      </Panel>
+      <SectionPlaceholderPanel />
     </section>
+  );
+}
+
+/** The placeholder panel of a section or view whose features arrive later. */
+export function SectionPlaceholderPanel() {
+  const t = useTranslations();
+  return (
+    <Panel padding="none" className="overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="relative h-40 bg-inset [background-image:linear-gradient(var(--gb-grid)_1px,transparent_1px),linear-gradient(90deg,var(--gb-grid)_1px,transparent_1px)] [background-size:32px_32px]"
+      >
+        <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-amber-ink opacity-80 shadow-glow-amber" />
+      </div>
+      <p className="border-t border-line px-4 py-3 text-[0.9375rem] text-fg-dim">
+        {t("sections.placeholder")}
+      </p>
+    </Panel>
   );
 }
