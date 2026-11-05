@@ -63,6 +63,8 @@ export interface StepStoreOptions {
   save: (key: StepKey, change: StepChange) => Promise<StepEntry>;
   /** Called when a change could not be saved (unless it was queued as silent). */
   onSaveFailed: () => void;
+  /** Called after each change the server saved. */
+  onSaved?: () => void;
   notesDelayMs?: number;
   /** Timer functions, replaceable in tests. */
   setTimer?: (callback: () => void, ms: number) => unknown;
@@ -173,6 +175,7 @@ export class StepStore {
       }
       this.queue.shift();
       this.emit();
+      if (saved) this.options.onSaved?.();
       if (!saved && !next.silent) this.options.onSaveFailed();
       next.settle(saved);
     }

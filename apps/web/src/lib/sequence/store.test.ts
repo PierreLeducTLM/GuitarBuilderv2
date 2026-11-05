@@ -240,6 +240,19 @@ describe("StepStore", () => {
     expect(store.getSnapshot().Crown?.completed).toBe(true);
   });
 
+  it("tells the caller each time a change is saved, and not when it fails", async () => {
+    const server = fakeServer();
+    const onSaved = vi.fn();
+    const store = new StepStore({ initial: {}, save: server.save, onSaveFailed: vi.fn(), onSaved });
+    await store.change("Neck", { op: "set_completed", completed: true });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    server.failNext();
+    await store.change("Neck", { op: "set_completed", completed: false });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    await store.change("TopPanel", { op: "set_completed", completed: true });
+    expect(onSaved).toHaveBeenCalledTimes(2);
+  });
+
   it("notifies subscribers of every change", async () => {
     const server = fakeServer();
     const store = new StepStore({ initial: {}, save: server.save, onSaveFailed: vi.fn() });

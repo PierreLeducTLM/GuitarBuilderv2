@@ -113,3 +113,32 @@ test.describe("build page bar", () => {
     await expect(page).toHaveURL(/\/builds$/);
   });
 });
+
+test.describe("recent builds", () => {
+  test("move a build to the top of the sidebar once one of its steps is saved", async ({
+    page,
+  }) => {
+    const older = await fakeSupabase.seedBuild({
+      ownerEmail: LUTHIER.email,
+      name: "Older",
+      guitar_type: "classical",
+      updated_at: "2026-10-01T12:00:00.000Z",
+    });
+    await fakeSupabase.seedBuild({
+      ownerEmail: LUTHIER.email,
+      name: "Newer",
+      guitar_type: "classical",
+      updated_at: "2026-10-02T12:00:00.000Z",
+    });
+    const recent = page
+      .getByRole("complementary")
+      .getByRole("list", { name: en.nav.recentBuilds })
+      .getByRole("link");
+    await signIn(page, LUTHIER, `/builds/${older.id}`);
+    await expect(recent).toHaveText(["Newer", "Older"]);
+
+    await page.goto(`/builds/${older.id}/steps/TrussRod`);
+    await page.getByRole("button", { name: en.sequence.markCompleted }).click();
+    await expect(recent).toHaveText(["Older", "Newer"]);
+  });
+});

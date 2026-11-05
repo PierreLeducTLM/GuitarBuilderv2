@@ -63,7 +63,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
   Add the `builds.views.*` and `builds.actions.*` keys. Verify component tests for the Build Detail Header scenarios and the read-only case
 - [x] 4.4 Add the view switcher (Steps, Map, Overview links with `aria-current`) under the summary strip, and change "Next up" to link to `/builds/<id>/steps/<key>`. Remove `BuildTabs`. Verify component tests and the Build Views scenarios in Playwright (default Steps view, reload keeps Overview)
-- [ ] 4.5 Call `router.refresh()` after create, delete and the first saved step change of a visit (`StepStore.onSaved`), so the sidebar's recent builds update. Verify a Playwright test that completing a step in an older build moves it to the top of the sidebar
+- [x] 4.5 Call `router.refresh()` after create, delete and the first saved step change of a visit (`StepStore.onSaved`), so the sidebar's recent builds update. Verify a Playwright test that completing a step in an older build moves it to the top of the sidebar
 
 ## 5. Steps checklist
 

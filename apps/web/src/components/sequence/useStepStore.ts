@@ -2,6 +2,7 @@
 
 import type { Json, StepChange, StepEntry } from "@gb/db";
 import { useToast } from "@gb/ui";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { mergeStepState } from "@/lib/sequence/state";
@@ -28,8 +29,18 @@ async function saveStepChange(buildId: string, key: StepKey, change: StepChange)
 export function useStepStore(buildId: string, storedState: unknown) {
   const t = useTranslations("builds");
   const toast = useToast();
+  const router = useRouter();
   const report = useRef(() => {});
   report.current = () => toast.show({ type: "error", message: t("saveFailed") });
+  // The first saved change of a visit makes this build the most recently changed one:
+  // refresh the server-rendered sidebar so its recent builds follow (Desktop Sidebar).
+  const refreshed = useRef(false);
+  const saved = useRef(() => {});
+  saved.current = () => {
+    if (refreshed.current) return;
+    refreshed.current = true;
+    router.refresh();
+  };
 
   const [store] = useState(
     () =>
@@ -37,6 +48,7 @@ export function useStepStore(buildId: string, storedState: unknown) {
         initial: mergeStepState(storedState),
         save: (key, change) => saveStepChange(buildId, key, change),
         onSaveFailed: () => report.current(),
+        onSaved: () => saved.current(),
       }),
   );
   const states = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);

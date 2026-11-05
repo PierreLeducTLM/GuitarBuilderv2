@@ -13,6 +13,7 @@ vi.mock("next-intl", async (original) => ({
   useTranslations: () => (key: string) => key,
 }));
 vi.mock("@/lib/supabase/client", () => ({ createClient: () => ({}) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const build = (overrides: Partial<BuildDetailData> = {}): BuildDetailData => ({
   id: "b1",
