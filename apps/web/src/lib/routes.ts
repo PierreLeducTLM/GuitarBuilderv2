@@ -1,29 +1,66 @@
 import type { AppRole } from "@gb/db";
 
-/** app-shell: Application Sections and URLs, in navigation order. */
-export const sections = [
-  { id: "builds", href: "/builds", adminOnly: false },
-  { id: "chat", href: "/chat", adminOnly: false },
-  { id: "simulator", href: "/simulator", adminOnly: false },
-  { id: "woodProperties", href: "/wood-properties", adminOnly: false },
-  { id: "references", href: "/references", adminOnly: true },
-  { id: "admin", href: "/admin", adminOnly: true },
-] as const;
-
-export type Section = (typeof sections)[number];
-export type SectionId = Section["id"];
-
 export const DEFAULT_ROUTE = "/builds";
 export const SIGN_IN_ROUTE = "/sign-in";
 
-/** Sections the given role may see. Until the role is known, pass `null`: admin entries stay hidden. */
-export function sectionsFor(role: AppRole | null): Section[] {
-  return sections.filter((section) => !section.adminOnly || role === "admin");
+/** app-shell: Application Sections and URLs — the four destinations, in navigation order. */
+export const destinations = [
+  { id: "builds", href: "/builds", sections: [] },
+  {
+    id: "tools",
+    href: "/tools",
+    sections: [
+      { id: "woodPanels", href: "/wood-properties" },
+      { id: "simulator", href: "/simulator" },
+    ],
+  },
+  { id: "assistant", href: "/chat", sections: [] },
+  { id: "you", href: "/you", sections: [] },
+] as const;
+
+const adminEntries = [
+  { id: "references", href: "/references" },
+  { id: "admin", href: "/admin" },
+] as const;
+
+export type Destination = (typeof destinations)[number];
+export type DestinationId = Destination["id"];
+export type AdminEntry = (typeof adminEntries)[number];
+export type EntryId = DestinationId | Destination["sections"][number]["id"] | AdminEntry["id"];
+
+/** The destination a section sits under (its page bar returns there), if any. */
+export function parentOf(id: EntryId): Destination | undefined {
+  return destinations.find((destination) =>
+    destination.sections.some((section) => section.id === id),
+  );
+}
+
+/** app-shell: Admin-Only Sections. Until the role is known, pass `null`: nothing is shown. */
+export function adminEntriesFor(role: AppRole | null): readonly AdminEntry[] {
+  return role === "admin" ? adminEntries : [];
 }
 
 /** app-shell: Navigation Entry Presentation — the entry whose URL prefix matches is active. */
 export function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+const holds = (destination: Destination, pathname: string) =>
+  [destination, ...destination.sections].some((entry) => isActive(pathname, entry.href));
+
+/** The bottom-tab-bar destination that holds `pathname`, or null (admin pages have no tab). */
+export function activeTab(pathname: string): DestinationId | null {
+  return destinations.find((destination) => holds(destination, pathname))?.id ?? null;
+}
+
+/** The most specific sidebar entry that holds `pathname`, or null. */
+export function activeEntry(pathname: string): EntryId | null {
+  const entries = [
+    ...destinations.flatMap((destination) => destination.sections),
+    ...destinations,
+    ...adminEntries,
+  ];
+  return entries.find((entry) => isActive(pathname, entry.href))?.id ?? null;
 }
 
 export type RouteKind =
@@ -43,10 +80,25 @@ export function classifyPath(pathname: string): RouteKind {
   if (path === SIGN_IN_ROUTE) return "signIn";
   if (path === "/auth/confirm") return "authCallback";
   if (path === "/references" || path === "/admin") return "adminSection";
-  if (/^\/builds(\/[^/]+)?$/.test(path)) return "section";
-  if (path === "/chat" || path === "/simulator" || path === "/wood-properties") return "section";
+  if (BUILD_PATH.test(path)) return "section";
+  if (TOP_LEVEL_SECTIONS.has(path)) return "section";
   return "unknown";
 }
+
+/**
+ * `/builds`, a build and its views, part flows and steps (guitar-builds: Build Deep
+ * Links). Keys are checked by shape only; the build pages check them against the template.
+ */
+const BUILD_PATH =
+  /^\/builds(\/[^/]+(\/map(\/[a-z-]{1,40})?|\/overview|\/steps\/[A-Za-z0-9]{1,64})?)?$/;
+
+const TOP_LEVEL_SECTIONS: ReadonlySet<string> = new Set([
+  "/tools",
+  "/you",
+  "/chat",
+  "/simulator",
+  "/wood-properties",
+]);
 
 /**
  * Accepts a post-sign-in destination only if it is a path on this site; anything

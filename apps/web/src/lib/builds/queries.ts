@@ -1,7 +1,8 @@
 import "server-only";
 import { toGuitarType } from "@gb/db";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type { BuildDetailData, BuildSummary } from "./types";
+import type { BuildDetailData, BuildSummary, RecentBuild } from "./types";
 import { isUuid } from "./validation";
 
 /**
@@ -25,8 +26,27 @@ export async function listOwnBuilds(userId: string): Promise<BuildSummary[] | nu
   }));
 }
 
-/** One build the user may read, or null when it does not exist or is not readable. */
-export async function getBuild(id: string): Promise<BuildDetailData | null> {
+/**
+ * The user's `count` most recently changed builds, for the sidebar. Own builds only,
+ * like the list. A failed query gives no builds rather than breaking the navigation.
+ */
+export async function listRecentBuilds(userId: string, count: number): Promise<RecentBuild[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("builds")
+    .select("id, name")
+    .eq("owner_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(count);
+  if (error || !data) return [];
+  return data.map((row) => ({ id: row.id, name: row.name }));
+}
+
+/**
+ * One build the user may read, or null when it does not exist or is not readable. Read
+ * once per request: the build's layout and its pages share it.
+ */
+export const getBuild = cache(async (id: string): Promise<BuildDetailData | null> => {
   if (!isUuid(id)) return null;
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -45,4 +65,4 @@ export async function getBuild(id: string): Promise<BuildDetailData | null> {
     updatedAt: data.updated_at,
     sequenceState: data.sequence_state,
   };
-}
+});

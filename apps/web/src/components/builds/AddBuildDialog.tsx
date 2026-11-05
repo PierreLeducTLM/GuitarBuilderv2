@@ -69,6 +69,7 @@ export function AddBuildDialog({ open, onOpenChange }: AddBuildDialogProps) {
       return;
     }
     router.push(`/builds/${data.id}` as Route);
+    router.refresh();
     reset();
     setPending(false);
     submitting.current = false;

@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import en from "../../../messages/en.json";
 import fr from "../../../messages/fr.json";
-import { isStepKey, STEP_KEYS, TEMPLATE_ARROWS, TEMPLATE_STEPS } from "./template";
+import { isStepKey, STEP_KEYS, stepNumberLabel, TEMPLATE_ARROWS, TEMPLATE_STEPS } from "./template";
 
 const spec = readFileSync(
   fileURLToPath(new URL("../../../../../openspec/specs/build-sequence/spec.md", import.meta.url)),
@@ -26,6 +26,8 @@ function specSteps(): { key: string; label: string; group: number }[] {
   const steps: { key: string; label: string; group: number }[] = [];
   let group = 0;
   for (const { title, body } of groupRequirements()) {
+    // Template Group Names names the groups; it holds no steps.
+    if (title === "Names") continue;
     // The bridge's classical branch continues group 9.
     if (title !== "Bridge Classical Branch") group++;
     const list = body.split("#### Scenario")[0] as string;
@@ -159,5 +161,13 @@ describe("step labels", () => {
       "Cut to side profile",
       "Shape bridge wings",
     ]);
+  });
+});
+
+describe("stepNumberLabel", () => {
+  it("pads template positions to three digits (Step Numbers)", () => {
+    expect(stepNumberLabel(7)).toBe("007");
+    expect(stepNumberLabel(36)).toBe("036");
+    expect(stepNumberLabel(132)).toBe("132");
   });
 });

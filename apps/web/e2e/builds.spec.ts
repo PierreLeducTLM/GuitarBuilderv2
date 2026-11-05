@@ -16,6 +16,16 @@ async function useFrench(page: Page) {
 
 const addDialog = (page: Page) => page.getByRole("dialog", { name: en.builds.create.title });
 
+/** The build page bar's return control. */
+const backToBuilds = (page: Page) =>
+  page.getByRole("main").getByRole("link", { name: en.nav.builds, exact: true }).click();
+
+/** Delete Build, from the build's More actions menu. */
+async function chooseDelete(page: Page) {
+  await page.getByRole("button", { name: en.builds.actions.more }).click();
+  await page.getByRole("menuitem", { name: en.builds.detail.delete }).click();
+}
+
 test.beforeEach(async () => {
   await seedAccounts();
 });
@@ -148,7 +158,7 @@ test.describe("creating a build", () => {
     await expect(page).toHaveURL(new RegExp(`/builds/${created?.id}$`));
     await expect(addDialog(page)).toBeHidden();
 
-    await page.getByRole("link", { name: en.builds.detail.back }).click();
+    await backToBuilds(page);
     await expect(page).toHaveURL(/\/builds$/);
     await expect(page.getByRole("main").getByRole("listitem").first()).toContainText(
       "Test Guitar #1",
@@ -216,19 +226,20 @@ test.describe("build detail page", () => {
     ).toBeVisible();
     await expect(main.getByText(en.builds.detail.boboNeck, { exact: true })).toBeVisible();
     await expect(main.getByText("Created Dec 6, 2025")).toBeVisible();
-    await expect(main.getByRole("button", { name: en.builds.detail.delete })).toBeVisible();
-    await expect(main.getByRole("tab", { name: en.builds.detail.tabOverview })).toHaveAttribute(
-      "aria-selected",
-      "true",
+    await expect(main.getByRole("button", { name: en.builds.actions.more })).toBeVisible();
+    await expect(main.getByRole("link", { name: en.builds.views.steps })).toHaveAttribute(
+      "aria-current",
+      "page",
     );
 
     await useFrench(page);
     await page.reload();
-    await expect(main.getByRole("link", { name: fr.builds.detail.back })).toBeVisible();
-    await expect(main.getByRole("tab", { name: fr.builds.detail.tabOverview })).toBeVisible();
-    await expect(main.getByRole("tab", { name: fr.builds.detail.tabSequence })).toBeVisible();
-    await expect(main.getByRole("button", { name: fr.builds.detail.delete })).toBeVisible();
+    await expect(main.getByRole("link", { name: fr.nav.builds, exact: true })).toBeVisible();
+    await expect(main.getByRole("link", { name: fr.builds.views.overview })).toBeVisible();
+    await expect(main.getByRole("link", { name: fr.builds.views.map })).toBeVisible();
     await expect(main.getByText("Créée le 6 déc. 2025")).toBeVisible();
+    await main.getByRole("button", { name: fr.builds.actions.more }).click();
+    await expect(page.getByRole("menuitem", { name: fr.builds.detail.delete })).toBeVisible();
   });
 
   test("goes back to the list", async ({ page }) => {
@@ -238,7 +249,7 @@ test.describe("build detail page", () => {
       guitar_type: "classical",
     });
     await signIn(page, LUTHIER, `/builds/${build.id}`);
-    await page.getByRole("link", { name: en.builds.detail.back }).click();
+    await backToBuilds(page);
     await expect(page).toHaveURL(/\/builds$/);
   });
 
@@ -280,29 +291,25 @@ test.describe("build detail page", () => {
     const main = page.getByRole("main");
     await expect(main.getByText("1 of 120 steps · 1%")).toBeVisible();
     await expect(main.getByText("181.6 Hz")).toBeVisible();
-    await main.getByRole("button", { name: "Next up: Make truss rod nut" }).click();
-    const dialog = page.getByRole("dialog", { name: /Make truss rod nut/ });
-    await expect(dialog).toBeVisible();
-    await dialog.getByRole("button", { name: en.sequence.close }).last().click();
-    await expect(main.getByRole("tab", { name: en.builds.detail.tabSequence })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+    await main.getByRole("link", { name: "Next up: Make truss rod nut" }).click();
+    await expect(page).toHaveURL(new RegExp(`/builds/${build.id}/steps/MakeTrussNut$`));
+    await expect(page.getByRole("heading", { level: 2, name: "Make truss rod nut" })).toBeVisible();
   });
 
-  test("starts on the Overview tab after a reload", async ({ page }) => {
+  test("opens on the Steps view and keeps the Overview after a reload", async ({ page }) => {
     const build = await fakeSupabase.seedBuild({
       ownerEmail: LUTHIER.email,
-      name: "Tabs",
+      name: "Views",
       guitar_type: "classical",
     });
     await signIn(page, LUTHIER, `/builds/${build.id}`);
-    await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await expect(page.locator("[data-step]").first()).toBeVisible();
+    await expect(page.getByRole("region", { name: en.sequence.checklist.label })).toBeVisible();
+    await page.getByRole("link", { name: en.builds.views.overview }).click();
+    await expect(page).toHaveURL(new RegExp(`/builds/${build.id}/overview$`));
     await page.reload();
-    await expect(page.getByRole("tab", { name: en.builds.detail.tabOverview })).toHaveAttribute(
-      "aria-selected",
-      "true",
+    await expect(page.getByRole("link", { name: en.builds.views.overview })).toHaveAttribute(
+      "aria-current",
+      "page",
     );
     await expect(page.getByRole("heading", { name: en.builds.construction.title })).toBeVisible();
   });
@@ -315,7 +322,7 @@ test.describe("build detail page", () => {
       bobo_neck: true,
       sequence_state: [{ key: "FabricateBridge", notes: "Rosewood blank" }],
     });
-    await signIn(page, LUTHIER, `/builds/${build.id}`);
+    await signIn(page, LUTHIER, `/builds/${build.id}/overview`);
     const main = page.getByRole("main");
     await expect(main.getByText("BOBO neck: Yes")).toBeVisible();
 
@@ -329,19 +336,20 @@ test.describe("build detail page", () => {
     ).toBeVisible();
     expect((await fakeSupabase.builds())[0]?.guitar_type).toBe("classical");
 
-    await main.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await expect(page.locator("[data-step=FabricateCLBridge]")).toBeVisible();
-    await expect(page.locator("[data-step=FabricateBridge]")).toHaveCount(0);
+    await main.getByRole("link", { name: en.builds.views.map }).click();
+    await main.getByRole("link", { name: /^Bridge,/ }).click();
+    await expect(main.getByRole("link", { name: /Fabricate CL bridge blank/ })).toBeVisible();
+    await expect(main.getByRole("link", { name: /Fabricate SS bridge blank/ })).toHaveCount(0);
 
-    await main.getByRole("tab", { name: en.builds.detail.tabOverview }).click();
+    await main.getByRole("link", { name: en.builds.views.overview }).click();
     await main.getByRole("button", { name: en.builds.construction.change }).click();
     await dialog.getByRole("radio", { name: en.builds.guitarType.steel_string }).check();
     await dialog.getByRole("button", { name: en.dialog.save }).click();
-    await main.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await page.locator("[data-step=FabricateBridge]").click();
-    await expect(page.getByRole("dialog").getByLabel(en.sequence.notes)).toHaveValue(
-      "Rosewood blank",
-    );
+    await expect(dialog).toBeHidden();
+    await main.getByRole("link", { name: en.builds.views.map }).click();
+    await main.getByRole("link", { name: /^Bridge,/ }).click();
+    await main.getByRole("link", { name: /Fabricate SS bridge blank/ }).click();
+    await expect(page.getByLabel(en.sequence.notes)).toHaveValue("Rosewood blank");
   });
 
   test("invites the owner to choose a guitar type for an imported build", async ({ page }) => {
@@ -350,12 +358,11 @@ test.describe("build detail page", () => {
       name: "Imported",
       guitar_type: null,
     });
-    await signIn(page, LUTHIER, `/builds/${build.id}`);
+    await signIn(page, LUTHIER, `/builds/${build.id}/overview`);
     const main = page.getByRole("main");
     await expect(main.getByText(en.builds.detail.typeNotSet).first()).toBeVisible();
     await expect(main.getByText(en.builds.construction.notSetHint)).toBeVisible();
-    await main.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await expect(page.locator("[data-step]")).toHaveCount(132);
+    await expect(main.getByText("0 of 132 steps · 0%")).toBeVisible();
   });
 });
 
@@ -367,16 +374,17 @@ test.describe("deleting a build", () => {
       guitar_type: "classical",
     });
     await signIn(page, LUTHIER, `/builds/${build.id}`);
-    await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await page.locator("[data-step=JoinPanels]").click();
+    await page.goto(`/builds/${build.id}/steps/JoinPanels`);
+    await page.waitForLoadState("networkidle");
     await page
       .getByTestId("photo-input")
       .setInputFiles({ name: "joint.png", mimeType: "image/png", buffer: PNG });
-    await expect(page.getByRole("dialog").getByRole("img")).toHaveCount(1);
+    await expect(
+      page.getByRole("region", { name: en.sequence.photos }).getByRole("img"),
+    ).toHaveCount(1);
     expect(await fakeSupabase.objects()).toHaveLength(1);
-    await page.getByRole("dialog").getByRole("button", { name: en.sequence.close }).last().click();
 
-    await page.getByRole("button", { name: en.builds.detail.delete }).click();
+    await chooseDelete(page);
     const confirm = page.getByRole("dialog", { name: en.builds.deleteDialog.title });
     await expect(confirm).toContainText(en.builds.deleteDialog.message);
     await confirm.getByRole("button", { name: en.builds.deleteDialog.confirm }).click();
@@ -393,7 +401,7 @@ test.describe("deleting a build", () => {
       guitar_type: "classical",
     });
     await signIn(page, LUTHIER, `/builds/${build.id}`);
-    await page.getByRole("button", { name: en.builds.detail.delete }).click();
+    await chooseDelete(page);
     await page
       .getByRole("dialog", { name: en.builds.deleteDialog.title })
       .getByRole("button", { name: en.dialog.cancel })
@@ -411,7 +419,7 @@ test.describe("deleting a build", () => {
       guitar_type: "classical",
     });
     await signIn(page, LUTHIER, `/builds/${build.id}`);
-    await page.getByRole("button", { name: en.builds.detail.delete }).click();
+    await chooseDelete(page);
     await page
       .getByRole("dialog", { name: en.builds.deleteDialog.title })
       .getByRole("button", { name: en.builds.deleteDialog.confirm })
@@ -451,16 +459,17 @@ test.describe("administrator access", () => {
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1, name: "Luthier's build" })).toBeVisible();
     await expect(main.getByText(en.builds.detail.readOnly)).toBeVisible();
-    await expect(main.getByRole("button", { name: en.builds.detail.delete })).toHaveCount(0);
+    await expect(main.getByRole("button", { name: en.builds.actions.more })).toHaveCount(0);
+    await main.getByRole("link", { name: en.builds.views.overview }).click();
+    await expect(main.getByRole("heading", { name: en.builds.construction.title })).toBeVisible();
     await expect(main.getByRole("button", { name: en.builds.construction.change })).toHaveCount(0);
 
-    await main.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await page.locator("[data-step=Neck]").click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog.getByLabel(en.sequence.notes)).toHaveValue("Mahogany");
-    await expect(dialog.getByLabel(en.sequence.notes)).toHaveAttribute("readonly", "");
-    await expect(dialog.getByRole("button", { name: en.sequence.markCompleted })).toHaveCount(0);
-    await expect(dialog.getByRole("button", { name: en.sequence.photo.add })).toHaveCount(0);
+    await page.goto(`/builds/${build.id}/steps/Neck`);
+    await expect(page.getByLabel(en.sequence.notes)).toHaveValue("Mahogany");
+    await expect(page.getByLabel(en.sequence.notes)).toHaveAttribute("readonly", "");
+    await expect(page.getByRole("button", { name: en.sequence.nav.doneNext })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: en.sequence.markIncomplete })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: en.sequence.photo.add })).toHaveCount(0);
   });
 });
 

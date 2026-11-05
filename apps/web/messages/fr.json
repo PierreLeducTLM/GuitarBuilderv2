@@ -1,38 +1,41 @@
 {
   "app": {
     "title": "Constructeur de Guitare",
-    "subtitle": "Suivez et analysez vos projets de construction de guitare",
     "documentTitle": "Application de suivi de construction de guitare",
     "description": "Construisez, mesurez et harmonisez vos instruments.",
     "loading": "Chargement...",
     "homeLink": "Constructeur de Guitare, aller aux constructions"
   },
   "nav": {
-    "label": "Sections",
+    "label": "Navigation",
     "builds": "Constructions",
-    "chat": "Chat",
     "simulator": "Simulateur",
-    "woodProperties": "Propriétés Bois",
     "references": "Références",
     "admin": "Admin",
-    "short": {
-      "builds": "Constructions",
-      "chat": "Chat",
-      "simulator": "Simulateur",
-      "woodProperties": "Bois",
-      "references": "Réfs",
-      "admin": "Admin"
-    },
-    "adminOnly": "Réservé aux administrateurs"
+    "adminOnly": "Réservé aux administrateurs",
+    "tools": "Outils",
+    "assistant": "Assistant",
+    "you": "Vous",
+    "woodPanels": "Panneaux de bois",
+    "recentBuilds": "Constructions récentes",
+    "account": "Compte"
+  },
+  "tools": {
+    "title": "Outils",
+    "woodPanels": "Densité, rigidité et épaisseur cible d’une table ou d’un fond à partir des mesures d’un échantillon.",
+    "simulator": "Voyez comment les choix de caisse et de tables changent la réponse de la guitare."
+  },
+  "you": {
+    "title": "Vous",
+    "preferences": "Préférences",
+    "language": "Langue",
+    "theme": "Thème",
+    "administration": "Administration"
   },
   "shell": {
     "signedInAs": "Connecté en tant que",
     "signOut": "Déconnexion",
     "signOutFailed": "Échec de la déconnexion",
-    "openMenu": "Ouvrir le menu",
-    "closeMenu": "Fermer le menu",
-    "menuTitle": "Menu",
-    "preferences": "Préférences",
     "skipToContent": "Aller au contenu"
   },
   "theme": {
@@ -132,16 +135,22 @@
     },
     "detail": {
       "loading": "Chargement de la fabrication...",
-      "back": "Retour aux fabrications",
       "share": "Partager",
       "delete": "Supprimer la fabrication",
       "created": "Créée le {date}",
       "typeNotSet": "Type de guitare non défini",
       "boboNeck": "Manche BOBO",
-      "readOnly": "Lecture seule : cette fabrication appartient à un autre utilisateur.",
-      "tabsLabel": "Vues de la fabrication",
-      "tabOverview": "Aperçu",
-      "tabSequence": "Diagramme des étapes"
+      "readOnly": "Lecture seule : cette fabrication appartient à un autre utilisateur."
+    },
+    "actions": {
+      "more": "Plus d’actions",
+      "changeConstruction": "Modifier la construction"
+    },
+    "views": {
+      "label": "Vues de la fabrication",
+      "steps": "Étapes",
+      "map": "Carte",
+      "overview": "Aperçu"
     },
     "summary": {
       "progressLabel": "Avancement de la fabrication",
@@ -172,31 +181,20 @@
     "saveFailed": "Impossible d'enregistrer les modifications"
   },
   "sequence": {
-    "loading": "Chargement du diagramme...",
-    "diagramLabel": "Diagramme des étapes de fabrication",
     "legend": {
       "label": "États des étapes",
       "completed": "Terminée",
       "ready": "Prête",
       "notStarted": "Non commencée"
     },
-    "controls": {
-      "zoomIn": "Zoom avant",
-      "zoomOut": "Zoom arrière",
-      "fitView": "Ajuster à la vue",
-      "label": "Commandes du diagramme"
-    },
     "stepName": "Étape {number} : {label}, {status}",
     "stepNumber": "Étape {number}",
     "completedIcon": "Terminée",
-    "hint": "Cette étape fait partie du processus de fabrication de la guitare. Suivez la séquence pour respecter l'ordre de construction.",
     "notes": "Notes",
     "notesPlaceholder": "Ajoutez des notes sur cette étape...",
     "photos": "Photos",
     "soundAnalysis": "Analyse sonore",
-    "markCompleted": "Marquer comme terminée",
     "markIncomplete": "Marquer comme non terminée",
-    "close": "Fermer",
     "photo": {
       "add": "Ajouter une photo",
       "uploading": "Téléversement...",
@@ -226,7 +224,60 @@
       "role": "{role} {frequency} Hz",
       "addAnalysis": "Ajouter une analyse",
       "defaultDescription": "Analyse de résonance"
+    },
+    "checklist": {
+      "label": "Étapes",
+      "readyNow": "Prêtes maintenant",
+      "groupProgress": "{completed}/{total}"
+    },
+    "map": {
+      "label": "Carte de la fabrication",
+      "parts": "Pièces : dans n’importe quel ordre",
+      "assembly": "Assemblage",
+      "from": "venant de {groups}",
+      "tile": "{name}, {completed} étapes sur {total}, {state}",
+      "loading": "Chargement de la carte..."
+    },
+    "flow": {
+      "progress": "{completed} / {total} terminées",
+      "comesFrom": "Vient de",
+      "leadsTo": "Mène à",
+      "link": "{step} ({group})",
+      "previous": "Partie précédente : {group}",
+      "next": "Partie suivante : {group}",
+      "steps": "Étapes : {group}"
+    },
+    "context": {
+      "after": "Après",
+      "leadsTo": "Mène à",
+      "starting": "Première étape : {group}",
+      "last": "Dernière étape de la fabrication",
+      "inGroup": "{step} ({group})"
+    },
+    "nav": {
+      "previous": "Étape précédente",
+      "next": "Étape suivante",
+      "doneNext": "Terminée, étape suivante",
+      "back": "Étapes",
+      "label": "Navigation entre les étapes"
     }
+  },
+  "groups": {
+    "trussRod": "Tige de réglage",
+    "fretboard": "Touche",
+    "neck": "Manche",
+    "topPanel": "Table d'harmonie",
+    "braces": "Barres et plaque de chevalet",
+    "backPanel": "Fond",
+    "sides": "Éclisses et bordures",
+    "endBlocks": "Tasseaux et contre-éclisses",
+    "bridge": "Chevalet",
+    "nutSaddle": "Sillets de tête et de chevalet",
+    "neckAssembly": "Assemblage du manche",
+    "bodyFinish": "Finition de la caisse",
+    "heelAssembly": "Assemblage du talon",
+    "bodyAssembly": "Assemblage de la caisse",
+    "finalAssembly": "Assemblage final"
   },
   "steps": {
     "TrussRod": "Tige de réglage",

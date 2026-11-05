@@ -1,22 +1,103 @@
 import { describe, expect, it } from "vitest";
-import { classifyPath, isActive, safeNextPath, sectionsFor, signInUrl } from "./routes";
+import {
+  activeEntry,
+  activeTab,
+  adminEntriesFor,
+  classifyPath,
+  destinations,
+  isActive,
+  parentOf,
+  safeNextPath,
+  signInUrl,
+} from "./routes";
 
-describe("sectionsFor", () => {
-  it("lists the four regular sections for users and while the role is unknown", () => {
-    const ids = ["builds", "chat", "simulator", "woodProperties"];
-    expect(sectionsFor("user").map((s) => s.id)).toEqual(ids);
-    expect(sectionsFor(null).map((s) => s.id)).toEqual(ids);
+describe("destinations", () => {
+  it("are Builds, Tools, Assistant and You, in that order, with their URLs", () => {
+    expect(destinations.map((d) => [d.id, d.href])).toEqual([
+      ["builds", "/builds"],
+      ["tools", "/tools"],
+      ["assistant", "/chat"],
+      ["you", "/you"],
+    ]);
   });
 
-  it("adds References and Admin, in that order, for administrators", () => {
-    expect(sectionsFor("admin").map((s) => s.href)).toEqual([
-      "/builds",
-      "/chat",
-      "/simulator",
-      "/wood-properties",
-      "/references",
-      "/admin",
+  it("put Wood panels then Simulator under Tools, and nothing under the others", () => {
+    expect(destinations.map((d) => d.sections.map((s) => [s.id, s.href]))).toEqual([
+      [],
+      [
+        ["woodPanels", "/wood-properties"],
+        ["simulator", "/simulator"],
+      ],
+      [],
+      [],
     ]);
+  });
+});
+
+describe("parentOf", () => {
+  it("gives Tools for the tools' sections", () => {
+    expect(parentOf("woodPanels")?.id).toBe("tools");
+    expect(parentOf("simulator")?.id).toBe("tools");
+  });
+
+  it("gives nothing for destinations and admin entries", () => {
+    expect(parentOf("tools")).toBeUndefined();
+    expect(parentOf("assistant")).toBeUndefined();
+    expect(parentOf("admin")).toBeUndefined();
+  });
+});
+
+describe("adminEntriesFor", () => {
+  it("gives administrators References then Admin", () => {
+    expect(adminEntriesFor("admin").map((e) => [e.id, e.href])).toEqual([
+      ["references", "/references"],
+      ["admin", "/admin"],
+    ]);
+  });
+
+  it("gives users, and visitors whose role is not known yet, nothing", () => {
+    expect(adminEntriesFor("user")).toEqual([]);
+    expect(adminEntriesFor(null)).toEqual([]);
+  });
+});
+
+describe("activeTab", () => {
+  it.each([
+    ["/builds", "builds"],
+    ["/builds/7f3c-example/steps/TopPanel", "builds"],
+    ["/tools", "tools"],
+    ["/wood-properties", "tools"],
+    ["/simulator", "tools"],
+    ["/chat", "assistant"],
+    ["/you", "you"],
+  ])("%s makes %s the active tab", (path, tab) => {
+    expect(activeTab(path)).toBe(tab);
+  });
+
+  it.each(["/references", "/admin", "/builds-archive", "/toolshed"])(
+    "%s activates no tab",
+    (path) => {
+      expect(activeTab(path)).toBeNull();
+    },
+  );
+});
+
+describe("activeEntry", () => {
+  it.each([
+    ["/builds/7f3c-example/steps/TopPanel", "builds"],
+    ["/tools", "tools"],
+    ["/wood-properties", "woodPanels"],
+    ["/simulator/run", "simulator"],
+    ["/chat", "assistant"],
+    ["/you", "you"],
+    ["/references", "references"],
+    ["/admin", "admin"],
+  ])("%s makes %s the active sidebar entry", (path, entry) => {
+    expect(activeEntry(path)).toBe(entry);
+  });
+
+  it("is null outside every entry", () => {
+    expect(activeEntry("/story/abc")).toBeNull();
   });
 });
 
@@ -35,6 +116,14 @@ describe("classifyPath", () => {
     ["/builds", "section"],
     ["/builds/", "section"],
     ["/builds/7f3c-example", "section"],
+    ["/builds/7f3c-example/map", "section"],
+    ["/builds/7f3c-example/map/truss-rod", "section"],
+    ["/builds/7f3c-example/overview", "section"],
+    ["/builds/7f3c-example/steps/TopPanel", "section"],
+    ["/builds/7f3c-example/steps/CLGlueBOBO1/", "section"],
+    ["/tools", "section"],
+    ["/tools//", "section"],
+    ["/you", "section"],
     ["/chat", "section"],
     ["/simulator", "section"],
     ["/wood-properties", "section"],
@@ -45,6 +134,19 @@ describe("classifyPath", () => {
     ["/auth/confirm", "authCallback"],
     ["/does-not-exist", "unknown"],
     ["/builds/a/b", "unknown"],
+    ["/builds/x/extra", "unknown"],
+    ["/builds/x/steps", "unknown"],
+    ["/builds/x/steps/a b", "unknown"],
+    ["/builds/x/steps/Top-Panel", "unknown"],
+    ["/builds/x/steps/A/B", "unknown"],
+    ["/builds/x/map/UPPER", "unknown"],
+    ["/builds/x/map/truss_rod", "unknown"],
+    ["/builds/x/map/a/b", "unknown"],
+    ["/builds/x/overview/more", "unknown"],
+    ["/x/builds", "unknown"],
+    ["/x/story/abc", "unknown"],
+    ["/tools/wood", "unknown"],
+    ["/you/settings", "unknown"],
     ["/admin/users", "unknown"],
     ["/story", "unknown"],
     ["/story/a/b", "unknown"],
@@ -58,6 +160,10 @@ describe("safeNextPath", () => {
     expect(safeNextPath("/chat")).toBe("/chat");
     expect(safeNextPath("/references?doc=12")).toBe("/references?doc=12");
     expect(safeNextPath("/builds/7f3c")).toBe("/builds/7f3c");
+    expect(safeNextPath("/builds/x/steps/TopPanel")).toBe("/builds/x/steps/TopPanel");
+    expect(safeNextPath("/builds/x/map/top-panel?from=map")).toBe(
+      "/builds/x/map/top-panel?from=map",
+    );
   });
 
   it.each([

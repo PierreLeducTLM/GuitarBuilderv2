@@ -1,38 +1,41 @@
 {
   "app": {
     "title": "Guitar Builder",
-    "subtitle": "Track and analyze your guitar building projects",
     "documentTitle": "Guitar Build Tracking App",
     "description": "Build, measure and voice your instruments.",
     "loading": "Loading...",
     "homeLink": "Guitar Builder, go to Builds"
   },
   "nav": {
-    "label": "Sections",
+    "label": "Navigation",
     "builds": "Builds",
-    "chat": "Chat",
     "simulator": "Simulator",
-    "woodProperties": "Wood Props",
     "references": "References",
     "admin": "Admin",
-    "short": {
-      "builds": "Builds",
-      "chat": "Chat",
-      "simulator": "Simulator",
-      "woodProperties": "Wood",
-      "references": "Refs",
-      "admin": "Admin"
-    },
-    "adminOnly": "Administrators only"
+    "adminOnly": "Administrators only",
+    "tools": "Tools",
+    "assistant": "Assistant",
+    "you": "You",
+    "woodPanels": "Wood panels",
+    "recentBuilds": "Recent builds",
+    "account": "Account"
+  },
+  "tools": {
+    "title": "Tools",
+    "woodPanels": "Density, stiffness and target thickness of a top or back from sample measurements.",
+    "simulator": "See how body and plate choices change the guitar’s response."
+  },
+  "you": {
+    "title": "You",
+    "preferences": "Preferences",
+    "language": "Language",
+    "theme": "Theme",
+    "administration": "Administration"
   },
   "shell": {
     "signedInAs": "Signed in as",
     "signOut": "Sign Out",
     "signOutFailed": "Failed to sign out",
-    "openMenu": "Open menu",
-    "closeMenu": "Close menu",
-    "menuTitle": "Menu",
-    "preferences": "Preferences",
     "skipToContent": "Skip to content"
   },
   "theme": {
@@ -132,16 +135,22 @@
     },
     "detail": {
       "loading": "Loading build...",
-      "back": "Back to Builds",
       "share": "Share",
       "delete": "Delete Build",
       "created": "Created {date}",
       "typeNotSet": "Guitar type not set",
       "boboNeck": "BOBO neck",
-      "readOnly": "Read-only: this build belongs to another user.",
-      "tabsLabel": "Build views",
-      "tabOverview": "Overview",
-      "tabSequence": "Sequence Diagram"
+      "readOnly": "Read-only: this build belongs to another user."
+    },
+    "actions": {
+      "more": "More actions",
+      "changeConstruction": "Change construction"
+    },
+    "views": {
+      "label": "Build views",
+      "steps": "Steps",
+      "map": "Map",
+      "overview": "Overview"
     },
     "summary": {
       "progressLabel": "Build progress",
@@ -172,31 +181,20 @@
     "saveFailed": "Failed to save changes"
   },
   "sequence": {
-    "loading": "Loading diagram...",
-    "diagramLabel": "Build sequence diagram",
     "legend": {
       "label": "Step states",
       "completed": "Completed",
       "ready": "Ready",
       "notStarted": "Not started"
     },
-    "controls": {
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out",
-      "fitView": "Fit view",
-      "label": "Diagram controls"
-    },
     "stepName": "Step {number}: {label}, {status}",
     "stepNumber": "Step {number}",
     "completedIcon": "Completed",
-    "hint": "This step is part of the guitar building process. Follow the sequence to ensure proper construction order.",
     "notes": "Notes",
     "notesPlaceholder": "Add notes about this step...",
     "photos": "Photos",
     "soundAnalysis": "Sound Analysis",
-    "markCompleted": "Mark as Completed",
     "markIncomplete": "Mark as Incomplete",
-    "close": "Close",
     "photo": {
       "add": "Add Photo",
       "uploading": "Uploading...",
@@ -226,7 +224,60 @@
       "role": "{role} {frequency} Hz",
       "addAnalysis": "Add Analysis",
       "defaultDescription": "Resonance Analysis"
+    },
+    "checklist": {
+      "label": "Steps",
+      "readyNow": "Ready now",
+      "groupProgress": "{completed}/{total}"
+    },
+    "map": {
+      "label": "Build map",
+      "parts": "Parts: start in any order",
+      "assembly": "Assembly",
+      "from": "from {groups}",
+      "tile": "{name}, {completed} of {total} steps, {state}",
+      "loading": "Loading map..."
+    },
+    "flow": {
+      "progress": "{completed} / {total} done",
+      "comesFrom": "Comes from",
+      "leadsTo": "Leads to",
+      "link": "{step} ({group})",
+      "previous": "Previous part: {group}",
+      "next": "Next part: {group}",
+      "steps": "Steps of {group}"
+    },
+    "context": {
+      "after": "After",
+      "leadsTo": "Leads to",
+      "starting": "Starting step of {group}",
+      "last": "Last step of the build",
+      "inGroup": "{step} ({group})"
+    },
+    "nav": {
+      "previous": "Previous step",
+      "next": "Next step",
+      "doneNext": "Done, next step",
+      "back": "Steps",
+      "label": "Step navigation"
     }
+  },
+  "groups": {
+    "trussRod": "Truss rod",
+    "fretboard": "Fretboard",
+    "neck": "Neck",
+    "topPanel": "Top panel",
+    "braces": "Braces and bridge plate",
+    "backPanel": "Back panel",
+    "sides": "Sides and bindings",
+    "endBlocks": "End blocks and linings",
+    "bridge": "Bridge",
+    "nutSaddle": "Nut and saddle",
+    "neckAssembly": "Neck assembly",
+    "bodyFinish": "Body finish setup",
+    "heelAssembly": "Heel assembly",
+    "bodyAssembly": "Body assembly",
+    "finalAssembly": "Final assembly"
   },
   "steps": {
     "TrussRod": "Truss rod",

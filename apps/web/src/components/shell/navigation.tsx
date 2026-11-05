@@ -1,20 +1,24 @@
 import {
   AudioWaveform,
   BookOpen,
+  CircleUser,
   Guitar,
   type LucideIcon,
   MessagesSquare,
   ShieldCheck,
   Trees,
+  Wrench,
 } from "lucide-react";
-import type { SectionId } from "@/lib/routes";
+import type { EntryId } from "@/lib/routes";
 
-/** Icon per section (app-shell: Navigation Entry Presentation). */
-export const sectionIcons: Record<SectionId, LucideIcon> = {
+/** Icon per navigation entry (app-shell: Navigation Entry Presentation). */
+export const entryIcons: Record<EntryId, LucideIcon> = {
   builds: Guitar,
-  chat: MessagesSquare,
+  tools: Wrench,
+  woodPanels: Trees,
   simulator: AudioWaveform,
-  woodProperties: Trees,
+  assistant: MessagesSquare,
+  you: CircleUser,
   references: BookOpen,
   admin: ShieldCheck,
 };

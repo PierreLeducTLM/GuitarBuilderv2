@@ -8,6 +8,12 @@ export interface BuildSummary {
   createdAt: string;
 }
 
+/** A build listed in the sidebar (app-shell: Desktop Sidebar, recent builds). */
+export interface RecentBuild {
+  id: string;
+  name: string;
+}
+
 /** What the detail page needs about one build. */
 export interface BuildDetailData extends BuildSummary {
   ownerId: string;

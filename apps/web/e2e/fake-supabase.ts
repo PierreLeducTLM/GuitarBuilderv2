@@ -6,7 +6,7 @@
  * Auth:    POST /auth/v1/token?grant_type=password|refresh_token, POST /auth/v1/signup,
  *          GET /auth/v1/user, POST /auth/v1/logout
  * REST:    GET /rest/v1/profiles?id=eq.<uuid>
- *          GET|POST|PATCH|DELETE /rest/v1/builds (the select, eq, order and
+ *          GET|POST|PATCH|DELETE /rest/v1/builds (the select, eq, order, limit and
  *          object-response forms the app sends)
  *          POST /rest/v1/rpc/update_build_step, POST /rest/v1/rpc/build_photo_paths
  *          GET|POST|PATCH|DELETE /rest/v1/wood_panels, GET /rest/v1/default_wood_panels,
@@ -738,7 +738,9 @@ async function handleBuilds(request: IncomingMessage, response: ServerResponse, 
       if (config.failBuildList && params.has("order")) {
         return restError(response, 500, "XX000", "fake-supabase: list failure");
       }
-      const rows = sortRows(filterRows(readableBuilds(viewer), params), params);
+      const sorted = sortRows(filterRows(readableBuilds(viewer), params), params);
+      const limit = params.get("limit");
+      const rows = limit === null ? sorted : sorted.slice(0, Number(limit));
       return sendRows(
         request,
         response,
@@ -933,7 +935,7 @@ const server = createServer(async (request, response) => {
           sequence_state: (input.sequence_state ?? []) as Build["sequence_state"],
           share_enabled: false,
           created_at: created,
-          updated_at: created,
+          updated_at: String(input.updated_at ?? created),
         };
         builds.set(build.id, build);
         return send(response, 201, build);
