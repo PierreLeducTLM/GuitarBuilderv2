@@ -28,7 +28,7 @@
   - function settings and grants.
 
   Add a two-session concurrency check in the style of `scripts/test-db/first-admin-race.sh`, and run it from `pnpm test:db`. Verify both pass, and that the concurrency check fails with the lock removed
-- [ ] 2.3 Hand-write the two tables, the function and `WoodPanelSpectra` in `packages/db/src/database.types.ts`. Verify `pnpm --filter @gb/db test` and `pnpm typecheck` pass
+- [x] 2.3 Hand-write the two tables, the function and `WoodPanelSpectra` in `packages/db/src/database.types.ts`. Verify `pnpm --filter @gb/db test` and `pnpm typecheck` pass
 
 ## 3. Calculator logic (`apps/web/src/lib/wood/`)
 

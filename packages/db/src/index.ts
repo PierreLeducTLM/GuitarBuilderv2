@@ -21,6 +21,11 @@ export {
   stepPhotoPath,
   toGuitarType,
 } from "./steps.ts";
+export {
+  WOOD_SPECTRUM_KEYS,
+  type WoodPanelSpectra,
+  type WoodSpectrumKey,
+} from "./wood.ts";
 
 /** The two roles of user-auth. A missing or unreadable profile counts as `user`. */
 export const appRoles = ["user", "admin"] as const;

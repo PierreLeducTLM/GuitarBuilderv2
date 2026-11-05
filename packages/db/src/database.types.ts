@@ -43,6 +43,143 @@ export type Database = {
         };
         Relationships: [];
       };
+      default_wood_panels: {
+        Row: {
+          created_at: string;
+          e_cross_gpa: number | null;
+          e_long_gpa: number | null;
+          estimated_mass_g: number | null;
+          freq_cross_grain_hz: number;
+          freq_diagonal_hz: number;
+          freq_longitudinal_hz: number;
+          g_lc_gpa: number | null;
+          id: string;
+          name: string;
+          plate_length_mm: number;
+          plate_width_mm: number;
+          sample_length_mm: number;
+          sample_mass_g: number;
+          sample_thickness_mm: number;
+          sample_width_mm: number;
+          stiffness_parameter: number;
+          target_thickness_mm: number | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          e_cross_gpa?: number | null;
+          e_long_gpa?: number | null;
+          estimated_mass_g?: number | null;
+          freq_cross_grain_hz: number;
+          freq_diagonal_hz: number;
+          freq_longitudinal_hz: number;
+          g_lc_gpa?: number | null;
+          id?: string;
+          name: string;
+          plate_length_mm: number;
+          plate_width_mm: number;
+          sample_length_mm: number;
+          sample_mass_g: number;
+          sample_thickness_mm: number;
+          sample_width_mm: number;
+          stiffness_parameter?: number;
+          target_thickness_mm?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          e_cross_gpa?: number | null;
+          e_long_gpa?: number | null;
+          estimated_mass_g?: number | null;
+          freq_cross_grain_hz?: number;
+          freq_diagonal_hz?: number;
+          freq_longitudinal_hz?: number;
+          g_lc_gpa?: number | null;
+          id?: string;
+          name?: string;
+          plate_length_mm?: number;
+          plate_width_mm?: number;
+          sample_length_mm?: number;
+          sample_mass_g?: number;
+          sample_thickness_mm?: number;
+          sample_width_mm?: number;
+          stiffness_parameter?: number;
+          target_thickness_mm?: number | null;
+        };
+        Relationships: [];
+      };
+      wood_panels: {
+        Row: {
+          created_at: string;
+          e_cross_gpa: number | null;
+          e_long_gpa: number | null;
+          estimated_mass_g: number | null;
+          freq_cross_grain_hz: number;
+          freq_diagonal_hz: number;
+          freq_longitudinal_hz: number;
+          g_lc_gpa: number | null;
+          id: string;
+          name: string;
+          owner_id: string;
+          plate_length_mm: number;
+          plate_width_mm: number;
+          sample_length_mm: number;
+          sample_mass_g: number;
+          sample_thickness_mm: number;
+          sample_width_mm: number;
+          spectra: NonNullable<Json>;
+          stiffness_parameter: number;
+          target_thickness_mm: number | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          e_cross_gpa?: number | null;
+          e_long_gpa?: number | null;
+          estimated_mass_g?: number | null;
+          freq_cross_grain_hz: number;
+          freq_diagonal_hz: number;
+          freq_longitudinal_hz: number;
+          g_lc_gpa?: number | null;
+          id?: string;
+          name: string;
+          owner_id?: string;
+          plate_length_mm: number;
+          plate_width_mm: number;
+          sample_length_mm: number;
+          sample_mass_g: number;
+          sample_thickness_mm: number;
+          sample_width_mm: number;
+          spectra?: Json;
+          stiffness_parameter?: number;
+          target_thickness_mm?: number | null;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          e_cross_gpa?: number | null;
+          e_long_gpa?: number | null;
+          estimated_mass_g?: number | null;
+          freq_cross_grain_hz?: number;
+          freq_diagonal_hz?: number;
+          freq_longitudinal_hz?: number;
+          g_lc_gpa?: number | null;
+          id?: string;
+          name?: string;
+          owner_id?: string;
+          plate_length_mm?: number;
+          plate_width_mm?: number;
+          sample_length_mm?: number;
+          sample_mass_g?: number;
+          sample_thickness_mm?: number;
+          sample_width_mm?: number;
+          spectra?: Json;
+          stiffness_parameter?: number;
+          target_thickness_mm?: number | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           created_at: string;
@@ -108,11 +245,59 @@ export type Database = {
       build_photo_paths: { Args: { p_build_id: string }; Returns: string[] };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_own_step_photo_path: { Args: { p_name: string }; Returns: boolean };
+      load_default_wood_panels: { Args: Record<PropertyKey, never>; Returns: number | null };
       measurement_roles_are_valid: { Args: { p_roles: Json }; Returns: boolean };
       spectrum_record_is_valid: { Args: { p_record: Json }; Returns: boolean };
       update_build_step: {
         Args: { p_build_id: string; p_change: Json; p_step_key: string };
         Returns: Json;
+      };
+      wood_density_kg_m3: {
+        Args: { h: number; l: number; m: number; w: number };
+        Returns: number;
+      };
+      wood_e_cross_gpa: {
+        Args: { fc: number; h: number; l: number; m: number; w: number };
+        Returns: number;
+      };
+      wood_e_long_gpa: {
+        Args: { fl: number; h: number; l: number; m: number; w: number };
+        Returns: number;
+      };
+      wood_estimated_mass_g: {
+        Args: {
+          a: number;
+          b: number;
+          f: number;
+          fc: number;
+          fd: number;
+          fl: number;
+          h: number;
+          l: number;
+          m: number;
+          w: number;
+        };
+        Returns: number;
+      };
+      wood_g_lc_gpa: {
+        Args: { fd: number; h: number; l: number; m: number; w: number };
+        Returns: number;
+      };
+      wood_panel_spectra_is_valid: { Args: { p_spectra: Json }; Returns: boolean };
+      wood_target_thickness_mm: {
+        Args: {
+          a: number;
+          b: number;
+          f: number;
+          fc: number;
+          fd: number;
+          fl: number;
+          h: number;
+          l: number;
+          m: number;
+          w: number;
+        };
+        Returns: number;
       };
     };
     Enums: {
