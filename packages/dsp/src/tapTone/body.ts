@@ -7,7 +7,7 @@ import {
   BODY_BAND_HZ,
   BODY_LOCAL_MAX_POINTS,
   BODY_PROMINENCE_DB,
-  BODY_PROMINENCE_POINTS,
+  BODY_PROMINENCE_HZ,
   BODY_RANGE_DB,
   BODY_SPLIT_HZ,
   ROLE_REATTACH_HZ,
@@ -41,10 +41,16 @@ const isLocalMaximum = (points: readonly SpectrumPoint[], i: number) =>
 
 const isProminent = (points: readonly SpectrumPoint[], i: number) => {
   const here = levelAt(points, i);
+  const centre = points[i]?.frequency ?? 0;
   const lowest = (direction: 1 | -1) =>
     Math.min(
       here,
-      ...offsets(BODY_PROMINENCE_POINTS).map((j) => levelAt(points, i + direction * j)),
+      ...points
+        .filter((p) => {
+          const offset = direction * (p.frequency - centre);
+          return offset > 0 && offset <= BODY_PROMINENCE_HZ;
+        })
+        .map((p) => p.db),
     );
   return here - Math.max(lowest(-1), lowest(1)) >= BODY_PROMINENCE_DB;
 };
