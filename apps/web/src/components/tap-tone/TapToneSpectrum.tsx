@@ -8,6 +8,7 @@ import {
   GRAPH,
   levelY,
   nearestPeakIndex,
+  onAxis,
   snapTargetIndex,
   tracePath,
   xOfFrequency,
@@ -138,6 +139,7 @@ export function TapToneSpectrum({
         strokeLinejoin="round"
       />
       {peaks.map((peak, i) => {
+        if (!onAxis(peak.frequency)) return null;
         const state = i === selected ? "selected" : i === 0 ? "strongest" : "other";
         const x = xOfFrequency(peak.frequency);
         const y = levelY(peak.level);

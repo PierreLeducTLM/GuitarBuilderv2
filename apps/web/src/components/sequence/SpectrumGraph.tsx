@@ -30,8 +30,8 @@ export interface SpectrumGraphProps {
 }
 
 /**
- * build-sequence: Spectrum Graph. Linear 20-2000 Hz across, -100 to 0 dB up, labelled
- * grid lines every 20 dB and at 100, 250, 500, 750, 1000, 1500 and 2000 Hz, and a dashed
+ * build-sequence: Spectrum Graph. Linear 20-600 Hz across, -100 to 0 dB up, labelled
+ * grid lines every 20 dB and at 50, 100, 200, 300, 400, 500 and 600 Hz, and a dashed
  * marker at the peak.
  */
 export function SpectrumGraph({ spectrum, peak, label }: SpectrumGraphProps) {
@@ -44,6 +44,7 @@ export function SpectrumGraph({ spectrum, peak, label }: SpectrumGraphProps) {
     .join(" ");
   const peakVisible = peak >= SPECTRUM_MIN_HZ && peak <= SPECTRUM_MAX_HZ;
   const peakX = px(spectrumX(peak));
+  const peakNearRightEdge = spectrumX(peak) > 0.85;
 
   return (
     <svg
@@ -123,8 +124,8 @@ export function SpectrumGraph({ spectrum, peak, label }: SpectrumGraphProps) {
             y={TOP + 12}
             className="fill-teal-ink font-mono font-bold"
             fontSize={11}
-            textAnchor={peak > 1700 ? "end" : "start"}
-            dx={peak > 1700 ? -10 : 0}
+            textAnchor={peakNearRightEdge ? "end" : "start"}
+            dx={peakNearRightEdge ? -10 : 0}
           >
             {t("peakMarker", { frequency: format.number(peak, "decimal1") })}
           </text>

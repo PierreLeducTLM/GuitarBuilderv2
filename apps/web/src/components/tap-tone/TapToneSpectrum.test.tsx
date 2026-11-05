@@ -48,23 +48,11 @@ const at = (frequency: number) => ({ clientX: xOfFrequency(frequency), clientY: 
 afterEach(() => vi.restoreAllMocks());
 
 describe("TapToneSpectrum", () => {
-  it("labels its grid at 50-1000 Hz and every 20 dB from 0 to -100", () => {
+  it("labels its grid at 50-600 Hz and every 20 dB from 0 to -100", () => {
     const { svg } = renderSpectrum();
     const labels = (kind: string) =>
       [...svg.querySelectorAll(`[data-grid=${kind}]`)].map((l) => l.textContent);
-    expect(labels("hz")).toEqual([
-      "50",
-      "100",
-      "200",
-      "300",
-      "400",
-      "500",
-      "600",
-      "700",
-      "800",
-      "900",
-      "1000",
-    ]);
+    expect(labels("hz")).toEqual(["50", "100", "200", "300", "400", "500", "600"]);
     expect(labels("db")).toEqual(["0", "-20", "-40", "-60", "-80", "-100"]);
   });
 
@@ -79,6 +67,13 @@ describe("TapToneSpectrum", () => {
     ]);
     expect(markers[1]?.querySelector("line")?.getAttribute("stroke-dasharray")).toBeNull();
     expect(markers[2]?.querySelector("line")?.getAttribute("stroke-dasharray")).toBeTruthy();
+  });
+
+  it("leaves off the graph the peaks beyond its frequency axis", () => {
+    const { svg } = renderSpectrum({ peaks: [peak(720.4, -10), peak(181.8, -20)] });
+    expect([...svg.querySelectorAll("[data-peak]")].map((m) => m.textContent)).toEqual([
+      "181.8 Hz",
+    ]);
   });
 
   it("names the peaks for screen readers", () => {
