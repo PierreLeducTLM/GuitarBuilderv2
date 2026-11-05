@@ -79,7 +79,7 @@ The owner chose **Oscilloscope**, a dark instrument panel, from the three concep
 
 The tokens are recorded in `openspec/config.yaml`. The owner also accepted three ideas from the concepts, now specified:
 - a **Ready** step state (`build-sequence`);
-- **step numbers** on the diagram (`build-sequence`);
+- **step numbers** on the diagram, now on the part flows and the checklist (`build-sequence`);
 - a **summary strip** with progress, the latest measurement and "Next up" (`guitar-builds`).
 
 ## Places where the specs intentionally differ from the legacy app
@@ -266,6 +266,24 @@ Please review these, because they are content choices rather than code facts:
   Check step 6 in particular: head and tail blocks are often glued before the linings.
 - **Hidden-step bridging.** A bridging arrow is now left out when its target is already reachable through other arrows, so hiding steps doesn't add redundant shortcuts.
 - **French step labels.** All 132 labels use standard French lutherie terms ("table d'harmonie", "éclisses", "contre-éclisses", "tasseau supérieur", "sillet de tête", "chevalet"). The codes CL, SS and BOBO are kept as is. A francophone luthier should review the wording, especially where France and Québec usage differ.
+
+### Fourth round: redesign (2026-11-04)
+
+After using the rebuilt app, the owner found it confusing and the phone version hard to use, mainly the navigation and the 114-step diagram. The review and its mockups are at https://claude.ai/artifact/5cRorCUw4m8J1Sakfhy96F; the first two slices are the change `openspec/changes/workbench-shell-and-steps`.
+
+| Question | Decision | Specs changed |
+|---|---|---|
+| How is the phone used? | Propped on the bench during work, so the step screen and its bottom "Done, next step" come first. | `build-sequence` |
+| How many places in the navigation? | Four: Builds, Tools (Wood panels, Simulator), Assistant and You. One navigation per screen size: a sidebar from 1024 px, a bottom tab bar below; the slide-out menu and the header are gone. Language, theme, sign-out and the admin entries live on the You page. | `app-shell` |
+| What happens to the sequence diagram? | It is split, on phones and desktops: a build map of the 15 groups, and one part flow per group, top to bottom, at most three steps wide. The pan-and-zoom canvas, its zoom range and its saved viewport are removed. | `build-sequence` |
+| How does a step open? | On its own screen with its own URL, showing what it comes after and leads to; Previous, Next and "Done, next step" move through the steps; marking a step done no longer closes anything. | `build-sequence`, `guitar-builds` |
+| How is a build page organised? | Steps (the default), Map and Overview views, each with its own URL; Share, Change construction and Delete Build in a "More actions" menu. | `guitar-builds` |
+| Dark by default? | No change: the theme follows the device; the light theme is to be tuned as the daytime workshop look. | none |
+
+Please review these, because they are content choices rather than code facts:
+- **Group names in French**, now visible for the first time: "Tige de réglage", "Touche", "Manche", "Table d'harmonie", "Barres et plaque de chevalet", "Fond", "Éclisses et bordures", "Tasseaux et contre-éclisses", "Chevalet", "Sillets de tête et de chevalet", "Assemblage du manche", "Finition de la caisse", "Assemblage du talon", "Assemblage de la caisse", "Assemblage final".
+- **"You" is "Vous"** in French, as in YouTube's French interface.
+- **Sections that start unfolded.** The Steps checklist unfolds every group holding a ready step; on a new build that is all ten parts, which makes the checklist long on a phone.
 
 ## Still open
 

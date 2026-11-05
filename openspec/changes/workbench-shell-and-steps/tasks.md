@@ -122,4 +122,4 @@ Every task is test-first: write the failing unit, component or Playwright test n
 - [x] 9.1 Rewrite `e2e/builds.spec.ts` and `e2e/sequence.spec.ts` for the views, part flows and step screens. Port each existing test (completion, notes autosave, photos, measurements, variant change, deletion, administrator read-only, deep links), and add a French run of the Steps view, the map and a step screen. Verify `pnpm test:e2e` passes
 - [ ] 9.2 Run `pnpm check`, `pnpm build`, `pnpm test:e2e` and `openspec validate workbench-shell-and-steps --strict` from a clean install. Verify all pass
 - [x] 9.3 Check both themes on the new screens (tab bar, sidebar, You, Tools, checklist, map, part flow, step screen) at 390 px and 1280 px. Verify that every text and background pair used is in `contrastPairs` and that the contrast test passes
-- [ ] 9.4 Update `README.md` (navigation and URLs) and `docs/rewrite/README.md` (what the redesign changed and why, linking the proposal page). Verify that the links resolve
+- [x] 9.4 Update `README.md` (navigation and URLs) and `docs/rewrite/README.md` (what the redesign changed and why, linking the proposal page). Verify that the links resolve

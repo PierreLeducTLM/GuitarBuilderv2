@@ -14,7 +14,7 @@ This repository is a rewrite of [the original app](https://github.com/PierreLedu
 | Path | What it holds |
 |---|---|
 | `openspec/specs/` | The behavior of every capability, in [OpenSpec](https://github.com/Fission-AI/OpenSpec) format. This is the source of truth. |
-| `apps/web/` | The Next.js app (App Router): shell, sign-in, builds and the build sequence; other sections are placeholders |
+| `apps/web/` | The Next.js app (App Router): shell, sign-in, builds, the build sequence and the wood panel calculator; the assistant and simulator are placeholders |
 | `packages/ui/` | Oscilloscope design tokens (`src/tokens/themes.ts`), Tailwind theme and components |
 | `packages/db/` | Database types for the Supabase schema |
 | `packages/dsp/` | Signal processing shared by the acoustic features (pure TypeScript) |
@@ -88,9 +88,22 @@ Photos attached to build steps live in the public Storage bucket `step-photos`, 
 
 The app sets no size limit of its own, but the project-wide upload limit in Supabase (Storage settings, 50 MB by default) still applies; a larger file fails like any other upload. Deleting a build removes its photo files first.
 
+## Navigation and URLs
+
+The app has four destinations (`app-shell`). On screens 1024 px wide or more a sidebar holds them, the five most recently changed builds and, for administrators, References and Admin; narrower screens have a four-item bottom tab bar instead. Each page draws its own page bar; there is no global header.
+
+| Destination | URLs |
+|---|---|
+| Builds | `/builds`; a build's Steps view `/builds/<id>`, Map `/builds/<id>/map`, a part flow `/builds/<id>/map/<group>`, Overview `/builds/<id>/overview` and a step screen `/builds/<id>/steps/<step key>` |
+| Tools | `/tools`, listing Wood panels (`/wood-properties`) and Simulator (`/simulator`) |
+| Assistant | `/chat` |
+| You | `/you`: account, language, theme, the admin entries for administrators, and Sign Out |
+
+A build's process is shown three ways (`build-sequence`): the Steps checklist (what is ready now, then the 15 template groups), the build map (the 15 groups as tiles, showing which feed which), and one part flow per group, drawn top to bottom. A step opens on its own screen, full screen on a phone and beside the checklist on a desktop, with Previous, Next and "Done, next step". The proxy (`apps/web/src/proxy.ts`) only lets these URL shapes through; the build pages check step and group keys against the template and the build's variant.
+
 ## Wood panels
 
-"Wood Props" (`/wood-properties`) is the tonewood calculator: the ten sample and plate inputs, the results computed as you type (`woodProperties` in `@gb/dsp`), "Measure plate" with the tap-tone reader in Plate mode, the user's saved panels and a PDF report of the loaded panel. Panels live in `public.wood_panels` (migration `supabase/migrations/20261104130000_wood_panels.sql`). The database computes each panel's results snapshot itself, in generated columns, from the same formulas.
+"Wood panels" (`/wood-properties`, under Tools) is the tonewood calculator: the ten sample and plate inputs, the results computed as you type (`woodProperties` in `@gb/dsp`), "Measure plate" with the tap-tone reader in Plate mode, the user's saved panels and a PDF report of the loaded panel. Panels live in `public.wood_panels` (migration `supabase/migrations/20261104130000_wood_panels.sql`). The database computes each panel's results snapshot itself, in generated columns, from the same formulas.
 
 **Reference panels.** "Load Default Panels" copies the shared reference set (`public.default_wood_panels`) into an empty library, once. Until `admin-console` adds a curation screen, the set is filled in SQL, or by the legacy import (`legacy-data-migration`). In the Supabase SQL editor, which runs as the database owner, or with `psql` on the local stack:
 
