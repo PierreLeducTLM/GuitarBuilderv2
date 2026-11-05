@@ -76,7 +76,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
 ## 6. Build map and part flows
 
-- [ ] 6.1 Build the Map view:
+- [x] 6.1 Build the Map view:
   - Parts and Assembly tiles from `groupGraph`, each with name, count, a state style from the existing ready, completed and idle tokens, and a "from …" line;
   - the three-state legend;
   - "Loading map..." until the step state is ready.
