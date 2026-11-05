@@ -6,10 +6,11 @@ What earlier changes left for this one:
 - `/wood-properties` is a section placeholder behind the shell's sign-in gate;
 - `public.is_admin()` and `public.set_updated_at()` exist;
 - `DialogProvider` (confirm), `useToast` (four kinds, 3 s default) and the shared number and date formats exist;
-- `tap-tone-dialog`, applied first, provides:
-  - `TapToneDialog` (`open`, `label`, `currentValue`, `savedRecord`, `onConfirm(frequency, record)`, `onCancel`);
-  - `public.spectrum_record_is_valid(jsonb)`;
-  - the `SpectrumRecord` type in `@gb/db`.
+- `tap-tone-reader` (archived 2026-11-04) provides:
+  - `TapToneDialog` in Plate mode (`open`, `mode="plate"`, `label`, `currentValues`, `savedRecords`, `onConfirm(PlateConfirm)`, `onCancel`). `PlateConfirm` holds, per measured take, `{ frequency, spectrum, spectralQ, decayQ }`;
+  - `public.spectrum_record_is_valid(jsonb)`: 662-point records at 48 kHz, at most 1024 points and an FFT size of at most 32768;
+  - the `SpectrumRecord` type in `@gb/db`;
+  - the `taps.wav` end-to-end fixture.
 
 The requirements are `openspec/specs/wood-panel-properties/spec.md` with this change's delta; the scope and deferrals are in proposal.md. The legacy audit (`docs/rewrite/legacy-findings/wood-panels-simulator.md`) lists the defects not to repeat:
 - the `L^4/42` cross-grain formula;
@@ -72,7 +73,7 @@ Two checks were run before writing this design:
 **Spectra:**
 - `public.wood_panel_spectra_is_valid(jsonb)` requires an object whose keys are a subset of `longitudinal`, `crossGrain` and `diagonal`, each value passing `spectrum_record_is_valid`.
 - The legacy keys (`freqLongitudinal`, …) are mapped by the import, as Wood Panel Spectrum Migration specifies.
-- Spectra stay in the row, not in a side table. Three records are about 55 KB, and the library query never selects the column.
+- Spectra stay in the row, not in a side table. Three 662-point records are about 100 KB, and the library query never selects the column.
 
 ### 2. Access rules
 
@@ -159,16 +160,28 @@ Buttons are disabled, and guarded by a ref, while their request runs, so a doubl
 
 The entry shows "Currently editing" and the "PDF" action. "Analyse" appears with `knowledge-assistant`. Clicking the loaded entry again deselects and resets.
 
-### 6. Tap-tone fields
+### 6. Plate measurement
 
-Next to each frequency input, an `IconButton` labelled "Detect frequency from recording" opens `TapToneDialog` with:
-- the field's translated label ("Longitudinal Frequency (f_L)" and so on);
-- `currentValue` set to the field's number when it is greater than 0;
-- `savedRecord` set to the field's spectrum, if any.
+Under "Frequency Measurements", a secondary `Button` "Measure plate" opens `TapToneDialog` in Plate mode with:
+- `label` set to the translated "Plate measurement";
+- `currentValues`: each field's number, when it is greater than 0;
+- `savedRecords`: the field spectra, if any.
 
-`onConfirm` writes `round(f, 1)` into the field and stores the record under that field's key. Cancel changes nothing.
+**Confirm.** For each take in the result, the page:
+- writes `round(frequency, 1)` into that field;
+- stores the spectrum under the field's key;
+- remembers `{ spectralQ, decayQ }` for the field.
 
-**Typing a frequency by hand keeps that field's spectrum,** because the spec keeps "the most recently accepted spectrum". Reopening then preselects the peak nearest the typed value, which the dialog's reopen rule already handles. (A legacy finding called this stale; the spec does not.) Reset and deselect discard unsaved spectra, as specified.
+Fields whose take was not measured are untouched, and the results are recalculated once. Cancel changes nothing.
+
+**The Q line.** Under a field with remembered values, the page shows "Spectral Q 64 · Decay Q 72", with "—" for a missing value.
+- The values live in page state only. They are not part of `spectra` and are never sent to the server.
+- They are cleared when that field is typed in, when a panel is loaded, and on reset and deselect (Measured Q Display).
+- A loaded panel shows no Q line: decay Q needs the recording, which is never stored.
+
+**Typing a frequency by hand keeps that field's spectrum,** because the spec keeps "the most recently accepted spectrum". The next plate measurement reopens that take on its spectrum and preselects the peak nearest the typed value, which the reader's reopen rule already handles. (A legacy finding called this stale; the spec does not.) Reset and deselect discard unsaved spectra, as specified.
+
+- Alternative considered: keeping a detect button per field that opens Plate mode on that field's take. Rejected because one session is the point of Plate mode: the user holds and taps the plate three ways in a row and confirms once.
 
 ### 7. PDF report
 
@@ -228,7 +241,7 @@ Every string lives under `wood.*` in `en.json` and `fr.json`:
 - all notifications;
 - the delete dialog;
 - the PDF headings and labels;
-- the three capture labels.
+- the "Measure plate" action and the Q line (the take names and the dialog text come from `tapTone.*`).
 
 The PDF uses the same catalogs. The French scenario strings ("Mesures d'entrée", "Enregistrer le panneau") are used as written.
 
@@ -258,7 +271,9 @@ The PDF uses the same catalogs. The French scenario strings ("Mesures d'entrée"
 - the library load failure;
 - a panel deleted elsewhere;
 - an administrator seeing only their own panels;
-- detecting a frequency through the dialog with the WAV fixture of `tap-tone-dialog` ("181.6" in the field, the spectrum reopening after save and load);
+- measuring the plate with the reader's `taps.wav` fixture:
+  - on the Cross-grain take, "190.0" appears in the field with its Q line;
+  - after save and load, the take reopens on the spectrum without a Q line;
 - the PDF download name and `%PDF` header;
 - French labels.
 
@@ -274,7 +289,7 @@ The PDF uses the same catalogs. The French scenario strings ("Mesures d'entrée"
 ## Migration Plan
 
 **Deploy:**
-- One additive migration, after the `tap-tone-dialog` migration that defines `spectrum_record_is_valid`.
+- One additive migration, after `20261104120000_spectrum_record_checks.sql` (`tap-tone-reader`), which defines `spectrum_record_is_valid`.
 - No environment variables are added.
 - The font files ship with the app build.
 

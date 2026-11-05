@@ -2,7 +2,7 @@
 
 ## Why
 
-"Wood Props" is still a placeholder. The calculator is the tool luthiers use to choose and thickness their tops and backs. `wood-panel-properties` comes right after the tap-tone dialog in the recommended order (`docs/rewrite/README.md`), and that dialog (`tap-tone-dialog`) gives the calculator its three frequency measurements. The legacy calculator also used the wrong cross-grain formula, so every value it showed for E_C, target thickness and mass was off. The rewrite fixes that from the first release.
+"Wood Props" is still a placeholder. The calculator is the tool luthiers use to choose and thickness their tops and backs. `wood-panel-properties` comes right after the tap-tone reader in the recommended order (`docs/rewrite/README.md`). The reader (`tap-tone-reader`, archived on 2026-11-04) gives the calculator its three frequency measurements in one Plate-mode session. The legacy calculator also used the wrong cross-grain formula, so every value it showed for E_C, target thickness and mass was off. The rewrite fixes that from the first release.
 
 ## What Changes
 
@@ -11,7 +11,7 @@
     - `wood_panels`: the user's library;
     - `default_wood_panels`: the shared reference set.
   - The results snapshot (E_L, E_C, G_LC, target thickness, estimated mass) is computed by the database from the stored inputs. Clients cannot write it, so it always matches the inputs.
-  - Inputs must be finite and greater than 0, and names must not be blank. Stored spectra must use the three field keys and pass the shared record check from `tap-tone-dialog`.
+  - Inputs must be finite and greater than 0, and names must not be blank. Stored spectra must use the three field keys and pass the shared record check from `tap-tone-reader`.
   - Row-level security:
     - only the owner writes a panel;
     - an administrator reads any panel but changes none;
@@ -22,7 +22,10 @@
 - **The calculator page `/wood-properties` (`wood-panel-properties`):**
   - the ten inputs with their defaults, validation messages and real-time results;
   - "Reset to defaults";
-  - a detect button on each frequency field, which opens the tap-tone dialog, writes the frequency rounded to one decimal, and keeps the spectrum per field. A field with a stored spectrum reopens on it.
+  - one "Measure plate" action, which opens the reader in Plate mode:
+    - each measured mode's frequency is written to its field, rounded to one decimal, and its spectrum is kept for that field;
+    - its spectral and decay Q are shown under the field but not saved;
+    - a take with a stored spectrum reopens on it.
 - **The library:**
   - newest first, with name, date, target thickness and estimated mass;
   - the empty state with "Load Default Panels";
@@ -32,7 +35,8 @@
   - the "Analyse" action and the PDF's "AI Analysis" section come with `knowledge-assistant`, which owns the grounded answer pipeline. Until then the PDF is produced without that section, as the spec allows when no analysis can be obtained;
   - the admin curation of the reference set (sync, delete) and the prompt template come with `admin-console`;
   - user deletion's cascade to panels comes from the foreign key now, and is exercised by `admin-console`.
-- **Spec additions (`wood-panel-properties`):**
+- **Spec changes (`wood-panel-properties`):**
+  - frequencies come from one Plate-mode measurement instead of three per-field captures, and the measured Q values are shown under each field;
   - what the library shows when panels can't be loaded (a legacy defect showed the empty state and "Load Default Panels" instead);
   - feedback for "Load Default Panels": progress, failure, an empty reference set, and copying once;
   - the server refuses invalid panel data;
@@ -47,7 +51,8 @@ None.
 ### Modified Capabilities
 
 - `wood-panel-properties`:
-  - new requirements "Library Load Failures" and "Load Default Panels Feedback";
+  - "Tap-Tone Capture for Frequency Fields", "Tap-Tone Spectrum Storage" and "Tap-Tone Spectrum Review" move to one Plate-mode measurement;
+  - new requirements "Measured Q Display", "Library Load Failures" and "Load Default Panels Feedback";
   - "Wood Panel Data" gains a server-validation scenario;
   - "PDF Report Download" gains a file-name scenario.
 
@@ -69,7 +74,7 @@ None.
   - math unit tests on the spec examples and the dataset;
   - validation and PDF-content unit tests;
   - the fake Supabase server learns the two tables and the function, for end-to-end tests of the whole calculator.
-- **Depends on `tap-tone-dialog`** for the dialog and `spectrum_record_is_valid`, so it is applied after that change.
+- **Builds on `tap-tone-reader`** (archived): its Plate mode, `spectrum_record_is_valid` and the `taps.wav` end-to-end fixture.
 - **Later changes:**
   - `knowledge-assistant` adds "Analyse" and the AI section;
   - `admin-console` adds the reference-set curation and the template setting;

@@ -9,11 +9,14 @@
  *          GET|POST|PATCH|DELETE /rest/v1/builds (the select, eq, order and
  *          object-response forms the app sends)
  *          POST /rest/v1/rpc/update_build_step, POST /rest/v1/rpc/build_photo_paths
+ *          GET|POST|PATCH|DELETE /rest/v1/wood_panels, GET /rest/v1/default_wood_panels,
+ *          POST /rest/v1/rpc/load_default_wood_panels
  * Storage: POST /storage/v1/object/step-photos/<path> (upload),
  *          DELETE /storage/v1/object/step-photos (remove),
  *          GET|HEAD /storage/v1/object/public/step-photos/<path> (public read)
  * Test control: POST /__test/reset, POST /__test/users, POST /__test/config,
- *          POST /__test/builds, GET /__test/builds, GET /__test/objects
+ *          POST /__test/builds, GET /__test/builds, GET /__test/objects,
+ *          POST /__test/wood_panels, POST /__test/wood_panels/remove, GET /__test/wood_panels, POST /__test/default_wood_panels
  *
  * Builds, steps and photos follow the same rules as the database (owner writes,
  * administrators read, one step change at a time, owner-only photo files), and the
@@ -24,6 +27,7 @@
  */
 import { randomBytes, randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { woodProperties } from "@gb/dsp";
 
 interface User {
   id: string;
@@ -77,6 +81,20 @@ interface Config {
   requireConfirmation: boolean;
   /** Delay before answering sign-in, to observe the pending state. */
   signInDelayMs: number;
+  /** Answer the wood panel library with a server error (Library Load Failures). */
+  failWoodList: boolean;
+  /** Answer loading one wood panel with a server error. */
+  failWoodLoad: boolean;
+  /** Refuse wood panel saves and updates (Save Outcome). */
+  failWoodSave: boolean;
+  /** Delay before answering a wood panel save, to observe "Saving...". */
+  woodSaveDelayMs: number;
+  /** Refuse wood panel deletion (Delete Outcome). */
+  failWoodDelete: boolean;
+  /** Answer "Load Default Panels" with a server error. */
+  failLoadDefaults: boolean;
+  /** Delay before answering "Load Default Panels", to observe "Loading...". */
+  loadDefaultsDelayMs: number;
 }
 
 const users = new Map<string, User>();
@@ -84,6 +102,8 @@ const accessTokens = new Map<string, string>();
 const refreshTokens = new Map<string, string>();
 const builds = new Map<string, Build>();
 const objects = new Map<string, StoredObject>();
+const woodPanels = new Map<string, WoodPanel>();
+const referencePanels = new Map<string, WoodPanel>();
 const defaults: Config = {
   failLogout: false,
   failBuildList: false,
@@ -97,6 +117,13 @@ const defaults: Config = {
   failSignIn: false,
   requireConfirmation: false,
   signInDelayMs: 0,
+  failWoodList: false,
+  failWoodLoad: false,
+  failWoodSave: false,
+  woodSaveDelayMs: 0,
+  failWoodDelete: false,
+  failLoadDefaults: false,
+  loadDefaultsDelayMs: 0,
 };
 let config: Config = { ...defaults };
 
@@ -104,6 +131,8 @@ function reset() {
   users.clear();
   builds.clear();
   objects.clear();
+  woodPanels.clear();
+  referencePanels.clear();
   accessTokens.clear();
   refreshTokens.clear();
   config = { ...defaults };
@@ -437,6 +466,235 @@ function rolesAreValid(roles: unknown): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Wood panels (mirrors supabase/migrations/20261104130000_wood_panels.sql)
+// ---------------------------------------------------------------------------
+
+const WOOD_INPUTS = [
+  "sample_length_mm",
+  "sample_width_mm",
+  "sample_thickness_mm",
+  "sample_mass_g",
+  "freq_longitudinal_hz",
+  "freq_cross_grain_hz",
+  "freq_diagonal_hz",
+  "plate_length_mm",
+  "plate_width_mm",
+  "stiffness_parameter",
+] as const;
+type WoodInput = (typeof WOOD_INPUTS)[number];
+const WOOD_WRITABLE: readonly string[] = ["name", ...WOOD_INPUTS, "spectra"];
+const WOOD_SPECTRUM_KEYS = ["longitudinal", "crossGrain", "diagonal"];
+
+interface WoodPanel extends Record<WoodInput, number> {
+  id: string;
+  owner_id: string | null;
+  name: string;
+  spectra: Record<string, unknown>;
+  e_long_gpa: number;
+  e_cross_gpa: number;
+  g_lc_gpa: number;
+  target_thickness_mm: number;
+  estimated_mass_g: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** The generated results snapshot, computed with the same formulas as the database. */
+function withSnapshot(
+  panel: Omit<
+    WoodPanel,
+    "e_long_gpa" | "e_cross_gpa" | "g_lc_gpa" | "target_thickness_mm" | "estimated_mass_g"
+  >,
+): WoodPanel {
+  const result = woodProperties({
+    lengthMm: panel.sample_length_mm,
+    widthMm: panel.sample_width_mm,
+    thicknessMm: panel.sample_thickness_mm,
+    massG: panel.sample_mass_g,
+    fLongHz: panel.freq_longitudinal_hz,
+    fCrossHz: panel.freq_cross_grain_hz,
+    fDiagHz: panel.freq_diagonal_hz,
+    plateLengthMm: panel.plate_length_mm,
+    plateWidthMm: panel.plate_width_mm,
+    stiffness: panel.stiffness_parameter,
+  });
+  return {
+    ...panel,
+    e_long_gpa: result.eLong,
+    e_cross_gpa: result.eCross,
+    g_lc_gpa: result.gLc,
+    target_thickness_mm: result.targetThickness,
+    estimated_mass_g: result.estimatedMass,
+  };
+}
+
+/** The wood checks of the migration: a non-blank name, finite positive inputs, valid spectra. */
+function woodRefusal(panel: Record<string, unknown>): string | null {
+  if (typeof panel.name !== "string" || !/\S/.test(panel.name)) return "name";
+  for (const column of WOOD_INPUTS) {
+    const value = panel[column];
+    if (typeof value !== "number" || !(value > 0) || !Number.isFinite(value)) return column;
+  }
+  const spectra = panel.spectra;
+  if (!isObject(spectra)) return "spectra";
+  for (const [key, record] of Object.entries(spectra)) {
+    if (!WOOD_SPECTRUM_KEYS.includes(key) || !isObject(record) || !spectrumRecordIsValid(record)) {
+      return "spectra";
+    }
+  }
+  return null;
+}
+
+function eqFilter<T extends object>(rows: T[], params: URLSearchParams): T[] {
+  return [...params].reduce(
+    (result, [column, value]) =>
+      value.startsWith("eq.")
+        ? result.filter(
+            (row) => String((row as Record<string, unknown>)[column]) === value.slice(3),
+          )
+        : result,
+    rows,
+  );
+}
+
+function orderRows<T extends object>(rows: T[], params: URLSearchParams): T[] {
+  const order = params.get("order");
+  if (!order) return rows;
+  const [column = "", direction] = order.split(".");
+  const sign = direction === "desc" ? -1 : 1;
+  return [...rows].sort((a, b) => {
+    const left = String((a as Record<string, unknown>)[column]);
+    const right = String((b as Record<string, unknown>)[column]);
+    return left < right ? -sign : left > right ? sign : 0;
+  });
+}
+
+function projectColumns(row: object, params: URLSearchParams): Record<string, unknown> {
+  const columns = (params.get("select") ?? "*").split(",").map((c) => c.trim());
+  const record = row as Record<string, unknown>;
+  if (columns.includes("*")) return { ...record };
+  return Object.fromEntries(columns.map((column) => [column, record[column]]));
+}
+
+async function handleWoodPanels(request: IncomingMessage, response: ServerResponse, url: URL) {
+  const viewer = bearerUser(request);
+  const params = url.searchParams;
+  if (!viewer) return restError(response, 401, "42501", "permission denied for table wood_panels");
+  const readable = [...woodPanels.values()].filter(
+    (panel) => panel.owner_id === viewer.id || viewer.role === "admin",
+  );
+  const owned = (rows: WoodPanel[]) => rows.filter((panel) => panel.owner_id === viewer.id);
+  switch (request.method) {
+    case "GET": {
+      if (config.failWoodList && params.has("order")) {
+        return restError(response, 500, "XX000", "fake-supabase: wood list failure");
+      }
+      if (config.failWoodLoad && params.has("id")) {
+        return restError(response, 500, "XX000", "fake-supabase: wood load failure");
+      }
+      const rows = orderRows(eqFilter(readable, params), params);
+      return sendRows(
+        request,
+        response,
+        rows.map((row) => projectColumns(row, params)),
+      );
+    }
+    case "POST": {
+      if (config.woodSaveDelayMs > 0) await delay(config.woodSaveDelayMs);
+      const input = await body(request);
+      if (Object.keys(input).some((column) => !WOOD_WRITABLE.includes(column))) {
+        return restError(response, 401, "42501", "permission denied for table wood_panels");
+      }
+      if (config.failWoodSave)
+        return restError(response, 500, "XX000", "fake-supabase: wood save failure");
+      const candidate = { stiffness_parameter: 75, spectra: {}, ...input };
+      const refusal = woodRefusal(candidate);
+      if (refusal)
+        return restError(response, 400, "23514", `violates check constraint on ${refusal}`);
+      const now = new Date().toISOString();
+      const panel = withSnapshot({
+        ...(candidate as Record<WoodInput, number> & {
+          name: string;
+          spectra: Record<string, unknown>;
+        }),
+        id: randomUUID(),
+        owner_id: viewer.id,
+        created_at: now,
+        updated_at: now,
+      });
+      woodPanels.set(panel.id, panel);
+      return sendRows(request, response, [projectColumns(panel, params)], 201);
+    }
+    case "PATCH": {
+      if (config.woodSaveDelayMs > 0) await delay(config.woodSaveDelayMs);
+      const input = await body(request);
+      if (Object.keys(input).some((column) => !WOOD_WRITABLE.includes(column))) {
+        return restError(response, 401, "42501", "permission denied for table wood_panels");
+      }
+      if (config.failWoodSave)
+        return restError(response, 500, "XX000", "fake-supabase: wood save failure");
+      const rows = owned(eqFilter(readable, params));
+      for (const row of rows) {
+        const refusal = woodRefusal({ ...row, ...input });
+        if (refusal)
+          return restError(response, 400, "23514", `violates check constraint on ${refusal}`);
+      }
+      const updated = rows.map((row) => {
+        const {
+          e_long_gpa,
+          e_cross_gpa,
+          g_lc_gpa,
+          target_thickness_mm,
+          estimated_mass_g,
+          ...stored
+        } = row;
+        const next = withSnapshot({ ...stored, ...input, updated_at: new Date().toISOString() });
+        woodPanels.set(next.id, next);
+        return next;
+      });
+      return sendRows(
+        request,
+        response,
+        updated.map((row) => projectColumns(row, params)),
+      );
+    }
+    case "DELETE": {
+      if (config.failWoodDelete)
+        return restError(response, 500, "XX000", "fake-supabase: wood delete failure");
+      const rows = owned(eqFilter(readable, params));
+      for (const row of rows) woodPanels.delete(row.id);
+      return sendRows(
+        request,
+        response,
+        rows.map((row) => projectColumns(row, params)),
+      );
+    }
+    default:
+      return restError(response, 405, "PGRST000", "method not allowed");
+  }
+}
+
+/** Seeds a panel from a test request: the owner's email, a name and the ten inputs. */
+function seededPanel(input: Record<string, unknown>, ownerId: string | null): WoodPanel {
+  const created = String(input.created_at ?? new Date().toISOString());
+  const values = Object.fromEntries(
+    WOOD_INPUTS.map((column) => [
+      column,
+      Number(input[column] ?? (column === "stiffness_parameter" ? 75 : 1)),
+    ]),
+  ) as Record<WoodInput, number>;
+  return withSnapshot({
+    ...values,
+    id: String(input.id ?? randomUUID()),
+    owner_id: ownerId,
+    name: String(input.name),
+    spectra: isObject(input.spectra) ? input.spectra : {},
+    created_at: created,
+    updated_at: created,
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Storage (step-photos bucket)
 // ---------------------------------------------------------------------------
 
@@ -645,6 +903,8 @@ const server = createServer(async (request, response) => {
 
   try {
     if (url.pathname === "/rest/v1/builds") return await handleBuilds(request, response, url);
+    if (url.pathname === "/rest/v1/wood_panels")
+      return await handleWoodPanels(request, response, url);
     if (url.pathname.startsWith("/storage/v1/")) return await handleStorage(request, response, url);
 
     switch (route) {
@@ -682,6 +942,78 @@ const server = createServer(async (request, response) => {
         return send(response, 200, [...builds.values()]);
       case "GET /__test/objects":
         return send(response, 200, [...objects.keys()]);
+      case "POST /__test/wood_panels": {
+        const input = await body(request);
+        const owner = users.get(String(input.ownerEmail).toLowerCase());
+        if (!owner) return send(response, 400, { message: "unknown owner" });
+        const panel = seededPanel(input, owner.id);
+        woodPanels.set(panel.id, panel);
+        return send(response, 201, panel);
+      }
+      case "POST /__test/wood_panels/remove": {
+        const input = await body(request);
+        woodPanels.delete(String(input.id));
+        return send(response, 204, null);
+      }
+      case "GET /__test/wood_panels":
+        return send(response, 200, [...woodPanels.values()]);
+      case "POST /__test/default_wood_panels": {
+        const input = await body(request);
+        const list = Array.isArray(input.panels) ? input.panels : [];
+        for (const item of list) {
+          const panel = seededPanel(isObject(item) ? item : {}, null);
+          referencePanels.set(panel.id, panel);
+        }
+        return send(response, 201, [...referencePanels.values()]);
+      }
+
+      case "GET /rest/v1/default_wood_panels": {
+        const viewer = bearerUser(request);
+        if (!viewer)
+          return restError(
+            response,
+            401,
+            "42501",
+            "permission denied for table default_wood_panels",
+          );
+        const rows = orderRows(
+          eqFilter([...referencePanels.values()], url.searchParams),
+          url.searchParams,
+        );
+        return sendRows(
+          request,
+          response,
+          rows.map((row) => projectColumns(row, url.searchParams)),
+        );
+      }
+      case "POST /rest/v1/rpc/load_default_wood_panels": {
+        const viewer = bearerUser(request);
+        if (!viewer) return restError(response, 401, "42501", "Not signed in");
+        if (config.loadDefaultsDelayMs > 0) await delay(config.loadDefaultsDelayMs);
+        if (config.failLoadDefaults) {
+          return restError(response, 500, "XX000", "fake-supabase: load defaults failure");
+        }
+        if ([...woodPanels.values()].some((panel) => panel.owner_id === viewer.id)) {
+          return send(response, 200, null);
+        }
+        const references = orderRows(
+          [...referencePanels.values()],
+          new URLSearchParams("order=created_at.asc"),
+        );
+        for (const reference of references) {
+          const now = new Date().toISOString();
+          const copy = {
+            ...reference,
+            id: randomUUID(),
+            owner_id: viewer.id,
+            spectra: {},
+            created_at: now,
+            updated_at: now,
+          };
+          woodPanels.set(copy.id, copy);
+        }
+        return send(response, 200, references.length);
+      }
 
       case "POST /rest/v1/rpc/update_build_step": {
         const viewer = bearerUser(request);

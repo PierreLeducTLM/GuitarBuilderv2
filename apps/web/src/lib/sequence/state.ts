@@ -25,7 +25,7 @@ export const EMPTY_STEP_STATE: StepState = Object.freeze({
   measurements: [],
 }) as StepState;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
@@ -40,7 +40,7 @@ function toPhoto(value: unknown): StepPhoto | null {
   return { url: value.url, name: value.name };
 }
 
-function toSpectrum(value: unknown): SpectrumRecord | null {
+export function toSpectrum(value: unknown): SpectrumRecord | null {
   if (!isRecord(value)) return null;
   const frequencies = numberList(value.frequencies);
   const magnitudes = numberList(value.magnitudes);

@@ -68,3 +68,4 @@ export {
 export { detectTaps, type Tap, type TapRejection } from "./tapTone/taps.ts";
 export { encodeWav, wavFileName } from "./wav.ts";
 export { hann, type Window } from "./windows.ts";
+export { type WoodInputs, type WoodProperties, woodProperties } from "./wood/properties.ts";

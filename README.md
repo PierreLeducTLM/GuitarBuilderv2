@@ -58,13 +58,13 @@ Run from the repository root.
 
 ### Database tests
 
-The pgTAP files live in `supabase/tests/database`. In CI they run with `supabase db start` and `supabase test db`. Locally, `pnpm test:db` runs them without Docker: it starts a throwaway Postgres cluster, loads a small shim of the Supabase pieces the migrations use (`scripts/test-db/supabase-shim.sql`), applies the migrations, runs the files with `prove`, then a two-session race test for the first-admin rule. The shim includes the Supabase `storage` tables, grants and delete protection that the step-photo rules apply to, copied from the Supabase image. It needs the Postgres 16 server binaries (`PG_BIN`, default `/usr/lib/postgresql/16/bin`), Perl's `prove`, and [pgTAP](https://pgtap.org) installed into that Postgres (`make && make install` from the [PGXN release](https://pgxn.org/dist/pgtap/)). With Docker and the Supabase CLI, `supabase db start` followed by `supabase test db` runs the same files against the real image, as CI does.
+The pgTAP files live in `supabase/tests/database`. In CI they run with `supabase db start` and `supabase test db`. Locally, `pnpm test:db` runs them without Docker: it starts a throwaway Postgres cluster, loads a small shim of the Supabase pieces the migrations use (`scripts/test-db/supabase-shim.sql`), applies the migrations, runs the files with `prove`, then two-session race tests for the first-admin rule and for "Load Default Panels" copying the reference panels once. The shim includes the Supabase `storage` tables, grants and delete protection that the step-photo rules apply to, copied from the Supabase image. It needs the Postgres 16 server binaries (`PG_BIN`, default `/usr/lib/postgresql/16/bin`), Perl's `prove`, and [pgTAP](https://pgtap.org) installed into that Postgres (`make && make install` from the [PGXN release](https://pgxn.org/dist/pgtap/)). With Docker and the Supabase CLI, `supabase db start` followed by `supabase test db` runs the same files against the real image, as CI does.
 
 ### End-to-end tests
 
-`pnpm test:e2e` builds the app into `apps/web/.next-e2e` with test configuration, starts it with a small fake of the Supabase endpoints the app calls (`apps/web/e2e/fake-supabase.ts`: Auth, the builds and profiles REST calls, the step-change and photo-path functions, and Storage upload, remove and public read), and runs the specs on a desktop and a phone viewport. `@playwright/test` is pinned to the version of the installed browsers; run `pnpm --filter @gb/web exec playwright install chromium` once on a new machine, or set `PW_CHROMIUM_EXECUTABLE` to a Chromium binary.
+`pnpm test:e2e` builds the app into `apps/web/.next-e2e` with test configuration, starts it with a small fake of the Supabase endpoints the app calls (`apps/web/e2e/fake-supabase.ts`: Auth, the builds, profiles and wood panel REST calls, the step-change, photo-path and default-panel functions, and Storage upload, remove and public read; it computes the wood panel results with `@gb/dsp`, as the database does), and runs the specs on a desktop and a phone viewport. `@playwright/test` is pinned to the version of the installed browsers; run `pnpm --filter @gb/web exec playwright install chromium` once on a new machine, or set `PW_CHROMIUM_EXECUTABLE` to a Chromium binary.
 
-The tap-tone specs (`apps/web/e2e/tap-tone*.spec.ts`) use synthetic recordings in `apps/web/e2e/fixtures/`. Chromium plays `body.wav` or `silence.wav` as the microphone (`--use-file-for-fake-audio-capture`), and the other files are uploaded:
+The tap-tone specs (`apps/web/e2e/tap-tone*.spec.ts`, and `wood-plate.spec.ts` for the wood calculator's plate measurement) use synthetic recordings in `apps/web/e2e/fixtures/`. Chromium plays `body.wav` or `silence.wav` as the microphone (`--use-file-for-fake-audio-capture`), and the other files are uploaded:
 - `taps.wav`: three plate taps;
 - `clipped.wav`: the same with tap 2 clipped;
 - `mobile.wav`: the 134.8 Hz phone artifact.
@@ -87,6 +87,25 @@ Photos attached to build steps live in the public Storage bucket `step-photos`, 
 - the bucket accepts images only.
 
 The app sets no size limit of its own, but the project-wide upload limit in Supabase (Storage settings, 50 MB by default) still applies; a larger file fails like any other upload. Deleting a build removes its photo files first.
+
+## Wood panels
+
+"Wood Props" (`/wood-properties`) is the tonewood calculator: the ten sample and plate inputs, the results computed as you type (`woodProperties` in `@gb/dsp`), "Measure plate" with the tap-tone reader in Plate mode, the user's saved panels and a PDF report of the loaded panel. Panels live in `public.wood_panels` (migration `supabase/migrations/20261104130000_wood_panels.sql`). The database computes each panel's results snapshot itself, in generated columns, from the same formulas.
+
+**Reference panels.** "Load Default Panels" copies the shared reference set (`public.default_wood_panels`) into an empty library, once. Until `admin-console` adds a curation screen, the set is filled in SQL, or by the legacy import (`legacy-data-migration`). In the Supabase SQL editor, which runs as the database owner, or with `psql` on the local stack:
+
+```sql
+insert into public.default_wood_panels
+  (name, sample_length_mm, sample_width_mm, sample_thickness_mm, sample_mass_g,
+   freq_longitudinal_hz, freq_cross_grain_hz, freq_diagonal_hz,
+   plate_length_mm, plate_width_mm, stiffness_parameter)
+values
+  ('Sitka spruce', 605, 238, 4.0, 228, 61.6, 105.0, 38.2, 500, 380, 75);
+```
+
+An administrator's session may also insert, change and delete reference panels; other users can only read them. Users who already copied the set keep their copies.
+
+**PDF fonts.** The report embeds subsets of static Space Grotesk Regular and Bold (words) and JetBrains Mono Regular and Bold (numbers and symbols, including "ρ", which Space Grotesk lacks). The TTF files are in `apps/web/public/fonts/pdf/`, fetched only when a report is generated. Both are under the SIL Open Font License 1.1 (`apps/web/public/fonts/pdf/OFL.txt`). Sources: [floriankarsten/space-grotesk](https://github.com/floriankarsten/space-grotesk) at `03507d0` (`fonts/ttf/static`) and [JetBrains/JetBrainsMono](https://github.com/JetBrains/JetBrainsMono) `v2.304` (`fonts/ttf`).
 
 ## Authentication settings
 

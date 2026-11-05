@@ -1,11 +1,17 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   type BodyRole,
+  type Database,
   type MeasurementRoles,
+  type SpectrumRecord,
   type StepMeasurement,
   stepPhotoPath,
+  type Tables,
+  type TablesInsert,
   toAppRole,
   toGuitarType,
+  WOOD_SPECTRUM_KEYS,
+  type WoodPanelSpectra,
 } from "./index.ts";
 
 describe("toAppRole", () => {
@@ -66,5 +72,23 @@ describe("step measurement roles", () => {
     >();
     expectTypeOf<BodyRole["origin"]>().toEqualTypeOf<"auto" | "user">();
     expect(withRoles.roles?.top?.frequency).toBe(196.94);
+  });
+});
+
+describe("wood panel types", () => {
+  it("types the panel rows, the reference rows, their spectra and the copy function", () => {
+    expectTypeOf<Tables<"wood_panels">["target_thickness_mm"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<Tables<"wood_panels">["owner_id"]>().toEqualTypeOf<string>();
+    expectTypeOf<Tables<"default_wood_panels">>().not.toHaveProperty("spectra");
+    expectTypeOf<TablesInsert<"wood_panels">["stiffness_parameter"]>().toEqualTypeOf<
+      number | undefined
+    >();
+    expectTypeOf<WoodPanelSpectra>().toEqualTypeOf<
+      Partial<Record<"longitudinal" | "crossGrain" | "diagonal", SpectrumRecord>>
+    >();
+    expectTypeOf<
+      Database["public"]["Functions"]["load_default_wood_panels"]["Returns"]
+    >().toEqualTypeOf<number | null>();
+    expect(WOOD_SPECTRUM_KEYS).toEqual(["longitudinal", "crossGrain", "diagonal"]);
   });
 });
