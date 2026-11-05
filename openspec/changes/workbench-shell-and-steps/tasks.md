@@ -89,7 +89,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
   - step boxes linking to `/builds/<id>/steps/<key>?from=<group>`, with the variant highlights kept.
 
   Verify component tests for the Part Flow scenarios and Diagram Interaction Restrictions (no drag handles, activation navigates)
-- [ ] 6.3 Verify the 360 px fit with a Playwright test at a 360 × 740 viewport: for every group of a build whose type is not set and that has a BOBO neck, `scrollWidth <= clientWidth` and every step label is visible. Take one screenshot of the Body finish setup flow and check the gutter skip edge by eye before ticking
+- [x] 6.3 Verify the 360 px fit with a Playwright test at a 360 × 740 viewport: for every group of a build whose type is not set and that has a BOBO neck, `scrollWidth <= clientWidth` and every step label is visible. Take one screenshot of the Body finish setup flow and check the gutter skip edge by eye before ticking
 
 ## 7. Step screen
 
