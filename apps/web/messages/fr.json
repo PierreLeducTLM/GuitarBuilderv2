@@ -517,7 +517,12 @@
       "emptyHint": "Calculez et enregistrez votre premier panneau de bois pour le voir ici",
       "loadDefaults": "Charger les panneaux par défaut",
       "targetThickness": "Épaisseur cible",
-      "estimatedMass": "Masse est."
+      "estimatedMass": "Masse est.",
+      "currentlyEditing": "En cours de modification",
+      "loadPanelFailed": "Impossible de charger le panneau de bois",
+      "delete": "Supprimer {name}",
+      "deleted": "Panneau de bois supprimé avec succès",
+      "deleteFailed": "Impossible de supprimer le panneau de bois"
     },
     "validation": {
       "sampleLength": "La longueur de l'échantillon doit être supérieure à 0",
@@ -569,6 +574,22 @@
       "target": "Spécifications cibles",
       "thickness": "Épaisseur recommandée",
       "mass": "Masse estimée du panneau"
+    },
+    "save": {
+      "nameLabel": "Nom du panneau",
+      "namePlaceholder": "ex. : Épicéa de Sitka n° 1",
+      "save": "Enregistrer le panneau",
+      "update": "Mettre à jour le panneau",
+      "saving": "Enregistrement...",
+      "nameRequired": "Veuillez saisir un nom pour ce panneau de bois",
+      "saved": "Panneau de bois enregistré avec succès !",
+      "updated": "Panneau de bois mis à jour avec succès !",
+      "failed": "Impossible d'enregistrer le panneau de bois. Veuillez réessayer."
+    },
+    "deleteDialog": {
+      "title": "Supprimer le panneau de bois",
+      "message": "Voulez-vous vraiment supprimer ce panneau de bois ? Cette action est irréversible.",
+      "confirm": "Supprimer"
     }
   }
 }

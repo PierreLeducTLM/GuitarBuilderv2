@@ -3,18 +3,15 @@
 import { woodProperties } from "@gb/dsp";
 import { Panel } from "@gb/ui";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useState } from "react";
-import {
-  DEFAULT_INPUTS,
-  type FieldKey,
-  parseInputs,
-  validateInputs,
-  type WoodInputStrings,
-} from "@/lib/wood/calculator";
+import { type ReactNode, useReducer } from "react";
+import { parseInputs, validateInputs } from "@/lib/wood/calculator";
+import { calculatorReducer, INITIAL_CALCULATOR } from "@/lib/wood/panel";
 import type { WoodPanelSummary } from "@/lib/wood/types";
+import { useWoodPanels } from "./useWoodPanels";
 import { WoodInputs } from "./WoodInputs";
 import { WoodLibrary } from "./WoodLibrary";
 import { WoodResults } from "./WoodResults";
+import { WoodSaveForm } from "./WoodSaveForm";
 
 function Area({
   id,
@@ -42,12 +39,11 @@ function Area({
 /** wood-panel-properties: the calculator page with its three areas. */
 export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }) {
   const t = useTranslations("wood");
-  const [inputs, setInputs] = useState<WoodInputStrings>(DEFAULT_INPUTS);
-  const errors = validateInputs(inputs);
-  const properties = Object.keys(errors).length === 0 ? woodProperties(parseInputs(inputs)) : null;
-
-  const change = (key: FieldKey, value: string) =>
-    setInputs((current) => ({ ...current, [key]: value }));
+  const [state, dispatch] = useReducer(calculatorReducer, INITIAL_CALCULATOR);
+  const actions = useWoodPanels(state, dispatch);
+  const errors = validateInputs(state.inputs);
+  const properties =
+    Object.keys(errors).length === 0 ? woodProperties(parseInputs(state.inputs)) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -55,18 +51,31 @@ export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <Area id="wood-inputs-title" title={t("areas.inputs")}>
           <WoodInputs
-            inputs={inputs}
+            inputs={state.inputs}
             errors={errors}
-            onChange={change}
-            onReset={() => setInputs(DEFAULT_INPUTS)}
+            onChange={(key, value) => dispatch({ type: "edited", key, value })}
+            onReset={() => dispatch({ type: "reset" })}
           />
         </Area>
         <Area id="wood-results-title" title={t("areas.results")} className="lg:sticky lg:top-6">
-          <WoodResults properties={properties} />
+          <WoodResults properties={properties}>
+            <WoodSaveForm
+              name={state.name}
+              updating={state.loadedId !== null}
+              saving={actions.saving}
+              onNameChange={(name) => dispatch({ type: "named", name })}
+              onSave={actions.save}
+            />
+          </WoodResults>
         </Area>
       </div>
       <Area id="wood-library-title" title={t("areas.library")}>
-        <WoodLibrary panels={panels} />
+        <WoodLibrary
+          panels={panels}
+          loadedId={state.loadedId}
+          onOpen={actions.open}
+          onDelete={actions.remove}
+        />
       </Area>
     </div>
   );

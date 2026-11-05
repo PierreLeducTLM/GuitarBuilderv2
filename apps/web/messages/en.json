@@ -517,7 +517,12 @@
       "emptyHint": "Calculate and save your first wood panel to see it here",
       "loadDefaults": "Load Default Panels",
       "targetThickness": "Target thickness",
-      "estimatedMass": "Est. Mass"
+      "estimatedMass": "Est. Mass",
+      "currentlyEditing": "Currently editing",
+      "loadPanelFailed": "Failed to load wood panel",
+      "delete": "Delete {name}",
+      "deleted": "Wood panel deleted successfully",
+      "deleteFailed": "Failed to delete wood panel"
     },
     "validation": {
       "sampleLength": "Sample length must be greater than 0",
@@ -569,6 +574,22 @@
       "target": "Target Specifications",
       "thickness": "Recommended Thickness",
       "mass": "Estimated Panel Mass"
+    },
+    "save": {
+      "nameLabel": "Wood Panel Name",
+      "namePlaceholder": "e.g., Sitka Spruce #1",
+      "save": "Save Wood Panel",
+      "update": "Update Wood Panel",
+      "saving": "Saving...",
+      "nameRequired": "Please enter a name for this wood panel",
+      "saved": "Wood panel saved successfully!",
+      "updated": "Wood panel updated successfully!",
+      "failed": "Failed to save wood panel. Please try again."
+    },
+    "deleteDialog": {
+      "title": "Delete Wood Panel",
+      "message": "Are you sure you want to delete this wood panel? This action cannot be undone.",
+      "confirm": "Delete"
     }
   }
 }

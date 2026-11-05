@@ -72,6 +72,13 @@ export const fakeSupabase = {
   async woodPanels(): Promise<StoredWoodPanel[]> {
     return (await (await fetch(`${FAKE_SUPABASE}/__test/wood_panels`)).json()) as StoredWoodPanel[];
   },
+  /** Deletes a wood panel behind the app's back, as another tab would. */
+  async removeWoodPanel(id: string) {
+    await fetch(`${FAKE_SUPABASE}/__test/wood_panels/remove`, {
+      method: "POST",
+      body: JSON.stringify({ id }),
+    });
+  },
   /** Fills the reference panel set. */
   async seedDefaultWoodPanels(panels: Omit<SeedWoodPanel, "ownerEmail">[]) {
     await fetch(`${FAKE_SUPABASE}/__test/default_wood_panels`, {

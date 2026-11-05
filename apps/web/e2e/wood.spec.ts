@@ -1,6 +1,6 @@
 // wood-panel-properties end to end: the calculator page, its library and the reference panels.
 import { expect, type Page, test } from "@playwright/test";
-import { ADMIN, en, fakeSupabase, fr, LUTHIER, seedAccounts, signIn } from "./support";
+import { ADMIN, en, errorToast, fakeSupabase, fr, LUTHIER, seedAccounts, signIn } from "./support";
 
 const WOOD = "/wood-properties";
 
@@ -10,6 +10,20 @@ const inputs = (page: Page) => page.getByRole("region", { name: en.wood.areas.in
 const results = (page: Page) => page.getByRole("region", { name: en.wood.areas.results });
 const field = (page: Page, key: keyof typeof en.wood.fields) =>
   inputs(page).getByRole("spinbutton", { name: en.wood.fields[key] });
+
+const nameField = (page: Page) =>
+  results(page).getByRole("textbox", { name: en.wood.save.nameLabel });
+const saveButton = (page: Page) => results(page).getByRole("button", { name: en.wood.save.save });
+const updateButton = (page: Page) =>
+  results(page).getByRole("button", { name: en.wood.save.update });
+const entry = (page: Page, name: string) => entries(page).filter({ hasText: name });
+const openEntry = (page: Page, name: string) =>
+  entry(page, name)
+    .getByRole("button", { name: new RegExp(`^${name}`) })
+    .click();
+const editing = (page: Page) => library(page).getByText(en.wood.library.currentlyEditing);
+const toasts = (page: Page) => page.getByRole("region", { name: en.toast.region });
+const deleteDialog = (page: Page) => page.getByRole("dialog", { name: en.wood.deleteDialog.title });
 
 async function useFrench(page: Page) {
   await page
@@ -146,6 +160,226 @@ test.describe("wood calculator", () => {
       "280",
     );
     await expect(page.getByText("425,2 kg/m³")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Enregistrer le panneau" })).toBeVisible();
+  });
+});
+
+test.describe("saving and loading panels", () => {
+  test("saves a new panel, then loads it back", async ({ page }) => {
+    await signIn(page, LUTHIER, WOOD);
+    await field(page, "sampleMass").fill("30");
+    await expect(nameField(page)).toHaveAttribute("placeholder", en.wood.save.namePlaceholder);
+    await nameField(page).fill("  Test Spruce Top  ");
+    await saveButton(page).click();
+
+    await expect(toasts(page).getByRole("status")).toContainText(en.wood.save.saved);
+    await expect(entries(page).nth(0)).toContainText("Test Spruce Top");
+    await expect(nameField(page)).toHaveValue("");
+    await expect(editing(page)).toHaveCount(0);
+    await expect(field(page, "sampleMass")).toHaveValue("30");
+    const [saved] = await fakeSupabase.woodPanels();
+    expect(saved).toMatchObject({ name: "Test Spruce Top", sample_mass_g: 30, spectra: {} });
+
+    await field(page, "sampleMass").fill("25");
+    await openEntry(page, "Test Spruce Top");
+    await expect(field(page, "sampleMass")).toHaveValue("30");
+    await expect(nameField(page)).toHaveValue("Test Spruce Top");
+    await expect(
+      entry(page, "Test Spruce Top").getByText(en.wood.library.currentlyEditing),
+    ).toBeVisible();
+    await expect(updateButton(page)).toBeVisible();
+  });
+
+  test("loads a stored panel with its frequencies rounded to one decimal", async ({ page }) => {
+    await fakeSupabase.seedWoodPanel({
+      ownerEmail: LUTHIER.email,
+      name: "Sitka #3",
+      freq_longitudinal_hz: 61.63,
+      freq_cross_grain_hz: 105,
+    });
+    await signIn(page, LUTHIER, WOOD);
+    await openEntry(page, "Sitka #3");
+    await expect(field(page, "freqLongitudinal")).toHaveValue("61.6");
+    await expect(field(page, "freqCrossGrain")).toHaveValue("105.0");
+    await expect(field(page, "sampleLength")).toHaveValue("605");
+    await expect(results(page).getByText("395.9 kg/m³")).toBeVisible();
+  });
+
+  test("updates the loaded panel instead of creating a new one", async ({ page }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await expect(entry(page, "Sitka #3")).toContainText("157.5 g");
+    await openEntry(page, "Sitka #3");
+    await expect(nameField(page)).toHaveValue("Sitka #3");
+    await field(page, "sampleMass").fill("250");
+    await updateButton(page).click();
+
+    await expect(toasts(page).getByRole("status")).toContainText(en.wood.save.updated);
+    await expect(entry(page, "Sitka #3")).toContainText("172.7 g");
+    await expect(nameField(page)).toHaveValue("");
+    await expect(editing(page)).toHaveCount(0);
+    const panels = await fakeSupabase.woodPanels();
+    expect(panels).toHaveLength(1);
+    expect(panels[0]).toMatchObject({ name: "Sitka #3", sample_mass_g: 250 });
+  });
+
+  test("offers saving only with a name", async ({ page }) => {
+    await signIn(page, LUTHIER, WOOD);
+    await expect(saveButton(page)).toBeDisabled();
+    await nameField(page).fill("   ");
+    await expect(saveButton(page)).toBeDisabled();
+    await nameField(page).fill("Sitka");
+    await expect(saveButton(page)).toBeEnabled();
+    await field(page, "sampleLength").fill("0");
+    await expect(nameField(page)).toHaveCount(0);
+  });
+
+  test("saves once on a double click, reading Saving... meanwhile", async ({ page }) => {
+    await fakeSupabase.configure({ woodSaveDelayMs: 800 });
+    await signIn(page, LUTHIER, WOOD);
+    await nameField(page).fill("Sitka");
+    await saveButton(page).dblclick();
+    await expect(results(page).getByRole("button", { name: en.wood.save.saving })).toBeDisabled();
+    await expect(toasts(page).getByRole("status")).toContainText(en.wood.save.saved);
+    expect(await fakeSupabase.woodPanels()).toHaveLength(1);
+
+    await nameField(page).fill("Maple");
+    await results(page)
+      .locator("form")
+      .evaluate((form: HTMLFormElement) => {
+        form.requestSubmit();
+        form.requestSubmit();
+      });
+    await expect(toasts(page).getByRole("status").last()).toContainText(en.wood.save.saved);
+    await expect.poll(async () => (await fakeSupabase.woodPanels()).length).toBe(2);
+    await page.waitForTimeout(1000);
+    expect(await fakeSupabase.woodPanels()).toHaveLength(2);
+  });
+
+  test("keeps everything when the save fails", async ({ page }) => {
+    await fakeSupabase.configure({ failWoodSave: true });
+    await signIn(page, LUTHIER, WOOD);
+    await field(page, "sampleMass").fill("30");
+    await nameField(page).fill("Sitka");
+    await saveButton(page).click();
+    await expect(errorToast(page)).toContainText(en.wood.save.failed);
+    await expect(nameField(page)).toHaveValue("Sitka");
+    await expect(field(page, "sampleMass")).toHaveValue("30");
+    expect(await fakeSupabase.woodPanels()).toHaveLength(0);
+  });
+
+  test("deselects the loaded panel on a second click", async ({ page }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await openEntry(page, "Sitka #3");
+    await expect(editing(page)).toBeVisible();
+    await openEntry(page, "Sitka #3");
+    await expect(editing(page)).toHaveCount(0);
+    await expect(field(page, "sampleLength")).toHaveValue("280");
+    await expect(nameField(page)).toHaveValue("");
+  });
+
+  test("resets after loading a panel", async ({ page }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await openEntry(page, "Sitka #3");
+    await expect(editing(page)).toBeVisible();
+    await inputs(page).getByRole("button", { name: en.wood.reset }).click();
+    await expect(field(page, "sampleLength")).toHaveValue("280");
+    await expect(nameField(page)).toHaveValue("");
+    await expect(editing(page)).toHaveCount(0);
+  });
+
+  test("fails to update a panel deleted elsewhere instead of saving a new one", async ({
+    page,
+  }) => {
+    const panel = await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await openEntry(page, "Sitka #3");
+    await expect(nameField(page)).toHaveValue("Sitka #3");
+    await fakeSupabase.removeWoodPanel(panel.id);
+    await updateButton(page).click();
+    await expect(errorToast(page)).toContainText(en.wood.save.failed);
+    await expect(nameField(page)).toHaveValue("Sitka #3");
+    expect(await fakeSupabase.woodPanels()).toHaveLength(0);
+  });
+
+  test("says when a panel deleted elsewhere cannot be opened", async ({ page }) => {
+    const panel = await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await field(page, "sampleMass").fill("30");
+    await fakeSupabase.removeWoodPanel(panel.id);
+    await openEntry(page, "Sitka #3");
+    await expect(errorToast(page)).toContainText(en.wood.library.loadPanelFailed);
+    await expect(field(page, "sampleMass")).toHaveValue("30");
+    await expect(editing(page)).toHaveCount(0);
+  });
+});
+
+test.describe("deleting panels", () => {
+  test("deletes a panel after confirmation, and keeps it when cancelled", async ({ page }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Test Spruce Top" });
+    await signIn(page, LUTHIER, WOOD);
+    const remove = entry(page, "Test Spruce Top").getByRole("button", {
+      name: en.wood.library.delete.replace("{name}", "Test Spruce Top"),
+    });
+
+    await remove.click();
+    await expect(deleteDialog(page)).toContainText(en.wood.deleteDialog.message);
+    await deleteDialog(page).getByRole("button", { name: en.dialog.cancel }).click();
+    await expect(deleteDialog(page)).toBeHidden();
+    expect(await fakeSupabase.woodPanels()).toHaveLength(1);
+
+    await remove.click();
+    await deleteDialog(page).getByRole("button", { name: en.wood.deleteDialog.confirm }).click();
+    await expect(toasts(page).getByRole("status")).toContainText(en.wood.library.deleted);
+    await expect(entry(page, "Test Spruce Top")).toHaveCount(0);
+    expect(await fakeSupabase.woodPanels()).toHaveLength(0);
+  });
+
+  test("resets the calculator when the loaded panel is deleted", async ({ page }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Maple" });
+    await signIn(page, LUTHIER, WOOD);
+    await openEntry(page, "Maple");
+    await expect(nameField(page)).toHaveValue("Maple");
+    await entry(page, "Sitka #3")
+      .getByRole("button", { name: en.wood.library.delete.replace("{name}", "Sitka #3") })
+      .click();
+    await deleteDialog(page).getByRole("button", { name: en.wood.deleteDialog.confirm }).click();
+    await expect(entry(page, "Sitka #3")).toHaveCount(0);
+    await expect(nameField(page)).toHaveValue("Maple");
+
+    await entry(page, "Maple")
+      .getByRole("button", { name: en.wood.library.delete.replace("{name}", "Maple") })
+      .click();
+    await deleteDialog(page).getByRole("button", { name: en.wood.deleteDialog.confirm }).click();
+    await expect(entries(page)).toHaveCount(0);
+    await expect(field(page, "sampleLength")).toHaveValue("280");
+    await expect(nameField(page)).toHaveValue("");
+  });
+
+  test("says when the panel to delete was already deleted elsewhere", async ({ page }) => {
+    const panel = await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await fakeSupabase.removeWoodPanel(panel.id);
+    await entry(page, "Sitka #3")
+      .getByRole("button", { name: en.wood.library.delete.replace("{name}", "Sitka #3") })
+      .click();
+    await deleteDialog(page).getByRole("button", { name: en.wood.deleteDialog.confirm }).click();
+    await expect(errorToast(page)).toContainText(en.wood.library.deleteFailed);
+  });
+
+  test("says when the deletion fails", async ({ page }) => {
+    await fakeSupabase.configure({ failWoodDelete: true });
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await entry(page, "Sitka #3")
+      .getByRole("button", { name: en.wood.library.delete.replace("{name}", "Sitka #3") })
+      .click();
+    await deleteDialog(page).getByRole("button", { name: en.wood.deleteDialog.confirm }).click();
+    await expect(errorToast(page)).toContainText(en.wood.library.deleteFailed);
+    await expect(entry(page, "Sitka #3")).toHaveCount(1);
   });
 });
 

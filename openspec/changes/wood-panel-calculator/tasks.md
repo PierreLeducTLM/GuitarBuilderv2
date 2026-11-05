@@ -59,7 +59,7 @@
   - a zero length hiding the results and showing its message;
   - reset after loading a panel;
   - the French labels "Mesures d'entrée" and "Enregistrer le panneau"
-- [ ] 5.3 Build the save form and library actions:
+- [x] 5.3 Build the save form and library actions:
   - the name field with its placeholder;
   - Save, and Update when a panel is loaded, with "Saving..." and the double-click guard;
   - the success and failure messages, and the save outcome (name cleared, nothing selected, inputs kept);

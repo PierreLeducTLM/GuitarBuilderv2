@@ -16,7 +16,7 @@
  *          GET|HEAD /storage/v1/object/public/step-photos/<path> (public read)
  * Test control: POST /__test/reset, POST /__test/users, POST /__test/config,
  *          POST /__test/builds, GET /__test/builds, GET /__test/objects,
- *          POST /__test/wood_panels, GET /__test/wood_panels, POST /__test/default_wood_panels
+ *          POST /__test/wood_panels, POST /__test/wood_panels/remove, GET /__test/wood_panels, POST /__test/default_wood_panels
  *
  * Builds, steps and photos follow the same rules as the database (owner writes,
  * administrators read, one step change at a time, owner-only photo files), and the
@@ -949,6 +949,11 @@ const server = createServer(async (request, response) => {
         const panel = seededPanel(input, owner.id);
         woodPanels.set(panel.id, panel);
         return send(response, 201, panel);
+      }
+      case "POST /__test/wood_panels/remove": {
+        const input = await body(request);
+        woodPanels.delete(String(input.id));
+        return send(response, 204, null);
       }
       case "GET /__test/wood_panels":
         return send(response, 200, [...woodPanels.values()]);
