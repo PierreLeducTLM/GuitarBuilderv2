@@ -135,16 +135,12 @@
     },
     "detail": {
       "loading": "Loading build...",
-      "back": "Back to Builds",
       "share": "Share",
       "delete": "Delete Build",
       "created": "Created {date}",
       "typeNotSet": "Guitar type not set",
       "boboNeck": "BOBO neck",
-      "readOnly": "Read-only: this build belongs to another user.",
-      "tabsLabel": "Build views",
-      "tabOverview": "Overview",
-      "tabSequence": "Sequence Diagram"
+      "readOnly": "Read-only: this build belongs to another user."
     },
     "actions": {
       "more": "More actions",
@@ -185,31 +181,20 @@
     "saveFailed": "Failed to save changes"
   },
   "sequence": {
-    "loading": "Loading diagram...",
-    "diagramLabel": "Build sequence diagram",
     "legend": {
       "label": "Step states",
       "completed": "Completed",
       "ready": "Ready",
       "notStarted": "Not started"
     },
-    "controls": {
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out",
-      "fitView": "Fit view",
-      "label": "Diagram controls"
-    },
     "stepName": "Step {number}: {label}, {status}",
     "stepNumber": "Step {number}",
     "completedIcon": "Completed",
-    "hint": "This step is part of the guitar building process. Follow the sequence to ensure proper construction order.",
     "notes": "Notes",
     "notesPlaceholder": "Add notes about this step...",
     "photos": "Photos",
     "soundAnalysis": "Sound Analysis",
-    "markCompleted": "Mark as Completed",
     "markIncomplete": "Mark as Incomplete",
-    "close": "Close",
     "photo": {
       "add": "Add Photo",
       "uploading": "Uploading...",

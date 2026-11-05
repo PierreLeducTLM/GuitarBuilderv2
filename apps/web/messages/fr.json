@@ -135,16 +135,12 @@
     },
     "detail": {
       "loading": "Chargement de la fabrication...",
-      "back": "Retour aux fabrications",
       "share": "Partager",
       "delete": "Supprimer la fabrication",
       "created": "Créée le {date}",
       "typeNotSet": "Type de guitare non défini",
       "boboNeck": "Manche BOBO",
-      "readOnly": "Lecture seule : cette fabrication appartient à un autre utilisateur.",
-      "tabsLabel": "Vues de la fabrication",
-      "tabOverview": "Aperçu",
-      "tabSequence": "Diagramme des étapes"
+      "readOnly": "Lecture seule : cette fabrication appartient à un autre utilisateur."
     },
     "actions": {
       "more": "Plus d’actions",
@@ -185,31 +181,20 @@
     "saveFailed": "Impossible d'enregistrer les modifications"
   },
   "sequence": {
-    "loading": "Chargement du diagramme...",
-    "diagramLabel": "Diagramme des étapes de fabrication",
     "legend": {
       "label": "États des étapes",
       "completed": "Terminée",
       "ready": "Prête",
       "notStarted": "Non commencée"
     },
-    "controls": {
-      "zoomIn": "Zoom avant",
-      "zoomOut": "Zoom arrière",
-      "fitView": "Ajuster à la vue",
-      "label": "Commandes du diagramme"
-    },
     "stepName": "Étape {number} : {label}, {status}",
     "stepNumber": "Étape {number}",
     "completedIcon": "Terminée",
-    "hint": "Cette étape fait partie du processus de fabrication de la guitare. Suivez la séquence pour respecter l'ordre de construction.",
     "notes": "Notes",
     "notesPlaceholder": "Ajoutez des notes sur cette étape...",
     "photos": "Photos",
     "soundAnalysis": "Analyse sonore",
-    "markCompleted": "Marquer comme terminée",
     "markIncomplete": "Marquer comme non terminée",
-    "close": "Fermer",
     "photo": {
       "add": "Ajouter une photo",
       "uploading": "Téléversement...",
