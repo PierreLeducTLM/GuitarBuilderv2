@@ -40,7 +40,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
 - [x] 3.2 Implement `groupGraph(displayGraph, states)`: per group, the displayed steps, completed and total counts, the state (done, ready, not started) and the feeding groups; assembly groups in depth order. Verify unit tests for:
   - the Build Map scenarios (assembly order and inputs, "Truss rod 6/7" ready, "Neck assembly 0/7");
   - feeds that are identical across all six variants
-- [ ] 3.3 Implement `partFlow(displayGraph, groupId)` returning rows, internal edges with spans (skip edges flagged) and cross-group entries and exits. Verify unit tests for:
+- [x] 3.3 Implement `partFlow(displayGraph, groupId)` returning rows, internal edges with spans (skip edges flagged) and cross-group entries and exits. Verify unit tests for:
   - Truss rod rows and the shared layer of the nut and stop block;
   - End blocks and linings having 3 steps in one row;
   - the Truss rod exit and the three Neck assembly entries;
