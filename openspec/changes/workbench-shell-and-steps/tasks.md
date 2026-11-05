@@ -56,13 +56,13 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
 - [ ] 4.1 Move the build loading into `layout.tsx` with a client `BuildProvider` (build, variant, `StepStore`, display graph, `canEdit`) and add the `page.tsx`, `map/page.tsx`, `overview/page.tsx` routes rendering placeholders for their views. Verify a Playwright test that typing notes, switching views and coming back keeps the notes without a reload, and that Back returns to the previous view
 - [ ] 4.2 Validate `map/[group]` and `steps/[key]` on the server (unknown key, or a step hidden by the stored variant, redirects to `/builds/<id>`), and add the client guard in `BuildProvider` after a variant change. Verify Playwright tests for the three new Inaccessible Build Links scenarios and for a classical switch while on an SS-only step
-- [ ] 4.3 Replace `BuildHeader` with the build's `PageBar`:
+- [x] 4.3 Replace `BuildHeader` with the build's `PageBar`:
   - the return control and title;
   - type, BOBO and created chips;
   - a "More actions" menu (Share placeholder, Change construction opening the existing dialog, Delete Build as a destructive item), absent for read-only builds.
 
   Add the `builds.views.*` and `builds.actions.*` keys. Verify component tests for the Build Detail Header scenarios and the read-only case
-- [ ] 4.4 Add the view switcher (Steps, Map, Overview links with `aria-current`) under the summary strip, and change "Next up" to link to `/builds/<id>/steps/<key>`. Remove `BuildTabs`. Verify component tests and the Build Views scenarios in Playwright (default Steps view, reload keeps Overview)
+- [x] 4.4 Add the view switcher (Steps, Map, Overview links with `aria-current`) under the summary strip, and change "Next up" to link to `/builds/<id>/steps/<key>`. Remove `BuildTabs`. Verify component tests and the Build Views scenarios in Playwright (default Steps view, reload keeps Overview)
 - [ ] 4.5 Call `router.refresh()` after create, delete and the first saved step change of a visit (`StepStore.onSaved`), so the sidebar's recent builds update. Verify a Playwright test that completing a step in an older build moves it to the top of the sidebar
 
 ## 5. Steps checklist

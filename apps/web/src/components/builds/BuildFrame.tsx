@@ -1,8 +1,7 @@
 "use client";
 
 import { Eye } from "lucide-react";
-import type { Route } from "next";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { BuildPageBar } from "./BuildPageBar";
@@ -10,11 +9,12 @@ import { useBuild } from "./BuildProvider";
 import { ConstructionDialog } from "./ConstructionDialog";
 import { SummaryStrip } from "./SummaryStrip";
 import { useDeleteBuild } from "./useDeleteBuild";
+import { ViewSwitcher } from "./ViewSwitcher";
 
 /** The parts of a build's page shared by all its views: page bar and summary strip. */
 export function BuildFrame({ children }: { children: ReactNode }) {
   const t = useTranslations("builds");
-  const router = useRouter();
+  const pathname = usePathname();
   const { build, canEdit, variant, setVariant, graph, states } = useBuild();
   const { requestDelete, deleting } = useDeleteBuild(build.id);
   const [changingConstruction, setChangingConstruction] = useState(false);
@@ -42,11 +42,8 @@ export function BuildFrame({ children }: { children: ReactNode }) {
           {t("detail.readOnly")}
         </p>
       )}
-      <SummaryStrip
-        graph={graph}
-        states={states}
-        onOpenStep={(key) => router.push(`/builds/${build.id}/steps/${key}` as Route)}
-      />
+      <SummaryStrip buildId={build.id} graph={graph} states={states} />
+      <ViewSwitcher buildId={build.id} pathname={pathname} />
       {children}
     </div>
   );

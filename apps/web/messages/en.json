@@ -150,6 +150,12 @@
       "more": "More actions",
       "changeConstruction": "Change construction"
     },
+    "views": {
+      "label": "Build views",
+      "steps": "Steps",
+      "map": "Map",
+      "overview": "Overview"
+    },
     "summary": {
       "progressLabel": "Build progress",
       "progress": "{completed} of {total} steps · {percent}%",

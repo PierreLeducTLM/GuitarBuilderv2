@@ -2,19 +2,20 @@
 
 import { LedProgress, Panel } from "@gb/ui";
 import { ArrowRight, CircleCheck } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import { latestMeasurement, nextUp, progress, type StepStates } from "@/lib/sequence/state";
-import type { StepKey } from "@/lib/sequence/template";
 import type { DisplayGraph } from "@/lib/sequence/variant";
 
 export interface SummaryStripProps {
+  buildId: string;
   graph: DisplayGraph;
   states: StepStates;
-  onOpenStep: (key: StepKey) => void;
 }
 
 /** guitar-builds: Build Summary Strip. */
-export function SummaryStrip({ graph, states, onOpenStep }: SummaryStripProps) {
+export function SummaryStrip({ buildId, graph, states }: SummaryStripProps) {
   const t = useTranslations();
   const format = useFormatter();
   const figures = progress(graph, states);
@@ -47,14 +48,13 @@ export function SummaryStrip({ graph, states, onOpenStep }: SummaryStripProps) {
         )}
       </div>
       {next ? (
-        <button
-          type="button"
-          onClick={() => onOpenStep(next)}
+        <Link
+          href={`/builds/${buildId}/steps/${next}` as Route}
           className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-amber-ink bg-amber-soft px-3.5 py-2 text-left font-semibold text-fg transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           <span>{t("builds.summary.nextUp", { step: t(`steps.${next}`) })}</span>
           <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-amber-ink" />
-        </button>
+        </Link>
       ) : (
         <span className="flex items-center gap-2 font-semibold text-teal-ink">
           <CircleCheck aria-hidden="true" className="size-5" />

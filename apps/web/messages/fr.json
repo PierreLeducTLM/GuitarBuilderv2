@@ -150,6 +150,12 @@
       "more": "Plus d’actions",
       "changeConstruction": "Modifier la construction"
     },
+    "views": {
+      "label": "Vues de la fabrication",
+      "steps": "Étapes",
+      "map": "Carte",
+      "overview": "Aperçu"
+    },
     "summary": {
       "progressLabel": "Avancement de la fabrication",
       "progress": "{completed} étapes sur {total} · {percent} %",
