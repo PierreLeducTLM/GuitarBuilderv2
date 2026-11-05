@@ -146,6 +146,10 @@
       "tabOverview": "Aperçu",
       "tabSequence": "Diagramme des étapes"
     },
+    "actions": {
+      "more": "Plus d’actions",
+      "changeConstruction": "Modifier la construction"
+    },
     "summary": {
       "progressLabel": "Avancement de la fabrication",
       "progress": "{completed} étapes sur {total} · {percent} %",

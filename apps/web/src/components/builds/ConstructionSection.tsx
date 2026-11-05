@@ -1,12 +1,10 @@
 "use client";
 
-import type { GuitarType } from "@gb/db";
-import { Button, DialogFrame, Panel, useToast } from "@gb/ui";
+import { Button, Panel } from "@gb/ui";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { BuildVariant } from "@/lib/sequence/variant";
-import { createClient } from "@/lib/supabase/client";
-import { VariantFields } from "./VariantFields";
+import { ConstructionDialog } from "./ConstructionDialog";
 
 export interface ConstructionSectionProps {
   buildId: string;
@@ -23,40 +21,7 @@ export function ConstructionSection({
   onChanged,
 }: ConstructionSectionProps) {
   const t = useTranslations("builds");
-  const tDialog = useTranslations("dialog");
-  const toast = useToast();
   const [open, setOpen] = useState(false);
-  const [guitarType, setGuitarType] = useState<GuitarType | null>(variant.guitarType);
-  const [boboNeck, setBoboNeck] = useState(variant.boboNeck);
-  const [missingType, setMissingType] = useState(false);
-  const [pending, setPending] = useState(false);
-
-  function openDialog() {
-    setGuitarType(variant.guitarType);
-    setBoboNeck(variant.boboNeck);
-    setMissingType(false);
-    setOpen(true);
-  }
-
-  async function save() {
-    if (!guitarType) {
-      setMissingType(true);
-      return;
-    }
-    setPending(true);
-    const { data, error } = await createClient()
-      .from("builds")
-      .update({ guitar_type: guitarType, bobo_neck: boboNeck })
-      .eq("id", buildId)
-      .select("id");
-    setPending(false);
-    if (error || !data || data.length === 0) {
-      toast.show({ type: "error", message: t("saveFailed") });
-      return;
-    }
-    onChanged({ guitarType, boboNeck });
-    setOpen(false);
-  }
 
   return (
     <Panel as="section" aria-labelledby="construction-title" className="flex flex-col gap-3">
@@ -65,7 +30,7 @@ export function ConstructionSection({
           {t("construction.title")}
         </h2>
         {canEdit ? (
-          <Button variant="secondary" onClick={openDialog}>
+          <Button variant="secondary" onClick={() => setOpen(true)}>
             {t("construction.change")}
           </Button>
         ) : null}
@@ -83,37 +48,13 @@ export function ConstructionSection({
       {!variant.guitarType && canEdit ? (
         <p className="text-sm text-amber-ink">{t("construction.notSetHint")}</p>
       ) : null}
-
-      <DialogFrame
+      <ConstructionDialog
+        buildId={buildId}
+        variant={variant}
         open={open}
-        onOpenChange={(next) => !pending && setOpen(next)}
-        title={t("construction.title")}
-        closeLabel={tDialog("close")}
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setOpen(false)} disabled={pending}>
-              {tDialog("cancel")}
-            </Button>
-            <Button onClick={save} disabled={pending}>
-              {tDialog("save")}
-            </Button>
-          </>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          <VariantFields
-            guitarType={guitarType}
-            boboNeck={boboNeck}
-            onGuitarTypeChange={(value) => {
-              setGuitarType(value);
-              setMissingType(false);
-            }}
-            onBoboNeckChange={setBoboNeck}
-            guitarTypeError={missingType ? t("create.typeRequired") : undefined}
-            disabled={pending}
-          />
-        </div>
-      </DialogFrame>
+        onOpenChange={setOpen}
+        onChanged={onChanged}
+      />
     </Panel>
   );
 }

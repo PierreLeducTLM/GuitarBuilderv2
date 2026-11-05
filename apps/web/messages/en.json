@@ -146,6 +146,10 @@
       "tabOverview": "Overview",
       "tabSequence": "Sequence Diagram"
     },
+    "actions": {
+      "more": "More actions",
+      "changeConstruction": "Change construction"
+    },
     "summary": {
       "progressLabel": "Build progress",
       "progress": "{completed} of {total} steps · {percent}%",
