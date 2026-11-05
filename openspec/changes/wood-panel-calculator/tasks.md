@@ -79,13 +79,21 @@
   - a panel deleted elsewhere
 - [ ] 5.4 Build the empty state with "Load Default Panels" calling the function, with "Loading...", "Failed to load default panels" and "No default panels are available yet". Verify end-to-end tests for 5 reference panels copied and listed, an empty reference set and a failure
 
-## 6. Tap-tone fields
+## 6. Plate measurement
 
-- [ ] 6.1 Add the detect button to the three frequency fields, opening `TapToneDialog` with the translated label, the current value and the saved record. Write the frequency rounded to 1 decimal and keep the record per field; Reset and deselect discard unsaved spectra; Save and Update send `spectra`. Verify end-to-end tests with the `tap-tone-dialog` fixture:
-  - uploading it on "Cross-grain (f_C)" writes "181.6" and recalculates;
-  - cancelling keeps the value;
-  - after save, reload and load, the dialog reopens on the saved spectrum with 181.6 Hz preselected;
-  - a typed-only field opens empty
+- [ ] 6.1 Add "Measure plate" under Frequency Measurements, opening `TapToneDialog` in Plate mode with the translated "Plate measurement" label, the fields' current values and their saved records. On Confirm:
+  - write each measured take's frequency rounded to 1 decimal and keep its record per field;
+  - leave the takes that were not measured untouched;
+  - show the Q line ("Spectral Q … · Decay Q …", "—" when missing) in page state only, cleared on typing in that field, on load, on reset and on deselect.
+
+  Reset and deselect also discard unsaved spectra, and Save and Update send `spectra` without any Q value. Verify:
+  - component tests for the Q line and each way it clears;
+  - end-to-end tests with the reader's `taps.wav` fixture:
+    - uploading it on the Cross-grain take writes "190.0", recalculates and shows the Q line;
+    - two takes confirmed together fill both fields;
+    - cancelling keeps every value;
+    - after save, reload and load, the Cross-grain take reopens on its spectrum with 190.0 Hz preselected and no Q line is shown;
+    - a typed-only take opens empty
 
 ## 7. PDF report
 
@@ -106,7 +114,7 @@
 
 ## Workflow follow-up
 
-- Apply after `tap-tone-dialog` is merged; this change uses its dialog, its record check and its WAV fixture.
+- `tap-tone-reader` is archived: this change uses its Plate mode, its record check and its `taps.wav` fixture.
 - Review with the owner: the dataset's target columns, linking panels to builds, and realistic default inputs (design Open Questions).
 - `knowledge-assistant` adds "Analyse" and the PDF's "AI Analysis" section; `admin-console` adds the reference-set curation.
 - Archive with `/opsx:archive` once reviewed.
