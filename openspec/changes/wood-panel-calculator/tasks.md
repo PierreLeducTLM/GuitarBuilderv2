@@ -8,7 +8,7 @@
 
 ## 2. Database
 
-- [ ] 2.1 Write the migration for the five result functions, `wood_panel_spectra_is_valid`, `public.wood_panels` (decision 1), its index and `updated_at` trigger, the RLS policies and column grants (decision 2). Write `supabase/tests/database/11_wood_panels_schema.test.sql` and `12_wood_panels_access.test.sql`:
+- [x] 2.1 Write the migration for the five result functions, `wood_panel_spectra_is_valid`, `public.wood_panels` (decision 1), its index and `updated_at` trigger, the RLS policies and column grants (decision 2). Write `supabase/tests/database/11_wood_panels_schema.test.sql` and `12_wood_panels_access.test.sql`:
   - blank-name, zero, negative, `NaN` and infinity refusals;
   - generated values for the reference spruce panel and two dataset plates;
   - spectra keys and record checks;
