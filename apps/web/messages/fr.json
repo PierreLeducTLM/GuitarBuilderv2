@@ -8,7 +8,7 @@
     "homeLink": "Constructeur de Guitare, aller aux constructions"
   },
   "nav": {
-    "label": "Sections",
+    "label": "Navigation",
     "builds": "Constructions",
     "chat": "Chat",
     "simulator": "Simulateur",
@@ -23,7 +23,25 @@
       "references": "Réfs",
       "admin": "Admin"
     },
-    "adminOnly": "Réservé aux administrateurs"
+    "adminOnly": "Réservé aux administrateurs",
+    "tools": "Outils",
+    "assistant": "Assistant",
+    "you": "Vous",
+    "woodPanels": "Panneaux de bois",
+    "recentBuilds": "Constructions récentes",
+    "account": "Compte"
+  },
+  "tools": {
+    "title": "Outils",
+    "woodPanels": "Densité, rigidité et épaisseur cible d’une table ou d’un fond à partir des mesures d’un échantillon.",
+    "simulator": "Voyez comment les choix de caisse et de tables changent la réponse de la guitare."
+  },
+  "you": {
+    "title": "Vous",
+    "preferences": "Préférences",
+    "language": "Langue",
+    "theme": "Thème",
+    "administration": "Administration"
   },
   "shell": {
     "signedInAs": "Connecté en tant que",

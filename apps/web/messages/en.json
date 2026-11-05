@@ -8,7 +8,7 @@
     "homeLink": "Guitar Builder, go to Builds"
   },
   "nav": {
-    "label": "Sections",
+    "label": "Navigation",
     "builds": "Builds",
     "chat": "Chat",
     "simulator": "Simulator",
@@ -23,7 +23,25 @@
       "references": "Refs",
       "admin": "Admin"
     },
-    "adminOnly": "Administrators only"
+    "adminOnly": "Administrators only",
+    "tools": "Tools",
+    "assistant": "Assistant",
+    "you": "You",
+    "woodPanels": "Wood panels",
+    "recentBuilds": "Recent builds",
+    "account": "Account"
+  },
+  "tools": {
+    "title": "Tools",
+    "woodPanels": "Density, stiffness and target thickness of a top or back from sample measurements.",
+    "simulator": "See how body and plate choices change the guitar’s response."
+  },
+  "you": {
+    "title": "You",
+    "preferences": "Preferences",
+    "language": "Language",
+    "theme": "Theme",
+    "administration": "Administration"
   },
   "shell": {
     "signedInAs": "Signed in as",

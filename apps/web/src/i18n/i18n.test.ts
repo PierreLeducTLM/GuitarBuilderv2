@@ -56,10 +56,12 @@ describe("message catalogs", () => {
   it("uses the spec's English and French labels", () => {
     expect([en.nav.builds, fr.nav.builds]).toEqual(["Builds", "Constructions"]);
     expect([en.shell.signOut, fr.shell.signOut]).toEqual(["Sign Out", "Déconnexion"]);
-    expect([en.nav.woodProperties, fr.nav.woodProperties]).toEqual([
-      "Wood Props",
-      "Propriétés Bois",
-    ]);
+    expect([en.nav.tools, fr.nav.tools]).toEqual(["Tools", "Outils"]);
+    expect([en.nav.assistant, fr.nav.assistant]).toEqual(["Assistant", "Assistant"]);
+    expect([en.nav.you, fr.nav.you]).toEqual(["You", "Vous"]);
+    expect([en.nav.woodPanels, fr.nav.woodPanels]).toEqual(["Wood panels", "Panneaux de bois"]);
+    expect([en.nav.simulator, fr.nav.simulator]).toEqual(["Simulator", "Simulateur"]);
+    expect([en.nav.references, fr.nav.references]).toEqual(["References", "Références"]);
     expect([en.dialog.cancel, fr.dialog.cancel]).toEqual(["Cancel", "Annuler"]);
     expect(en.app.documentTitle).toBe("Guitar Build Tracking App");
   });
