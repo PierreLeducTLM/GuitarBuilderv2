@@ -34,3 +34,12 @@ export function groupOf(key: StepKey): TemplateGroup {
   const { group } = templateStep(key);
   return TEMPLATE_GROUPS[group - 1] as TemplateGroup;
 }
+
+/** The groups before and after `group` in group order (part flow navigation). */
+export function neighbourGroups(group: TemplateGroup): {
+  previous: TemplateGroup | null;
+  next: TemplateGroup | null;
+} {
+  const index = TEMPLATE_GROUPS.indexOf(group);
+  return { previous: TEMPLATE_GROUPS[index - 1] ?? null, next: TEMPLATE_GROUPS[index + 1] ?? null };
+}

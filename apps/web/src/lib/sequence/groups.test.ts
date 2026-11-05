@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import en from "../../../messages/en.json";
 import fr from "../../../messages/fr.json";
-import { groupByKey, groupOf, TEMPLATE_GROUPS } from "./groups";
+import { groupByKey, groupOf, neighbourGroups, TEMPLATE_GROUPS } from "./groups";
 import { TEMPLATE_STEPS } from "./template";
 
 /** The nearest folder above this file that holds `openspec/`. */
@@ -74,5 +74,17 @@ describe("template groups", () => {
     expect(TEMPLATE_GROUPS.filter((group) => group.assembly).map((group) => group.id)).toEqual([
       11, 12, 13, 14, 15,
     ]);
+  });
+});
+
+describe("neighbourGroups", () => {
+  it("gives the groups before and after in group order", () => {
+    const { previous, next } = neighbourGroups(groupByKey("fretboard") ?? TEMPLATE_GROUPS[0]);
+    expect([previous?.key, next?.key]).toEqual(["truss-rod", "neck"]);
+  });
+
+  it("has nothing before the first group and nothing after the last", () => {
+    expect(neighbourGroups(TEMPLATE_GROUPS[0]).previous).toBeNull();
+    expect(neighbourGroups(TEMPLATE_GROUPS[14]).next).toBeNull();
   });
 });

@@ -252,6 +252,15 @@
       "from": "from {groups}",
       "tile": "{name}, {completed} of {total} steps, {state}",
       "loading": "Loading map..."
+    },
+    "flow": {
+      "progress": "{completed} / {total} done",
+      "comesFrom": "Comes from",
+      "leadsTo": "Leads to",
+      "link": "{step} ({group})",
+      "previous": "Previous part: {group}",
+      "next": "Next part: {group}",
+      "steps": "Steps of {group}"
     }
   },
   "groups": {

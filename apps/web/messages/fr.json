@@ -252,6 +252,15 @@
       "from": "venant de {groups}",
       "tile": "{name}, {completed} étapes sur {total}, {state}",
       "loading": "Chargement de la carte..."
+    },
+    "flow": {
+      "progress": "{completed} / {total} terminées",
+      "comesFrom": "Vient de",
+      "leadsTo": "Mène à",
+      "link": "{step} ({group})",
+      "previous": "Partie précédente : {group}",
+      "next": "Partie suivante : {group}",
+      "steps": "Étapes : {group}"
     }
   },
   "groups": {

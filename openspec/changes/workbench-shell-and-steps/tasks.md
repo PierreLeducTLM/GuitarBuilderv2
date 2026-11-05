@@ -82,7 +82,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
   - "Loading map..." until the step state is ready.
 
   Verify component tests for the Build Map and Ready Steps scenarios and the French tile names
-- [ ] 6.2 Build the part flow page:
+- [x] 6.2 Build the part flow page:
   - a header with the group name, "<c> / <t> done", previous and next group controls, and a return control to the map;
   - rows as CSS grids, with an SVG connector layer and skip edges drawn in the gutter (design decision 6);
   - "Comes from" and "Leads to" links;
