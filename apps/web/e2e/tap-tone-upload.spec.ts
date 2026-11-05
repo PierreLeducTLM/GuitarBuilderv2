@@ -72,9 +72,7 @@ test("shows the reader in French", async ({ page, context }) => {
   });
   await signIn(page, LUTHIER, `/builds/${build.id}`);
   await context.addCookies([{ name: "gb-locale", value: "fr", url: "http://127.0.0.1:3100" }]);
-  await page.reload();
-  await page.getByRole("tab", { name: fr.builds.detail.tabSequence }).click();
-  await openStep(page);
+  await openStep(page, build.id);
   await page.getByRole("button", { name: fr.sequence.measurement.addAnalysis }).click();
   const dialog = page.getByRole("dialog", { name: fr.tapTone.title });
   await expect(dialog).toBeVisible();

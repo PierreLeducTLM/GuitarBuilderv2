@@ -25,17 +25,16 @@ export async function openReader(page: Page, build: Partial<SeedBuild> = {}) {
     ...build,
   });
   await signIn(page, LUTHIER, `/builds/${seeded.id}`);
-  await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-  await openStep(page);
+  await openStep(page, seeded.id);
   await page.getByRole("button", { name: en.sequence.measurement.addAnalysis }).click();
   return seeded;
 }
 
-/** Opens the step; dispatching the click also works when the diagram puts it off screen on a phone. */
-export async function openStep(page: Page) {
-  const node = page.locator("[data-step=TapTestPanels]");
-  await expect(node).toBeAttached();
-  await node.dispatchEvent("click");
+/** Opens the "Tap test panels" step screen. */
+export async function openStep(page: Page, buildId: string) {
+  await page.goto(`/builds/${buildId}/steps/TapTestPanels`);
+  await expect(page.locator("article")).toBeVisible();
+  await page.waitForLoadState("networkidle");
 }
 
 export const reader = (page: Page) => page.getByRole("dialog", { name: en.tapTone.title });

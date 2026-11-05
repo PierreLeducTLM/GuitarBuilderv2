@@ -21,10 +21,9 @@ test("offers the Camera button on a device with a camera", async ({ page }) => {
     guitar_type: "classical",
   });
   await signIn(page, LUTHIER, `/builds/${build.id}`);
-  await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-  await page.locator("[data-step=JoinPanels]").click();
-  const dialog = page.getByRole("dialog").first();
-  await expect(dialog.getByRole("button", { name: en.sequence.photo.camera })).toBeVisible();
-  await expect(dialog.getByTestId("camera-input")).toHaveAttribute("capture", "environment");
-  await expect(dialog.getByTestId("camera-input")).toHaveAttribute("accept", "image/*");
+  await page.goto(`/builds/${build.id}/steps/JoinPanels`);
+  const photos = page.getByRole("region", { name: en.sequence.photos });
+  await expect(photos.getByRole("button", { name: en.sequence.photo.camera })).toBeVisible();
+  await expect(photos.getByTestId("camera-input")).toHaveAttribute("capture", "environment");
+  await expect(photos.getByTestId("camera-input")).toHaveAttribute("accept", "image/*");
 });

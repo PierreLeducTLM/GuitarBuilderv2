@@ -183,10 +183,8 @@ export function StepScreen({
         />
       </section>
 
-      <section aria-labelledby={`${notesId}-photos`} className="flex flex-col gap-2">
-        <h3 id={`${notesId}-photos`} className="text-base font-semibold text-fg">
-          {t("sequence.photos")}
-        </h3>
+      <section aria-label={t("sequence.photos")} className="flex flex-col gap-2">
+        <h3 className="text-base font-semibold text-fg">{t("sequence.photos")}</h3>
         <StepPhotos
           buildId={buildId}
           stepKey={stepKey}
@@ -197,10 +195,8 @@ export function StepScreen({
         />
       </section>
 
-      <section aria-labelledby={`${notesId}-sound`} className="flex flex-col gap-2">
-        <h3 id={`${notesId}-sound`} className="text-base font-semibold text-fg">
-          {t("sequence.soundAnalysis")}
-        </h3>
+      <section aria-label={t("sequence.soundAnalysis")} className="flex flex-col gap-2">
+        <h3 className="text-base font-semibold text-fg">{t("sequence.soundAnalysis")}</h3>
         <StepMeasurements
           stepKey={stepKey}
           stepLabel={label}

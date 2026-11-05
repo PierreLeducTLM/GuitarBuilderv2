@@ -57,8 +57,6 @@ test("records taps on a build step, labels the body, moves Top and saves the ana
   await expect.poll(async () => (await storedMeasurements(build.id)).length).toBe(1);
 
   await page.reload();
-  await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-  await page.locator("[data-step=TapTestPanels]").click();
   const entry = page.locator("[data-measurement]").first();
   await expect(entry).toContainText("Box closed");
   await expect(entry.locator("[data-roles]")).toContainText(/Air 9[78]\.\d Hz · Top 24[78]\.\d Hz/);

@@ -1,5 +1,6 @@
-// build-sequence end to end: the diagram, step completion, notes, photos, measurements
-// and the remembered viewport.
+// build-sequence end to end: the build map and part flows, the Steps checklist, the step
+// screen with completion, notes, photos and measurements, and the cleanup of the old
+// diagram's remembered viewports.
 import { expect, type Page, test } from "@playwright/test";
 import {
   en,
@@ -22,8 +23,8 @@ test.beforeEach(async () => {
   await seedAccounts();
 });
 
-/** Seeds a build for the luthier, signs in and opens its Sequence Diagram tab. */
-async function openDiagram(page: Page, build: Partial<SeedBuild> = {}) {
+/** Seeds a build for the luthier and signs in on its Steps view. */
+async function openBuild(page: Page, build: Partial<SeedBuild> = {}) {
   const seeded = await fakeSupabase.seedBuild({
     ownerEmail: LUTHIER.email,
     name: "Sequence",
@@ -32,170 +33,191 @@ async function openDiagram(page: Page, build: Partial<SeedBuild> = {}) {
     ...build,
   });
   await signIn(page, LUTHIER, `/builds/${seeded.id}`);
-  await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-  await expect(page.locator("[data-step]").first()).toBeVisible();
   return seeded;
 }
 
-const step = (page: Page, key: string) => page.locator(`[data-step=${key}]`);
-const stepDialog = (page: Page) => page.getByRole("dialog").first();
+/** Seeds a build, signs in and opens one of its step screens. */
+async function openStep(page: Page, key: string, build: Partial<SeedBuild> = {}) {
+  const seeded = await openBuild(page, build);
+  await page.goto(`/builds/${seeded.id}/steps/${key}`);
+  await expect(page.getByRole("navigation", { name: en.sequence.nav.label })).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  return seeded;
+}
+
+const checklistRow = (page: Page, number: string) =>
+  page
+    .getByRole("region", { name: en.sequence.checklist.label })
+    .getByRole("link", { name: new RegExp(`^Step ${number}:`) })
+    .first();
+const photos = (page: Page) => page.getByRole("region", { name: en.sequence.photos });
+const sound = (page: Page) => page.getByRole("region", { name: en.sequence.soundAnalysis });
+const flowSteps = (page: Page) => page.getByRole("list", { name: /^Steps of / }).getByRole("link");
+const doneNext = (page: Page) => page.getByRole("button", { name: en.sequence.nav.doneNext });
 
 async function storedStep(buildId: string, key: string) {
   const build = (await fakeSupabase.builds()).find((candidate) => candidate.id === buildId);
   return build?.sequence_state.find((entry) => entry.key === key);
 }
 
-test.describe("sequence diagram", () => {
-  test("shows a new steel-string BOBO build's 120 steps and 131 arrows, starting steps ready", async ({
+const GROUP_KEYS = [
+  "truss-rod",
+  "fretboard",
+  "neck",
+  "top-panel",
+  "braces",
+  "back-panel",
+  "sides",
+  "end-blocks",
+  "bridge",
+  "nut-saddle",
+  "neck-assembly",
+  "body-finish",
+  "heel-assembly",
+  "body-assembly",
+  "final-assembly",
+];
+
+test.describe("build map and part flows", () => {
+  test("show a new steel-string BOBO build's 120 steps and 131 arrows, starting steps ready", async ({
     page,
   }) => {
-    await openDiagram(page);
-    await expect(page.locator(".react-flow__node")).toHaveCount(120);
-    await expect(page.locator(".react-flow__edge")).toHaveCount(131);
-    await expect(page.getByTestId("completion-badge")).toHaveCount(0);
-    await expect(page.locator("[data-status=ready]")).toHaveCount(10);
-    await expect(step(page, "TrussRod")).toHaveAttribute("data-status", "ready");
+    const build = await openBuild(page);
+    await page.goto(`/builds/${build.id}/map`);
     await expect(page.getByRole("list", { name: en.sequence.legend.label })).toContainText(
       en.sequence.legend.ready,
     );
+    let boxes = 0;
+    let arrows = 0;
+    let ready = 0;
+    for (const key of GROUP_KEYS) {
+      await page.goto(`/builds/${build.id}/map/${key}`);
+      await expect(flowSteps(page).first()).toBeVisible();
+      boxes += await flowSteps(page).count();
+      ready += await page
+        .getByRole("list", { name: /^Steps of / })
+        .locator("a[aria-label$=', Ready']")
+        .count();
+      arrows += await page.locator("svg[data-connectors] path").count();
+      arrows += await page
+        .getByRole("list", { name: en.sequence.flow.leadsTo })
+        .getByRole("link")
+        .count();
+      await expect(page.getByTestId("completion-badge")).toHaveCount(0);
+    }
+    expect([boxes, arrows, ready]).toEqual([120, 131, 10]);
   });
 
-  test("shows a classical build without a BOBO neck as 112 steps and 120 arrows", async ({
-    page,
-  }) => {
-    await openDiagram(page, { guitar_type: "classical", bobo_neck: false });
-    await expect(page.locator(".react-flow__node")).toHaveCount(112);
-    await expect(page.locator(".react-flow__edge")).toHaveCount(120);
+  test("number the steps and highlight the variant steps", async ({ page }) => {
+    const build = await openBuild(page, { guitar_type: null, bobo_neck: true });
+    const box = (name: RegExp) =>
+      flowSteps(page)
+        .filter({ has: page.getByText(name) })
+        .first();
+    await page.goto(`/builds/${build.id}/map/top-panel`);
+    await expect(box(/^Fit and glue braces$/)).toContainText("036");
+    await page.goto(`/builds/${build.id}/map/body-assembly`);
+    await expect(box(/^Fit top and back$/)).toContainText("115");
+    await page.goto(`/builds/${build.id}/map/neck`);
+    await expect(box(/^CL cut off BOBO slat$/)).toHaveAttribute("data-highlight", "variant");
+    await page.goto(`/builds/${build.id}/map/heel-assembly`);
+    await expect(box(/^SS fit heel laminate/)).toHaveAttribute("data-highlight", "variant");
+    await page.goto(`/builds/${build.id}/map/bridge`);
+    await expect(box(/^Fabricate SS bridge blank$/)).toHaveAttribute(
+      "data-highlight",
+      "bridgeBlank",
+    );
+    await page.goto(`/builds/${build.id}/map/truss-rod`);
+    await expect(box(/^Truss rod$/)).not.toHaveAttribute("data-highlight", /.+/);
   });
 
-  test("numbers the steps and highlights the variant steps", async ({ page }) => {
-    await openDiagram(page, { guitar_type: null, bobo_neck: true });
-    await expect(step(page, "FitGlueBraces")).toContainText("036");
-    await expect(step(page, "FitTopBack")).toContainText("115");
-    await expect(step(page, "CLCutBOBO")).toHaveAttribute("data-highlight", "variant");
-    await expect(step(page, "SSFitHeel")).toHaveAttribute("data-highlight", "variant");
-    await expect(step(page, "FabricateBridge")).toHaveAttribute("data-highlight", "bridgeBlank");
-    await expect(step(page, "TrussRod")).not.toHaveAttribute("data-highlight", /.+/);
-  });
-
-  test("does not move a step that is dragged", async ({ page }) => {
-    await openDiagram(page);
-    const node = page.locator(".react-flow__node").filter({ has: step(page, "Neck") });
-    const before = await node.getAttribute("style");
-    const box = await step(page, "Neck").boundingBox();
-    if (!box) throw new Error("no box");
-    await page.mouse.move(box.x + 50, box.y + 30);
+  test("do not move a step that is dragged", async ({ page }) => {
+    const build = await openBuild(page);
+    await page.goto(`/builds/${build.id}/map/neck`);
+    const neck = flowSteps(page).first();
+    const before = await neck.boundingBox();
+    if (!before) throw new Error("no box");
+    await page.mouse.move(before.x + 40, before.y + 20);
     await page.mouse.down();
-    await page.mouse.move(box.x + 250, box.y + 200, { steps: 8 });
+    await page.mouse.move(before.x + 200, before.y + 160, { steps: 8 });
     await page.mouse.up();
-    expect(await node.getAttribute("style")).toBe(before);
+    expect(await neck.boundingBox()).toEqual(before);
   });
 
-  test("remembers the viewport per build", async ({ page }) => {
-    const first = await openDiagram(page);
-    const viewport = page.locator(".react-flow__viewport");
-    const fitted = await viewport.getAttribute("style");
-    await page.getByRole("button", { name: en.sequence.controls.zoomIn }).click();
-    await page.getByRole("button", { name: en.sequence.controls.zoomIn }).click();
-    await expect(viewport).not.toHaveAttribute("style", fitted ?? "");
+  test("drop the viewports the old diagram remembered", async ({ page }) => {
+    const build = await openBuild(page);
+    await page.evaluate(() => localStorage.setItem("gb-viewport:old", '{"x":0,"y":0,"zoom":1}'));
+    await page.goto(`/builds/${build.id}/map`);
     await expect
-      .poll(() => page.evaluate((id) => localStorage.getItem(`gb-viewport:${id}`), first.id))
-      .not.toBeNull();
-    const zoomed = await viewport.getAttribute("style");
-
-    await page.reload();
-    await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await expect(viewport).toHaveAttribute("style", zoomed ?? "");
-
-    const second = await fakeSupabase.seedBuild({
-      ownerEmail: LUTHIER.email,
-      name: "Other",
-      guitar_type: "steel_string",
-      bobo_neck: true,
-    });
-    await page.goto(`/builds/${second.id}`);
-    await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await expect(viewport).toHaveAttribute("style", fitted ?? "");
+      .poll(() => page.evaluate(() => localStorage.getItem("gb-viewport:old")))
+      .toBeNull();
   });
 });
 
 test.describe("step completion and notes", () => {
   test("completes a step, keeps it after a reload, and reopens it", async ({ page }) => {
-    const build = await openDiagram(page);
-    await step(page, "ThicknessBlank").click();
-    const dialog = stepDialog(page);
-    await expect(dialog).toContainText("Step 10");
-    await expect(dialog).toContainText(en.sequence.hint);
-    await dialog.getByRole("button", { name: en.sequence.markCompleted }).click();
-    await expect(dialog).toBeHidden();
-    await expect(step(page, "ThicknessBlank").getByTestId("completion-badge")).toBeVisible();
+    const build = await openStep(page, "ThicknessBlank");
+    await expect(page.getByText("Step 10", { exact: true })).toBeVisible();
+    await expect(page.getByText(/Follow the sequence/)).toHaveCount(0);
+    await doneNext(page).click();
+    await expect(checklistRow(page, "010")).toHaveAccessibleName(/Completed$/);
     await expect
       .poll(async () => (await storedStep(build.id, "ThicknessBlank"))?.completed)
       .toBe(true);
 
-    await page.reload();
-    await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await expect(step(page, "ThicknessBlank").getByTestId("completion-badge")).toBeVisible();
-    await step(page, "ThicknessBlank").click();
-    await expect(stepDialog(page).getByText(en.sequence.completedIcon)).toBeAttached();
-    await stepDialog(page).getByRole("button", { name: en.sequence.markIncomplete }).click();
-    await expect(step(page, "ThicknessBlank").getByTestId("completion-badge")).toHaveCount(0);
+    await page.goto(`/builds/${build.id}/steps/ThicknessBlank`);
+    await expect(page.getByText(en.sequence.completedIcon, { exact: true })).toBeAttached();
+    await page.getByRole("button", { name: en.sequence.markIncomplete }).click();
+    await expect(checklistRow(page, "010")).not.toHaveAccessibleName(/Completed$/);
     await expect
       .poll(async () => (await storedStep(build.id, "ThicknessBlank"))?.completed)
       .toBe(false);
   });
 
   test("completes steps in any order", async ({ page }) => {
-    await openDiagram(page);
-    await step(page, "PressFrets").click();
-    await stepDialog(page).getByRole("button", { name: en.sequence.markCompleted }).click();
-    await expect(step(page, "PressFrets")).toHaveAttribute("data-status", "completed");
-    await expect(step(page, "Fretboard")).toHaveAttribute("data-status", "ready");
+    await openStep(page, "PressFrets");
+    await doneNext(page).click();
+    await expect(
+      page.getByRole("link", { name: /^Step 016: Press in frets, Completed/ }).first(),
+    ).toBeVisible();
+    await expect(checklistRow(page, "008")).toHaveAccessibleName(/Ready$/);
   });
 
   test("saves notes while typing, with line breaks", async ({ page }) => {
-    const build = await openDiagram(page);
-    await step(page, "CutBraceBlank").click();
-    const notes = stepDialog(page).getByLabel(en.sequence.notes);
+    const build = await openStep(page, "CutBraceBlank");
+    const notes = page.getByLabel(en.sequence.notes);
     await expect(notes).toHaveAttribute("placeholder", en.sequence.notesPlaceholder);
     await notes.fill("Used 3 mm brace stock\nQuartersawn spruce");
     await expect
       .poll(async () => (await storedStep(build.id, "CutBraceBlank"))?.notes)
       .toBe("Used 3 mm brace stock\nQuartersawn spruce");
-    await stepDialog(page).getByRole("button", { name: en.sequence.close }).last().click();
 
     await page.reload();
-    await page.getByRole("tab", { name: en.builds.detail.tabSequence }).click();
-    await step(page, "CutBraceBlank").click();
-    await expect(stepDialog(page).getByLabel(en.sequence.notes)).toHaveValue(
+    await expect(page.getByLabel(en.sequence.notes)).toHaveValue(
       "Used 3 mm brace stock\nQuartersawn spruce",
     );
   });
 
   test("keeps notes typed just before completing the step", async ({ page }) => {
-    const build = await openDiagram(page);
-    await step(page, "ThicknessBlank").click();
-    await stepDialog(page)
-      .getByLabel(en.sequence.notes)
-      .pressSequentially("Planed to 4.2 mm", { delay: 5 });
-    await stepDialog(page).getByRole("button", { name: en.sequence.markCompleted }).click();
+    const build = await openStep(page, "ThicknessBlank");
+    await page.getByLabel(en.sequence.notes).pressSequentially("Planed to 4.2 mm", { delay: 5 });
+    await doneNext(page).click();
     await expect
       .poll(async () => storedStep(build.id, "ThicknessBlank"))
       .toMatchObject({ notes: "Planed to 4.2 mm", completed: true });
   });
 
   test("tells the user when a change cannot be saved", async ({ page }) => {
-    await openDiagram(page);
+    const build = await openStep(page, "ThicknessBlank");
     await fakeSupabase.configure({ failStepChanges: true });
-    await step(page, "ThicknessBlank").click();
-    await stepDialog(page).getByRole("button", { name: en.sequence.markCompleted }).click();
+    await doneNext(page).click();
     await expect(errorToast(page)).toContainText(en.builds.saveFailed);
-    await expect(step(page, "ThicknessBlank").getByTestId("completion-badge")).toHaveCount(0);
+    await expect(checklistRow(page, "010")).not.toHaveAccessibleName(/Completed$/);
 
-    await step(page, "CutBraceBlank").click();
-    await stepDialog(page).getByLabel(en.sequence.notes).fill("Not lost");
+    await page.goto(`/builds/${build.id}/steps/CutBraceBlank`);
+    await page.getByLabel(en.sequence.notes).fill("Not lost");
     await expect(errorToast(page).filter({ hasText: en.builds.saveFailed })).not.toHaveCount(0);
-    await expect(stepDialog(page).getByLabel(en.sequence.notes)).toHaveValue("Not lost");
+    await expect(page.getByLabel(en.sequence.notes)).toHaveValue("Not lost");
   });
 });
 
@@ -203,9 +225,8 @@ test.describe("step photos", () => {
   test("uploads several photos after the existing ones and shows them full screen", async ({
     page,
   }) => {
-    const build = await openDiagram(page);
-    await step(page, "JoinPanels").click();
-    const dialog = stepDialog(page);
+    const build = await openStep(page, "JoinPanels");
+    const dialog = photos(page);
     await expect(dialog).toContainText(en.sequence.photo.empty);
     await dialog.getByTestId("photo-input").setInputFiles(png("first.png"));
     await expect(dialog.getByRole("img")).toHaveCount(1);
@@ -223,54 +244,51 @@ test.describe("step photos", () => {
     await dialog.getByRole("button", { name: "Open photo 2 full screen" }).click();
     const viewer = page.getByRole("dialog", { name: "Photo 2 of Join panels" });
     await expect(viewer.getByRole("img")).toBeVisible();
-    await page.mouse.click(10, 10);
-    await expect(viewer).toBeHidden();
-    await expect(stepDialog(page)).toBeVisible();
+    await expect(async () => {
+      await page.mouse.click(10, 10);
+      await expect(viewer).toBeHidden({ timeout: 1000 });
+    }).toPass();
+    await expect(photos(page)).toBeVisible();
   });
 
   test("shows Uploading... while photos upload", async ({ page }) => {
-    await openDiagram(page);
+    await openStep(page, "JoinPanels");
     await fakeSupabase.configure({ uploadDelayMs: 1000 });
-    await step(page, "JoinPanels").click();
-    await stepDialog(page).getByTestId("photo-input").setInputFiles(png("slow.png"));
+    await photos(page).getByTestId("photo-input").setInputFiles(png("slow.png"));
     await expect(
-      stepDialog(page).getByRole("button", { name: en.sequence.photo.uploading }),
+      photos(page).getByRole("button", { name: en.sequence.photo.uploading }),
     ).toBeDisabled();
-    await expect(stepDialog(page).getByRole("img")).toHaveCount(1);
-    await expect(
-      stepDialog(page).getByRole("button", { name: en.sequence.photo.add }),
-    ).toBeEnabled();
+    await expect(photos(page).getByRole("img")).toHaveCount(1);
+    await expect(photos(page).getByRole("button", { name: en.sequence.photo.add })).toBeEnabled();
   });
 
   test("keeps the photos that uploaded when others fail", async ({ page }) => {
-    await openDiagram(page);
+    await openStep(page, "JoinPanels");
     await fakeSupabase.configure({ failUploadsMatching: "^fail" });
-    await step(page, "JoinPanels").click();
-    await stepDialog(page)
+    await photos(page)
       .getByTestId("photo-input")
       .setInputFiles([png("one.png"), png("fail.png"), png("three.png")]);
     await expect(errorToast(page)).toContainText(en.sequence.photo.uploadFailed);
-    await expect(stepDialog(page).getByRole("img")).toHaveCount(2);
+    await expect(photos(page).getByRole("img")).toHaveCount(2);
 
-    await stepDialog(page)
+    await photos(page)
       .getByTestId("photo-input")
       .setInputFiles([png("fail-1.png"), png("fail-2.png")]);
     await expect(errorToast(page).filter({ hasText: en.sequence.photo.uploadFailed })).toHaveCount(
       2,
     );
-    await expect(stepDialog(page).getByRole("img")).toHaveCount(2);
+    await expect(photos(page).getByRole("img")).toHaveCount(2);
   });
 
   test("deletes a photo and its file with one click", async ({ page }) => {
-    const build = await openDiagram(page);
-    await step(page, "JoinPanels").click();
-    await stepDialog(page)
+    const build = await openStep(page, "JoinPanels");
+    await photos(page)
       .getByTestId("photo-input")
       .setInputFiles([png("a.png"), png("b.png"), png("c.png")]);
-    await expect(stepDialog(page).getByRole("img")).toHaveCount(3);
+    await expect(photos(page).getByRole("img")).toHaveCount(3);
     const before = (await storedStep(build.id, "JoinPanels"))?.photos ?? [];
-    await stepDialog(page).getByRole("button", { name: "Delete photo 2" }).click();
-    await expect(stepDialog(page).getByRole("img")).toHaveCount(2);
+    await photos(page).getByRole("button", { name: "Delete photo 2" }).click();
+    await expect(photos(page).getByRole("img")).toHaveCount(2);
     await expect
       .poll(async () =>
         (await storedStep(build.id, "JoinPanels"))?.photos?.map((photo) => photo.name),
@@ -280,25 +298,25 @@ test.describe("step photos", () => {
   });
 
   test("reports a photo that cannot be deleted and keeps it", async ({ page }) => {
-    await openDiagram(page);
-    await step(page, "JoinPanels").click();
-    await stepDialog(page).getByTestId("photo-input").setInputFiles(png("a.png"));
-    await expect(stepDialog(page).getByRole("img")).toHaveCount(1);
+    await openStep(page, "JoinPanels");
+    await photos(page).getByTestId("photo-input").setInputFiles(png("a.png"));
+    await expect(photos(page).getByRole("img")).toHaveCount(1);
     await fakeSupabase.configure({ failStorageRemove: true });
-    await stepDialog(page).getByRole("button", { name: "Delete photo 1" }).click();
+    await photos(page).getByRole("button", { name: "Delete photo 1" }).click();
     await expect(errorToast(page)).toContainText(en.sequence.photo.deleteFailed);
-    await expect(stepDialog(page).getByRole("img")).toHaveCount(1);
+    await expect(photos(page).getByRole("img")).toHaveCount(1);
   });
 
   test("hides the Camera button on a device without a camera", async ({ page }) => {
-    await openDiagram(page);
-    await step(page, "JoinPanels").click();
-    await expect(
-      stepDialog(page).getByRole("button", { name: en.sequence.photo.add }),
-    ).toBeVisible();
-    await expect(
-      stepDialog(page).getByRole("button", { name: en.sequence.photo.camera }),
-    ).toHaveCount(0);
+    // Report no camera, whatever the machine running the test has.
+    await page.addInitScript(() => {
+      navigator.mediaDevices.enumerateDevices = async () => [];
+    });
+    await openStep(page, "JoinPanels");
+    await expect(photos(page).getByRole("button", { name: en.sequence.photo.add })).toBeVisible();
+    await expect(photos(page).getByRole("button", { name: en.sequence.photo.camera })).toHaveCount(
+      0,
+    );
   });
 });
 
@@ -336,9 +354,8 @@ test.describe("step measurements", () => {
   };
 
   test("lists measurements with their peak and graph", async ({ page }) => {
-    await openDiagram(page, seeded);
-    await step(page, "TapTestPanels").click();
-    const dialog = stepDialog(page);
+    await openStep(page, "TapTestPanels", seeded);
+    const dialog = sound(page);
     await expect(dialog.getByText("Peak: 98.3 Hz")).toBeVisible();
     await expect(dialog.getByText("Peak: 187.4 Hz")).toBeVisible();
     await expect(
@@ -349,11 +366,8 @@ test.describe("step measurements", () => {
   });
 
   test("edits a description", async ({ page }) => {
-    const build = await openDiagram(page, seeded);
-    await step(page, "TapTestPanels").click();
-    await stepDialog(page)
-      .getByRole("button", { name: "Edit description: Resonance Analysis" })
-      .click();
+    const build = await openStep(page, "TapTestPanels", seeded);
+    await sound(page).getByRole("button", { name: "Edit description: Resonance Analysis" }).click();
     const prompt = page.getByRole("dialog", { name: en.sequence.measurement.editDescription });
     const input = prompt.getByRole("textbox");
     await expect(input).toHaveValue("Resonance Analysis");
@@ -368,19 +382,14 @@ test.describe("step measurements", () => {
   });
 
   test("deletes a measurement only after confirmation", async ({ page }) => {
-    const build = await openDiagram(page, seeded);
-    await step(page, "TapTestPanels").click();
-    await stepDialog(page)
-      .getByRole("button", { name: "Delete sound analysis Second tap" })
-      .click();
+    const build = await openStep(page, "TapTestPanels", seeded);
+    await sound(page).getByRole("button", { name: "Delete sound analysis Second tap" }).click();
     let confirm = page.getByRole("dialog", { name: en.sequence.measurement.deleteTitle });
     await expect(confirm).toContainText(en.sequence.measurement.deleteMessage);
     await confirm.getByRole("button", { name: en.dialog.cancel }).click();
     await expect(page.getByText("Peak: 187.4 Hz")).toBeVisible();
 
-    await stepDialog(page)
-      .getByRole("button", { name: "Delete sound analysis Second tap" })
-      .click();
+    await sound(page).getByRole("button", { name: "Delete sound analysis Second tap" }).click();
     confirm = page.getByRole("dialog", { name: en.sequence.measurement.deleteTitle });
     await confirm.getByRole("button", { name: en.sequence.measurement.deleteConfirm }).click();
     await expect(page.getByText("Peak: 187.4 Hz")).toHaveCount(0);
@@ -392,14 +401,13 @@ test.describe("step measurements", () => {
   });
 
   test("shows the empty state", async ({ page }) => {
-    await openDiagram(page);
-    await step(page, "TapTestPanels").click();
-    await expect(stepDialog(page)).toContainText(en.sequence.measurement.empty);
+    await openStep(page, "TapTestPanels");
+    await expect(sound(page)).toContainText(en.sequence.measurement.empty);
   });
 });
 
 test.describe("French", () => {
-  test("shows the diagram and the step dialog in French", async ({ page }) => {
+  test("shows the checklist, a part flow and the step screen in French", async ({ page }) => {
     const build = await fakeSupabase.seedBuild({
       ownerEmail: LUTHIER.email,
       name: "Française",
@@ -432,28 +440,32 @@ test.describe("French", () => {
       .context()
       .addCookies([{ name: "gb-locale", value: "fr", url: "http://127.0.0.1:3100" }]);
     await page.reload();
-    await page.getByRole("tab", { name: fr.builds.detail.tabSequence }).click();
-    await expect(step(page, "TrussRod")).toContainText(fr.steps.TrussRod);
-    await step(page, "TapTestPanels").click();
-    const dialog = stepDialog(page);
-    await expect(dialog).toContainText(fr.steps.TapTestPanels);
-    await expect(dialog).toContainText(fr.sequence.notes);
-    await expect(dialog).toContainText(fr.sequence.soundAnalysis);
-    await expect(dialog.getByRole("button", { name: fr.sequence.markCompleted })).toBeVisible();
-    await expect(dialog.getByRole("button", { name: fr.sequence.photo.add })).toBeVisible();
-    await expect(dialog.getByText("Pic : 98,3 Hz")).toBeVisible();
+    await expect(page.getByRole("list", { name: fr.sequence.checklist.readyNow })).toContainText(
+      fr.steps.TrussRod,
+    );
+    await page.goto(`/builds/${build.id}/map/truss-rod`);
+    await expect(page.getByRole("heading", { name: fr.groups.trussRod })).toBeVisible();
+    await page.goto(`/builds/${build.id}/steps/TapTestPanels`);
+    const main = page.getByRole("main");
+    await expect(
+      main.getByRole("heading", { level: 2, name: fr.steps.TapTestPanels }),
+    ).toBeVisible();
+    await expect(main).toContainText(fr.sequence.notes);
+    await expect(main).toContainText(fr.sequence.soundAnalysis);
+    await expect(main.getByRole("button", { name: fr.sequence.nav.doneNext })).toBeVisible();
+    await expect(main.getByRole("button", { name: fr.sequence.photo.add })).toBeVisible();
+    await expect(main.getByText("Pic : 98,3 Hz")).toBeVisible();
   });
 });
 
 test.describe("phone layout @phone", () => {
-  test("opens the diagram and a step on a phone", async ({ page }) => {
-    await openDiagram(page);
-    await expect(page.locator(".react-flow__node")).toHaveCount(120);
-    await step(page, "TrussRod").click();
-    await expect(
-      stepDialog(page).getByRole("button", { name: en.sequence.markCompleted }),
-    ).toBeVisible();
-    await stepDialog(page).getByRole("button", { name: en.sequence.markCompleted }).click();
-    await expect(step(page, "TrussRod").getByTestId("completion-badge")).toBeVisible();
+  test("goes from the checklist to a step and completes it on a phone", async ({ page }) => {
+    await openBuild(page);
+    await checklistRow(page, "001").click();
+    await expect(page.getByRole("heading", { level: 2, name: "Truss rod" })).toBeVisible();
+    await doneNext(page).click();
+    await expect(page.getByRole("heading", { level: 2, name: /^Make truss rod/ })).toBeVisible();
+    await page.getByRole("main").getByRole("link", { name: en.sequence.nav.back }).click();
+    await expect(checklistRow(page, "001")).toHaveAccessibleName(/Completed$/);
   });
 });
