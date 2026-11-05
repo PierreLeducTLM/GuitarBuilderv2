@@ -113,8 +113,8 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
 ## 8. Removal and cleanup
 
-- [ ] 8.1 Delete `SequenceDiagram`, `StepNode` (and its test), `SequenceLegend`, `viewport.ts`, `lib/sequence/layout.ts` (and its test), `BuildTabs` and `BuildHeader`. Remove `@xyflow/react` and `@dagrejs/dagre` from `apps/web/package.json`. Verify `pnpm install`, `pnpm typecheck` and that `grep -r "xyflow\|dagre" apps/web/src` finds nothing
-- [ ] 8.2 On the first visit to any build page, remove every `localStorage` key starting with `gb-viewport:` once (guarded by try/catch). Verify a unit test of the cleanup function
+- [x] 8.1 Delete `SequenceDiagram`, `StepNode` (and its test), `SequenceLegend`, `viewport.ts`, `lib/sequence/layout.ts` (and its test), `BuildTabs` and `BuildHeader`. Remove `@xyflow/react` and `@dagrejs/dagre` from `apps/web/package.json`. Verify `pnpm install`, `pnpm typecheck` and that `grep -r "xyflow\|dagre" apps/web/src` finds nothing
+- [x] 8.2 On the first visit to any build page, remove every `localStorage` key starting with `gb-viewport:` once (guarded by try/catch). Verify a unit test of the cleanup function
 - [ ] 8.3 Remove `sequence.hint`, `sequence.controls.*` and the old tab keys from both catalogs. Verify the i18n tests pass and that `grep` finds no use of the removed keys
 
 ## 9. End-to-end and integration

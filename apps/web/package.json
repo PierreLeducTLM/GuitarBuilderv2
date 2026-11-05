@@ -14,14 +14,12 @@
     "fixtures:tap-tone": "node scripts/tap-tone-fixtures.ts"
   },
   "dependencies": {
-    "@dagrejs/dagre": "3.1.1",
     "@gb/db": "workspace:*",
     "@gb/dsp": "workspace:*",
     "@gb/ui": "workspace:*",
     "@pdf-lib/fontkit": "1.1.1",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",
-    "@xyflow/react": "12.12.0",
     "lucide-react": "1.66.0",
     "next": "16.4.3",
     "next-intl": "4.14.9",

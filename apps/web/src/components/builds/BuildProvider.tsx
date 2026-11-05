@@ -1,11 +1,12 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useMemo, useState } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { useStepStore } from "@/components/sequence/useStepStore";
 import type { BuildDetailData } from "@/lib/builds/types";
 import type { StepStates } from "@/lib/sequence/state";
 import type { StepStore } from "@/lib/sequence/store";
 import { type BuildVariant, type DisplayGraph, displayGraph } from "@/lib/sequence/variant";
+import { forgetDiagramViewports } from "@/lib/sequence/viewports";
 
 export interface BuildContextValue {
   build: BuildDetailData;
@@ -40,6 +41,7 @@ export function BuildProvider({
   });
   const { store, states } = useStepStore(build.id, build.sequenceState);
   const graph = useMemo(() => displayGraph(variant), [variant]);
+  useEffect(() => forgetDiagramViewports(() => window.localStorage), []);
   return (
     <BuildContext.Provider value={{ build, canEdit, variant, setVariant, graph, store, states }}>
       {children}
