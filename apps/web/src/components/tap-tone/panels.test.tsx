@@ -6,10 +6,15 @@ import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { formats } from "@/i18n/config";
-import type { RoleView } from "@/lib/tap-tone/machine";
 import en from "../../../messages/en.json";
 import fr from "../../../messages/fr.json";
-import { DetectedFrequency, DetectedPeaks, RolesPanel } from "./panels";
+import {
+  BodyModes,
+  type BodyModeView,
+  DetectedFrequency,
+  DetectedPeaks,
+  MainFrequency,
+} from "./panels";
 
 const withIntl = (node: ReactNode, locale: "en" | "fr" = "en") =>
   render(
@@ -111,62 +116,157 @@ describe("Detected Peaks list", () => {
   });
 });
 
-describe("Roles panel", () => {
-  const role = (frequency: number, origin: "auto" | "user" = "auto"): RoleView => ({
+describe("Body modes", () => {
+  const found = (frequency: number, overrides: Partial<BodyModeView> = {}): BodyModeView => ({
     frequency,
-    level: -20,
-    spectralQ: 30,
-    origin,
+    spectralQ: 26.2,
+    decayQ: { value: 31.4 },
+    origin: "auto",
+    ...overrides,
   });
 
-  it("lists Air, Top and Back with their frequency, origin, or Not identified", () => {
+  const renderModes = (
+    overrides: Partial<Parameters<typeof BodyModes>[0]> = {},
+    locale: "en" | "fr" = "en",
+  ) => {
+    const handlers = { onFocus: vi.fn(), onMove: vi.fn(), onClear: vi.fn() };
     withIntl(
-      <RolesPanel
-        roles={{ air: role(98.4), top: role(204.6, "user"), back: null }}
-        moving={null}
-        onMove={vi.fn()}
-        onClear={vi.fn()}
+      <BodyModes
+        modes={{ air: found(103.4), top: found(186.7, { origin: "user" }), back: null }}
+        focused={null}
+        moving={false}
+        {...handlers}
+        {...overrides}
       />,
+      locale,
     );
-    const rows = screen.getAllByRole("listitem").map((row) => row.textContent);
-    expect(rows[0]).toContain("Air");
-    expect(rows[0]).toContain("98.4 Hz");
-    expect(rows[0]).not.toContain("set by you");
-    expect(rows[1]).toContain("204.6 Hz");
-    expect(rows[1]).toContain("set by you");
-    expect(rows[2]).toContain("Not identified");
+    return handlers;
+  };
+
+  const tile = (name: RegExp) => screen.getByRole("button", { name });
+
+  it("shows each mode's number, frequency, note and both Q values", () => {
+    renderModes();
+    const air = tile(/^Air/).textContent;
+    expect(air).toContain("T(1,1)₁");
+    expect(air).toContain("103.4");
+    expect(air).toContain("Hz");
+    expect(air).toContain("Ab2 -7 c");
+    expect(air).toContain("Q 26 · decay 31");
+    expect(air).not.toContain("set by you");
+    expect(tile(/^Top/).textContent).toContain("T(1,1)₂");
+    expect(tile(/^Top/).textContent).toContain("set by you");
   });
 
-  it("starts moving a role and clears one from the keyboard", async () => {
-    const onMove = vi.fn();
-    const onClear = vi.fn();
+  it("shows a dash and Not identified for a mode that was not found", () => {
+    renderModes();
+    const back = tile(/^Back/).textContent;
+    expect(back).toContain("T(1,1)₃");
+    expect(back).toContain("—");
+    expect(back).toContain("Not identified");
+  });
+
+  it("shows dashes for missing Q values and progress while decay Q is measured", () => {
+    renderModes({
+      modes: {
+        air: found(103.4, { spectralQ: null, decayQ: { value: null, reason: "NO_DECAY" } }),
+        top: found(186.7, { decayQ: "pending" }),
+        back: null,
+      },
+    });
+    expect(tile(/^Air/).textContent).toContain("Q — · decay —");
+    expect(tile(/^Top/).textContent).toContain("Q 26 · decay …");
+  });
+
+  it("spotlights the chosen mode and offers Move and Clear for it", async () => {
     const user = userEvent.setup();
-    withIntl(
-      <RolesPanel
-        roles={{ air: role(98.4), top: role(196.9), back: null }}
-        moving={null}
-        onMove={onMove}
-        onClear={onClear}
-      />,
-    );
-    screen.getByRole("button", { name: "Move Top" }).focus();
-    await user.keyboard("{Enter}");
-    expect(onMove).toHaveBeenCalledWith("top");
-    await user.click(screen.getByRole("button", { name: "Clear Air" }));
-    expect(onClear).toHaveBeenCalledWith("air");
+    const handlers = renderModes({ focused: "top" });
+    expect(tile(/^Top/).getAttribute("aria-pressed")).toBe("true");
+    expect(tile(/^Air/).getAttribute("aria-pressed")).toBe("false");
+    await user.click(tile(/^Air/));
+    expect(handlers.onFocus).toHaveBeenCalledWith("air");
+    await user.click(screen.getByRole("button", { name: "Move Top" }));
+    expect(handlers.onMove).toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Clear Top" }));
+    expect(handlers.onClear).toHaveBeenCalledWith("top");
+  });
+
+  it("offers no actions until a mode is chosen", () => {
+    renderModes();
+    expect(screen.queryByRole("button", { name: /^Move|^Clear|^Assign/ })).toBeNull();
+  });
+
+  it("offers to assign a peak to a chosen mode that was not found", () => {
+    renderModes({ focused: "back" });
+    expect(screen.getByRole("button", { name: "Assign Back" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Clear Back" })).toBeNull();
   });
 
-  it("asks for a peak while a role is moving", () => {
+  it("asks for a peak while a mode is moving, in French too", () => {
+    renderModes({ focused: "back", moving: true }, "fr");
+    expect(screen.getByRole("status").textContent).toBe("Choisissez un pic pour Fond");
+    expect(
+      screen.getByRole("button", { name: "Attribuer Fond" }).getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(tile(/^Table/).textContent).toContain("Q 26 · amort. 31");
+  });
+});
+
+describe("Main frequency", () => {
+  const peaks = [186.7, 103.4, 220.8].map((f) => peak(f, { level: -13.84, note: "F#3 +16 c" }));
+
+  it("shows the main peak, the body mode it matches, its details and the peak buttons", async () => {
+    const onSelect = vi.fn();
     withIntl(
-      <RolesPanel
-        roles={{ air: null, top: null, back: null }}
-        moving="back"
-        onMove={vi.fn()}
-        onClear={vi.fn()}
+      <MainFrequency
+        peak={peaks[0]}
+        decayQ={{ value: 52.3 }}
+        sameAs="top"
+        peaks={peaks}
+        selected={0}
+        onSelect={onSelect}
+      />,
+    );
+    const section = screen.getByRole("region", { name: "Main frequency" });
+    expect(section.textContent).toContain("186.7");
+    expect(section.textContent).toContain("Same peak as Top");
+    expect(section.textContent).toContain("-13.8 dB · F#3 +16 c · Q 64 · decay 52");
+    const buttons = [...section.querySelectorAll("button")].map((b) => b.textContent);
+    expect(buttons).toEqual(["186.7 Hz (highest)", "103.4 Hz", "220.8 Hz"]);
+    await userEvent.setup().click(screen.getByRole("button", { name: "103.4 Hz" }));
+    expect(onSelect).toHaveBeenCalledWith(1);
+  });
+
+  it("explains missing values and says nothing about body modes when none matches", () => {
+    withIntl(
+      <MainFrequency
+        peak={peak(412, { spectralQ: null })}
+        decayQ={{ value: null, reason: "noRecording" }}
+        sameAs={null}
+        peaks={[peak(412)]}
+        selected={0}
+        onSelect={vi.fn()}
       />,
       "fr",
     );
-    expect(screen.getByRole("status").textContent).toBe("Choisissez un pic pour Fond");
+    const section = screen.getByRole("region", { name: "Fréquence principale" });
+    expect(section.textContent).toContain("Q — · amort. —");
+    expect(section.textContent).not.toContain("Même pic");
+    expect(section.querySelectorAll("button")).toHaveLength(0);
+    expect(screen.getByText("Le pic est trop large ou se confond avec un voisin")).toBeTruthy();
+  });
+
+  it("shows a dash without a selected peak", () => {
+    withIntl(
+      <MainFrequency
+        peak={undefined}
+        decayQ="pending"
+        sameAs={null}
+        peaks={[]}
+        selected={null}
+        onSelect={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole("region", { name: "Main frequency" }).textContent).toContain("—");
   });
 });

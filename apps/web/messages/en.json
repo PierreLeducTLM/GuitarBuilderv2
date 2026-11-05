@@ -552,6 +552,28 @@
       "excluded": "excluded (tap contact and filter edges)",
       "fitEnds": "fit ends here",
       "noise": "noise floor"
+    },
+    "bodyModes": {
+      "heading": "Body modes",
+      "hint": "Drag a label onto another peak",
+      "number": {
+        "air": "T(1,1)₁",
+        "top": "T(1,1)₂",
+        "back": "T(1,1)₃"
+      },
+      "q": "Q {spectral} · decay {decay}",
+      "pending": "…",
+      "notIdentified": "Not identified",
+      "setByYou": "set by you",
+      "move": "Move {role}",
+      "assign": "Assign {role}",
+      "clear": "Clear {role}",
+      "moving": "Choose a peak for {role}"
+    },
+    "main": {
+      "heading": "Main frequency",
+      "sameAs": "Same peak as {role}",
+      "detail": "{level} dB · {note} · {q}"
     }
   },
   "wood": {

@@ -552,6 +552,28 @@
       "excluded": "exclu (contact de la frappe et bords du filtre)",
       "fitEnds": "fin de l'ajustement",
       "noise": "bruit de fond"
+    },
+    "bodyModes": {
+      "heading": "Modes de la caisse",
+      "hint": "Faites glisser une étiquette sur un autre pic",
+      "number": {
+        "air": "T(1,1)₁",
+        "top": "T(1,1)₂",
+        "back": "T(1,1)₃"
+      },
+      "q": "Q {spectral} · amort. {decay}",
+      "pending": "…",
+      "notIdentified": "Non identifié",
+      "setByYou": "défini par vous",
+      "move": "Déplacer {role}",
+      "assign": "Attribuer {role}",
+      "clear": "Effacer {role}",
+      "moving": "Choisissez un pic pour {role}"
+    },
+    "main": {
+      "heading": "Fréquence principale",
+      "sameAs": "Même pic que {role}",
+      "detail": "{level} dB · {note} · {q}"
     }
   },
   "wood": {

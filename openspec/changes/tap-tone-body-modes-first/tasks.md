@@ -18,8 +18,8 @@ Every task is test-first: write the failing test named in the task, then the cod
 
 ## 4. Readouts and main frequency (`panels.tsx`)
 
-- [ ] 4.1 `BodyModes` tiles replacing `RolesPanel`: content per the spec scenario (Air 103.4 Hz, Ab2 -7 c, Q 26 and 31), "set by you", "Not identified", pressed state, and the Move / Clear bar with the moving status. English and French.
-- [ ] 4.2 `MainFrequency`: frequency, "Same peak as <Role>", level, note, Q values and reasons, and the peak buttons. English and French.
+- [x] 4.1 `BodyModes` tiles replacing `RolesPanel`: content per the spec scenario (Air 103.4 Hz, Ab2 -7 c, Q 26 and 31), "set by you", "Not identified", pressed state, and the Move / Clear bar with the moving status. English and French.
+- [x] 4.2 `MainFrequency`: frequency, "Same peak as <Role>", level, note, Q values and reasons, and the peak buttons. English and French.
 
 ## 5. Dialog (`TapToneDialog`)
 
