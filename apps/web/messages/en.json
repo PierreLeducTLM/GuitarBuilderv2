@@ -522,7 +522,10 @@
       "loadPanelFailed": "Failed to load wood panel",
       "delete": "Delete {name}",
       "deleted": "Wood panel deleted successfully",
-      "deleteFailed": "Failed to delete wood panel"
+      "deleteFailed": "Failed to delete wood panel",
+      "loadingDefaults": "Loading...",
+      "loadDefaultsFailed": "Failed to load default panels",
+      "noDefaults": "No default panels are available yet"
     },
     "validation": {
       "sampleLength": "Sample length must be greater than 0",

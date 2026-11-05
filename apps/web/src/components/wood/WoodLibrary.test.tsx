@@ -31,7 +31,14 @@ function renderLibrary(
       timeZone="UTC"
       formats={formats}
     >
-      <WoodLibrary panels={panels} loadedId={loadedId} onOpen={onOpen} onDelete={onDelete} />
+      <WoodLibrary
+        panels={panels}
+        loadedId={loadedId}
+        onOpen={onOpen}
+        onDelete={onDelete}
+        onLoadDefaults={vi.fn()}
+        loadingDefaults={false}
+      />
     </NextIntlClientProvider>,
   );
   return { onOpen, onDelete };

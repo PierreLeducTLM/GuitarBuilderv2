@@ -75,6 +75,8 @@ export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }
           loadedId={state.loadedId}
           onOpen={actions.open}
           onDelete={actions.remove}
+          onLoadDefaults={actions.loadDefaults}
+          loadingDefaults={actions.loadingDefaults}
         />
       </Area>
     </div>

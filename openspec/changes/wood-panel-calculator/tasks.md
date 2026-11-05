@@ -77,7 +77,7 @@
   - deleting the loaded panel resetting the calculator;
   - deselecting by a second click;
   - a panel deleted elsewhere
-- [ ] 5.4 Build the empty state with "Load Default Panels" calling the function, with "Loading...", "Failed to load default panels" and "No default panels are available yet". Verify end-to-end tests for 5 reference panels copied and listed, an empty reference set and a failure
+- [x] 5.4 Build the empty state with "Load Default Panels" calling the function, with "Loading...", "Failed to load default panels" and "No default panels are available yet". Verify end-to-end tests for 5 reference panels copied and listed, an empty reference set and a failure
 
 ## 6. Plate measurement
 

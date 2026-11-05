@@ -1,7 +1,7 @@
 "use client";
 
-import { Chip, cx, IconButton } from "@gb/ui";
-import { CircleAlert, Trash2 } from "lucide-react";
+import { Button, Chip, cx, IconButton } from "@gb/ui";
+import { CircleAlert, Library, Trash2, Trees } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { formatValue } from "@/lib/wood/calculator";
 import type { WoodPanelSummary } from "@/lib/wood/types";
@@ -11,10 +11,19 @@ export interface WoodLibraryProps {
   loadedId: string | null;
   onOpen: (panel: WoodPanelSummary) => void;
   onDelete: (panel: WoodPanelSummary) => void;
+  onLoadDefaults: () => void;
+  loadingDefaults: boolean;
 }
 
 /** wood-panel-properties: Saved Panel Library and Library Load Failures. */
-export function WoodLibrary({ panels, loadedId, onOpen, onDelete }: WoodLibraryProps) {
+export function WoodLibrary({
+  panels,
+  loadedId,
+  onOpen,
+  onDelete,
+  onLoadDefaults,
+  loadingDefaults,
+}: WoodLibraryProps) {
   const t = useTranslations("wood.library");
   const format = useFormatter();
   const locale = useLocale();
@@ -28,6 +37,24 @@ export function WoodLibrary({ panels, loadedId, onOpen, onDelete }: WoodLibraryP
         <CircleAlert aria-hidden="true" className="size-5 shrink-0" />
         {t("loadFailed")}
       </p>
+    );
+  }
+
+  if (panels.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-8 text-center">
+        <Trees aria-hidden="true" className="size-10 text-fg-faint" />
+        <p className="text-lg font-semibold text-fg">{t("empty")}</p>
+        <p className="text-fg-dim">{t("emptyHint")}</p>
+        <Button
+          variant="secondary"
+          icon={<Library className="size-4" />}
+          disabled={loadingDefaults}
+          onClick={onLoadDefaults}
+        >
+          {loadingDefaults ? t("loadingDefaults") : t("loadDefaults")}
+        </Button>
+      </div>
     );
   }
 

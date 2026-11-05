@@ -3,7 +3,7 @@
 import { useToast } from "@gb/ui";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { type Dispatch, useRef, useState } from "react";
+import { type Dispatch, useRef, useState, useTransition } from "react";
 import { useConfirm } from "@/components/DialogProvider";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -38,6 +38,8 @@ export function useWoodPanels(state: CalculatorState, dispatch: Dispatch<Calcula
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const busy = useRef(false);
+  const [copying, setCopying] = useState(false);
+  const [refreshing, startRefresh] = useTransition();
 
   async function save() {
     if (busy.current) return;
@@ -105,5 +107,24 @@ export function useWoodPanels(state: CalculatorState, dispatch: Dispatch<Calcula
     router.refresh();
   }
 
-  return { save, open, remove, saving };
+  /** wood-panel-properties: Load Default Panels and Load Default Panels Feedback. */
+  async function loadDefaults() {
+    if (busy.current) return;
+    busy.current = true;
+    setCopying(true);
+    const { data, error } = await createClient().rpc("load_default_wood_panels");
+    busy.current = false;
+    setCopying(false);
+    if (error) {
+      toast.show({ type: "error", message: t("library.loadDefaultsFailed") });
+      return;
+    }
+    if (data === 0) {
+      toast.show({ type: "info", message: t("library.noDefaults") });
+      return;
+    }
+    startRefresh(() => router.refresh());
+  }
+
+  return { save, open, remove, loadDefaults, saving, loadingDefaults: copying || refreshing };
 }

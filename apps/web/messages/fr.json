@@ -522,7 +522,10 @@
       "loadPanelFailed": "Impossible de charger le panneau de bois",
       "delete": "Supprimer {name}",
       "deleted": "Panneau de bois supprimé avec succès",
-      "deleteFailed": "Impossible de supprimer le panneau de bois"
+      "deleteFailed": "Impossible de supprimer le panneau de bois",
+      "loadingDefaults": "Chargement...",
+      "loadDefaultsFailed": "Impossible de charger les panneaux par défaut",
+      "noDefaults": "Aucun panneau par défaut n'est encore disponible"
     },
     "validation": {
       "sampleLength": "La longueur de l'échantillon doit être supérieure à 0",

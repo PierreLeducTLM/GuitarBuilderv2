@@ -383,6 +383,50 @@ test.describe("deleting panels", () => {
   });
 });
 
+test.describe("default panels", () => {
+  const loadDefaults = (page: Page) =>
+    library(page).getByRole("button", { name: en.wood.library.loadDefaults });
+  const REFERENCES = ["Sitka", "Engelmann", "Lutz", "Western Red Cedar", "European Spruce"];
+
+  test("copies the reference panels into an empty library", async ({ page }) => {
+    await fakeSupabase.seedDefaultWoodPanels(
+      REFERENCES.map((name, i) => ({ name, created_at: `2026-01-0${i + 1}T10:00:00Z` })),
+    );
+    await fakeSupabase.configure({ loadDefaultsDelayMs: 800 });
+    await signIn(page, LUTHIER, WOOD);
+    await expect(library(page).getByText(en.wood.library.empty)).toBeVisible();
+    await expect(library(page).getByText(en.wood.library.emptyHint)).toBeVisible();
+
+    await loadDefaults(page).click();
+    await expect(
+      library(page).getByRole("button", { name: en.wood.library.loadingDefaults }),
+    ).toBeDisabled();
+    await expect(entries(page)).toHaveCount(5);
+    for (const name of REFERENCES) await expect(entry(page, name)).toHaveCount(1);
+    await expect(library(page).getByText(en.wood.library.empty)).toHaveCount(0);
+    const copies = await fakeSupabase.woodPanels();
+    expect(copies).toHaveLength(5);
+  });
+
+  test("says when there are no reference panels yet", async ({ page }) => {
+    await signIn(page, LUTHIER, WOOD);
+    await loadDefaults(page).click();
+    await expect(toasts(page).getByRole("status")).toContainText(en.wood.library.noDefaults);
+    await expect(library(page).getByText(en.wood.library.empty)).toBeVisible();
+    await expect(loadDefaults(page)).toBeEnabled();
+  });
+
+  test("says when the copy fails and leaves the library empty", async ({ page }) => {
+    await fakeSupabase.seedDefaultWoodPanels([{ name: "Sitka" }]);
+    await fakeSupabase.configure({ failLoadDefaults: true });
+    await signIn(page, LUTHIER, WOOD);
+    await loadDefaults(page).click();
+    await expect(errorToast(page)).toContainText(en.wood.library.loadDefaultsFailed);
+    await expect(entries(page)).toHaveCount(0);
+    await expect(loadDefaults(page)).toBeEnabled();
+  });
+});
+
 test.describe("wood calculator on a phone @phone", () => {
   test("stacks the inputs, the results and the library", async ({ page }) => {
     await signIn(page, LUTHIER, WOOD);
