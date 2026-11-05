@@ -4,7 +4,7 @@ Every task is test-first: write the failing test named in the task, then the cod
 
 ## 1. Body mode colours (`packages/ui`)
 
-- [ ] 1.1 Add `modeAir`, `modeTop`, `modeBack` and their `Soft` tints to both themes, regenerate `tokens.css`, expose them in `theme.css`, and add their contrast pairs (each ink on every surface and on its soft tint; `fg` and `fgDim` on each soft tint). Verify `contrast.test.ts` passes for both themes.
+- [x] 1.1 Add `modeAir`, `modeTop`, `modeBack` and their `Soft` tints to both themes, regenerate `tokens.css`, expose them in `theme.css`, and add their contrast pairs (each ink on every surface and on its soft tint; `fg` and `fgDim` on each soft tint). Verify `contrast.test.ts` passes for both themes.
 
 ## 2. Label placement (`apps/web/src/lib/tap-tone/graph.ts`)
 

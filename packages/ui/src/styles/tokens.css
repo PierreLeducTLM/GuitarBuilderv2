@@ -35,6 +35,12 @@
   --gb-variant-soft: #191d34;
   --gb-blank-ink: #f293d8;
   --gb-blank-soft: #2a1727;
+  --gb-mode-air: #6cb6ff;
+  --gb-mode-air-soft: #132233;
+  --gb-mode-top: #5fe0a8;
+  --gb-mode-top-soft: #11271f;
+  --gb-mode-back: #f28cc8;
+  --gb-mode-back-soft: #2a1726;
   --gb-focus: #ffb23e;
   --gb-overlay: rgba(5, 7, 9, 0.72);
   --gb-glow-amber: rgba(255, 178, 62, 0.35);
@@ -75,6 +81,12 @@
   --gb-variant-soft: #e9ecfb;
   --gb-blank-ink: #9c2a7d;
   --gb-blank-soft: #fae7f4;
+  --gb-mode-air: #1d5fa8;
+  --gb-mode-air-soft: #e6f0fb;
+  --gb-mode-top: #0a7149;
+  --gb-mode-top-soft: #e2f5ec;
+  --gb-mode-back: #a3286e;
+  --gb-mode-back-soft: #fbe8f2;
   --gb-focus: #8a4f00;
   --gb-overlay: rgba(13, 19, 24, 0.45);
   --gb-glow-amber: rgba(255, 178, 62, 0.45);
@@ -116,6 +128,12 @@
     --gb-variant-soft: #e9ecfb;
     --gb-blank-ink: #9c2a7d;
     --gb-blank-soft: #fae7f4;
+    --gb-mode-air: #1d5fa8;
+    --gb-mode-air-soft: #e6f0fb;
+    --gb-mode-top: #0a7149;
+    --gb-mode-top-soft: #e2f5ec;
+    --gb-mode-back: #a3286e;
+    --gb-mode-back-soft: #fbe8f2;
     --gb-focus: #8a4f00;
     --gb-overlay: rgba(13, 19, 24, 0.45);
     --gb-glow-amber: rgba(255, 178, 62, 0.45);
