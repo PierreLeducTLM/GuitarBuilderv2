@@ -42,7 +42,7 @@
 
 ## 4. Fake Supabase server
 
-- [ ] 4.1 Extend `apps/web/e2e/fake-supabase.ts` with:
+- [x] 4.1 Extend `apps/web/e2e/fake-supabase.ts` with:
   - `wood_panels` (list with owner filter and order, single by id, insert, update and delete returning, snapshot computed with `@gb/dsp`);
   - `default_wood_panels` select;
   - `rpc/load_default_wood_panels` with the same return values;
