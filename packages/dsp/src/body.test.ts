@@ -109,21 +109,6 @@ describe("body resonance candidates", () => {
     expect(frequencies(bodySpectrum({ 67: -45, 300: -10 })).air).toBe(hz(67));
   });
 
-  it("needs 6 dB of prominence over the 6 points on each side", () => {
-    const shoulder = (drop: number, distance: number) =>
-      pointsFromDb(
-        Array.from({ length: 662 }, (_, i) => {
-          if (i === 67 - firstBin) return -20;
-          if (Math.abs(i - (67 - firstBin)) === distance) return -20 - drop;
-          return -24;
-        }),
-        { firstBin, binWidth },
-      );
-    expect(frequencies(shoulder(6, 6)).air).toBe(hz(67));
-    expect(frequencies(shoulder(5.9, 6)).air).toBeNull();
-    expect(frequencies(shoulder(10, 7)).air).toBeNull();
-  });
-
   it("needs a strict maximum over 3 points on each side", () => {
     const plateau = (distance: number) => bodySpectrum({ 67: -20, [67 + distance]: -20 });
     expect(frequencies(plateau(1)).air).toBeNull();
@@ -131,21 +116,40 @@ describe("body resonance candidates", () => {
   });
 });
 
-describe("body resonance candidates, exact edges on a 1 Hz grid", () => {
-  const integerGrid = (
-    at: Readonly<Record<number, number>>,
-    floor = -100,
-  ): readonly SpectrumPoint[] =>
-    Array.from({ length: 971 }, (_, i) => {
-      const frequency = 30 + i;
-      const db = at[frequency] ?? floor;
-      return { frequency, magnitude: 10 ** (db / 20), db };
-    });
-  const roles = (at: Readonly<Record<number, number>>) => {
-    const { air, top, back } = identifyBodyResonances(integerGrid(at));
-    return [air?.frequency ?? null, top?.frequency ?? null, back?.frequency ?? null];
-  };
+const integerGrid = (
+  at: Readonly<Record<number, number>>,
+  floor = -100,
+): readonly SpectrumPoint[] =>
+  Array.from({ length: 971 }, (_, i) => {
+    const frequency = 30 + i;
+    const db = at[frequency] ?? floor;
+    return { frequency, magnitude: 10 ** (db / 20), db };
+  });
 
+const roles = (at: Readonly<Record<number, number>>) => {
+  const { air, top, back } = identifyBodyResonances(integerGrid(at));
+  return [air?.frequency ?? null, top?.frequency ?? null, back?.frequency ?? null];
+};
+
+describe("Back near the air octave", () => {
+  it("takes the candidate above Top nearest 2 x f_air, not the lowest one", () => {
+    expect(roles({ 100: -20, 150: -22, 170: -24, 205: -25 })).toEqual([100, 150, 205]);
+  });
+
+  it("measures nearness as a frequency ratio, not in Hz", () => {
+    expect(roles({ 100: -20, 150: -22, 170: -24, 232: -25 })).toEqual([100, 150, 232]);
+  });
+
+  it("keeps the lower candidate when two are equally far from the octave", () => {
+    expect(roles({ 100: -20, 140: -22, 160: -24, 250: -25 })).toEqual([100, 140, 160]);
+  });
+
+  it("still takes the lowest candidate above Top when they all lie above the octave", () => {
+    expect(roles({ 98: -20, 197: -22, 248: -24, 330: -25 })).toEqual([98, 197, 248]);
+  });
+});
+
+describe("body resonance candidates, exact edges on a 1 Hz grid", () => {
   it("includes 60 and 400 Hz in the band that sets the 30 dB range", () => {
     expect(roles({ 60: -10, 100: -45 })[0]).toBeNull();
     expect(roles({ 400: -10, 100: -45 })[0]).toBeNull();
@@ -167,12 +171,42 @@ describe("body resonance candidates, exact edges on a 1 Hz grid", () => {
     expect(identifyBodyResonances(shoulder).air?.frequency).toBe(102);
   });
 
-  it("needs the 6 dB dip on both sides, not just one", () => {
-    const oneSided = integerGrid(
-      { 100: -20, 99: -22, 98: -22, 97: -22, 96: -22, 95: -22, 94: -22 },
-      -40,
+  it("needs 6 dB of prominence over the points within 30 Hz on each side", () => {
+    const shoulder = (drop: number, distance: number) =>
+      identifyBodyResonances(
+        integerGrid({ 100: -20, [100 - distance]: -20 - drop, [100 + distance]: -20 - drop }, -24),
+      ).air?.frequency ?? null;
+    expect(shoulder(6, 30)).toBe(100);
+    expect(shoulder(5.9, 30)).toBeNull();
+    expect(shoulder(10, 31)).toBeNull();
+  });
+
+  it.each([
+    ["below", -1],
+    ["above", 1],
+  ])("needs the 6 dB dip on both sides, not just one (shelf %s)", (_, direction) => {
+    const shelf = Object.fromEntries(
+      Array.from({ length: 30 }, (_, j) => [100 + direction * (j + 1), -22]),
     );
+    const oneSided = integerGrid({ 100: -20, ...shelf }, -40);
     expect(identifyBodyResonances(oneSided).air).toBeNull();
+  });
+
+  it("accepts a damped mode whose 6 dB dip lies beyond 9 Hz", () => {
+    const resonance = (frequency: number, centre: number, q: number) =>
+      1 / Math.sqrt(1 + ((2 * q * (frequency - centre)) / centre) ** 2);
+    const points = Array.from({ length: 662 }, (_, i) => {
+      const frequency = hz(i + firstBin);
+      const magnitude = Math.max(
+        0.02 * resonance(frequency, 104, 20),
+        0.05 * resonance(frequency, 187, 40),
+        0.02 * resonance(frequency, 223, 15),
+        0.006 * resonance(frequency, 300, 40),
+      );
+      return { frequency, magnitude, db: 20 * Math.log10(magnitude) };
+    });
+    const { air, top, back } = identifyBodyResonances(points);
+    expect([air, top, back].map((r) => Math.round(r?.frequency ?? 0))).toEqual([104, 187, 223]);
   });
 });
 

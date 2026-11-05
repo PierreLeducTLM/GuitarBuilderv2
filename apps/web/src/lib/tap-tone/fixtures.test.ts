@@ -13,7 +13,7 @@ const readWav = (name: string) => {
   return prepareAudio({ channels: [samples], sampleRate: view.getUint32(24, true) });
 };
 
-const analyse = (name: string, mode: TakeMode) => {
+const analyse = (name: string, mode: TakeMode, mobile = false) => {
   const audio = readWav(name);
   const signal = audio.filtered[0] ?? new Float64Array(0);
   return runTake({
@@ -21,7 +21,7 @@ const analyse = (name: string, mode: TakeMode) => {
     raw: audio.raw,
     sampleRate: audio.sampleRate,
     mode,
-    mobile: false,
+    mobile,
   });
 };
 
@@ -56,5 +56,14 @@ describe("end-to-end fixtures", () => {
         Math.round(r?.frequency ?? 0),
       ),
     ).toEqual([98, 197, 248]);
+  });
+
+  it("mobile-body.wav: a damped T(1,1)3 at 223 Hz, not the 300 Hz peak", () => {
+    const { result } = analyse("mobile-body.wav", "instrument", true);
+    expect(
+      [result.roles?.air, result.roles?.top, result.roles?.back].map(
+        (r) => Math.round((r?.frequency ?? 0) * 10) / 10,
+      ),
+    ).toEqual([103.6, 186.7, 223.1]);
   });
 });

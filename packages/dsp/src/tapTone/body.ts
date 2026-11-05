@@ -1,12 +1,13 @@
 import { type SpectralQ, spectralQ } from "./bandwidthQ.ts";
 import {
   AIR_RANGE_HZ,
+  BACK_AIR_RATIO,
   BACK_MAX_HZ,
   BACK_MIN_ABOVE_TOP_HZ,
   BODY_BAND_HZ,
   BODY_LOCAL_MAX_POINTS,
   BODY_PROMINENCE_DB,
-  BODY_PROMINENCE_POINTS,
+  BODY_PROMINENCE_HZ,
   BODY_RANGE_DB,
   BODY_SPLIT_HZ,
   ROLE_REATTACH_HZ,
@@ -40,10 +41,16 @@ const isLocalMaximum = (points: readonly SpectrumPoint[], i: number) =>
 
 const isProminent = (points: readonly SpectrumPoint[], i: number) => {
   const here = levelAt(points, i);
+  const centre = points[i]?.frequency ?? 0;
   const lowest = (direction: 1 | -1) =>
     Math.min(
       here,
-      ...offsets(BODY_PROMINENCE_POINTS).map((j) => levelAt(points, i + direction * j)),
+      ...points
+        .filter((p) => {
+          const offset = direction * (p.frequency - centre);
+          return offset > 0 && offset <= BODY_PROMINENCE_HZ;
+        })
+        .map((p) => p.db),
     );
   return here - Math.max(lowest(-1), lowest(1)) >= BODY_PROMINENCE_DB;
 };
@@ -69,6 +76,20 @@ const candidates = (points: readonly SpectrumPoint[]): readonly Candidate[] => {
 const lowestIn = (all: readonly Candidate[], from: number, to: number) =>
   all.find((c) => c.frequency >= from && c.frequency <= to);
 
+const ratioDistance = (frequency: number, target: number) =>
+  Math.max(frequency / target, target / frequency);
+
+const nearestIn = (all: readonly Candidate[], from: number, to: number, target: number) =>
+  all
+    .filter((c) => c.frequency >= from && c.frequency <= to)
+    .reduce<Candidate | undefined>(
+      (best, c) =>
+        best && ratioDistance(best.frequency, target) <= ratioDistance(c.frequency, target)
+          ? best
+          : c,
+      undefined,
+    );
+
 const reliable = (
   all: readonly Candidate[],
   chosen: Candidate | undefined,
@@ -91,9 +112,18 @@ export const identifyBodyResonances = (points: readonly SpectrumPoint[]): BodyRe
         lowestIn(all, Math.max(TOP_MIN_HZ, TOP_MIN_AIR_RATIO * air.frequency), TOP_MAX_HZ),
       )
     : null;
-  const back = top
-    ? reliable(all, lowestIn(all, top.frequency + BACK_MIN_ABOVE_TOP_HZ, BACK_MAX_HZ))
-    : null;
+  const back =
+    air && top
+      ? reliable(
+          all,
+          nearestIn(
+            all,
+            top.frequency + BACK_MIN_ABOVE_TOP_HZ,
+            BACK_MAX_HZ,
+            BACK_AIR_RATIO * air.frequency,
+          ),
+        )
+      : null;
   return { air, top, back };
 };
 
