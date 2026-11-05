@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createContext, useContext } from "react";
 import type { StepStatus } from "@/lib/sequence/state";
-import type { StepHighlight, StepKey } from "@/lib/sequence/template";
+import { type StepHighlight, type StepKey, stepNumberLabel } from "@/lib/sequence/template";
 
 export type StepNodeData = {
   stepKey: StepKey;
@@ -20,10 +20,7 @@ export type StepNodeType = Node<StepNodeData, "step">;
 /** Opens a step's details dialog (the only interaction a step box offers). */
 export const OpenStepContext = createContext<(key: StepKey) => void>(() => {});
 
-/** Template position, zero-padded to three digits (build-sequence: Step Numbers). */
-export function stepNumberLabel(number: number): string {
-  return String(number).padStart(3, "0");
-}
+export { stepNumberLabel };
 
 const statusClasses: Record<StepStatus, string> = {
   completed: "border-teal-line bg-teal-soft",

@@ -1105,3 +1105,8 @@ export function templateStep(key: StepKey): TemplateStep {
   if (!step) throw new Error(`Unknown step key: ${key}`);
   return step;
 }
+
+/** A template position zero-padded to three digits (build-sequence: Step Numbers). */
+export function stepNumberLabel(number: number): string {
+  return String(number).padStart(3, "0");
+}

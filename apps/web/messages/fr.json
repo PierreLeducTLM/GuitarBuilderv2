@@ -239,6 +239,11 @@
       "role": "{role} {frequency} Hz",
       "addAnalysis": "Ajouter une analyse",
       "defaultDescription": "Analyse de résonance"
+    },
+    "checklist": {
+      "label": "Étapes",
+      "readyNow": "Prêtes maintenant",
+      "groupProgress": "{completed}/{total}"
     }
   },
   "groups": {

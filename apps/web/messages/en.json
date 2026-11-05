@@ -239,6 +239,11 @@
       "role": "{role} {frequency} Hz",
       "addAnalysis": "Add Analysis",
       "defaultDescription": "Resonance Analysis"
+    },
+    "checklist": {
+      "label": "Steps",
+      "readyNow": "Ready now",
+      "groupProgress": "{completed}/{total}"
     }
   },
   "groups": {

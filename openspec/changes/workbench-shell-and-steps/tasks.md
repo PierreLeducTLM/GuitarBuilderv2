@@ -67,7 +67,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
 ## 5. Steps checklist
 
-- [ ] 5.1 Build the Steps view:
+- [x] 5.1 Build the Steps view:
   - "Ready now" in template order, or "All steps done";
   - one folding section per group with name and "<completed>/<total>", unfolded when it holds a ready step;
   - rows with number, label, state and completion badge, linking to the step screen.
