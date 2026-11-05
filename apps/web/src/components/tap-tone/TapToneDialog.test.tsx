@@ -116,12 +116,15 @@ describe("TapToneDialog in Instrument mode", () => {
     expect(screen.getByText("Max 10 seconds")).toBeTruthy();
     await upload(body);
     expect(screen.getByText("3 of 3 taps used")).toBeTruthy();
-    const roles = screen.getByRole("heading", { name: "Body resonances" }).closest("section");
+    const modes = screen.getByRole("region", { name: "Body modes" });
     expect(
-      within(roles ?? document.body)
-        .getAllByRole("listitem")
-        .map((row) => row.textContent?.match(/\d+\.\d/)?.[0]),
+      within(modes)
+        .getAllByRole("button")
+        .map((tile) => tile.textContent?.match(/\d+\.\d/)?.[0]),
     ).toEqual(["98.1", "196.8", "247.7"]);
+    expect(screen.getByRole("region", { name: "Main frequency" }).textContent).toContain(
+      "Same peak as Top",
+    );
     const confirm = screen.getByRole("button", { name: "Confirm" });
     await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
     await userEvent.setup().click(confirm);
@@ -131,6 +134,47 @@ describe("TapToneDialog in Instrument mode", () => {
     expect(Object.keys(result.roles).sort()).toEqual(["air", "back", "top"]);
     expect(result.roles.top).toMatchObject({ origin: "auto" });
     expect(result.roles.top.decayQ).toBeGreaterThan(0);
+  }, 30000);
+
+  it("moves and clears a body mode from its readout", async () => {
+    stubBrowser();
+    const onConfirm = vi.fn();
+    const user = userEvent.setup();
+    withIntl(
+      <TapToneDialog
+        open
+        mode="instrument"
+        label="Analysis"
+        onConfirm={onConfirm}
+        onCancel={vi.fn()}
+      />,
+    );
+    await upload(body);
+    const modes = screen.getByRole("region", { name: "Body modes" });
+    const tile = (name: RegExp) => within(modes).getByRole("button", { name });
+    await user.click(tile(/^Back/));
+    expect(tile(/^Back/).getAttribute("aria-pressed")).toBe("true");
+    expect(
+      screen
+        .getByRole("img", { name: /Frequency spectrum/ })
+        .querySelector("[data-role=air]")
+        ?.getAttribute("opacity"),
+    ).toBe("0.3");
+    await user.click(screen.getByRole("button", { name: "Move Back" }));
+    expect(within(modes).getByRole("status").textContent).toBe("Choose a peak for Back");
+    await user.click(screen.getByRole("button", { name: /^98\.\d Hz$/ }));
+    expect(tile(/^Back/).textContent).toMatch(/98\.\d/);
+    expect(tile(/^Back/).textContent).toContain("set by you");
+    expect(within(modes).getByRole("status").textContent).toBe("");
+    await user.click(tile(/^Air/));
+    await user.click(screen.getByRole("button", { name: "Clear Air" }));
+    expect(tile(/^Air/).textContent).toContain("Not identified");
+    const confirm = screen.getByRole("button", { name: "Confirm" });
+    await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
+    await user.click(confirm);
+    const [result] = onConfirm.mock.calls[0] ?? [];
+    expect(Object.keys(result.roles).sort()).toEqual(["back", "top"]);
+    expect(result.roles.back).toMatchObject({ origin: "user" });
   }, 30000);
 
   it("refuses an unsupported file and stays idle", async () => {

@@ -23,5 +23,5 @@ Every task is test-first: write the failing test named in the task, then the cod
 
 ## 5. Dialog (`TapToneDialog`)
 
-- [ ] 5.1 Instrument layout: graph full width, then body modes, then main frequency; spotlight state wired to the graph; Move then a peak assigns the role. Plate layout unchanged. Verify dialog tests, then update `e2e/tap-tone.spec.ts` to the readouts and run it.
-- [ ] 5.2 Run `pnpm check`, mutation testing on `spreadLabels`, and `openspec validate --strict`.
+- [x] 5.1 Instrument layout: graph full width, then body modes, then main frequency; spotlight state wired to the graph; Move then a peak assigns the role. Plate layout unchanged. Verify dialog tests, then update `e2e/tap-tone.spec.ts` to the readouts and run it.
+- [x] 5.2 Run `pnpm check`, mutation testing on `spreadLabels`, and `openspec validate --strict`.

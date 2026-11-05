@@ -42,7 +42,7 @@ The system SHALL, in Instrument mode, show under the graph one tile per body mod
 ## MODIFIED Requirements
 
 ### Requirement: Peak Markers
-The system SHALL mark every detected peak between 30 and 600 Hz on the graph, visually distinguishing the strongest peak, the selected peak and the peak under the pointer. In Plate mode each marker has a vertical line, a dot and a "<frequency> Hz" label (one decimal). In Instrument mode a peak that is not selected and not under the pointer is a small dot with no label, and the selected peak gets a ring. Peaks above 600 Hz get no marker.
+The system SHALL mark every detected peak between 30 and 600 Hz on the graph, visually distinguishing the strongest peak, the selected peak and the peak under the pointer. In Plate mode each marker has a vertical line, a dot and a "<frequency> Hz" label (one decimal). In Instrument mode a peak that is not selected and not under the pointer is a small dot with no label, the selected peak gets a ring, and a body mode's chip stands in for its peak's label. Peaks above 600 Hz get no marker.
 
 #### Scenario: Results displayed
 - **WHEN** analysis finds peaks at 181.6 Hz (strongest) and 92.8 Hz

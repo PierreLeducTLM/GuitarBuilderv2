@@ -220,8 +220,16 @@ export const contrastPairs: readonly ContrastPair[] = [
       usage: `${mode} body mode label on ${background}`,
     })),
     { text: mode, background: `${mode}Soft` as const, usage: `${mode} name on its chosen tile` },
-    { text: "fg" as const, background: `${mode}Soft` as const, usage: `reading on a chosen ${mode} tile` },
-    { text: "fgDim" as const, background: `${mode}Soft` as const, usage: `detail on a chosen ${mode} tile` },
+    {
+      text: "fg" as const,
+      background: `${mode}Soft` as const,
+      usage: `reading on a chosen ${mode} tile`,
+    },
+    {
+      text: "fgDim" as const,
+      background: `${mode}Soft` as const,
+      usage: `detail on a chosen ${mode} tile`,
+    },
   ]),
 ];
 

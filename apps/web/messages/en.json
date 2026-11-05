@@ -417,6 +417,7 @@
     "spectrum": {
       "caption": "Frequency Spectrum",
       "hint": "Click on a peak to select",
+      "instrumentHint": "Click on a peak to select it; drag a mode's label onto another peak to move it",
       "label": "Frequency spectrum. Peaks: {peaks}",
       "noPeaks": "Frequency spectrum, no peak detected",
       "frequency": "{frequency} Hz",
@@ -455,15 +456,6 @@
       "heading": "Detected Peaks",
       "item": "{frequency} Hz",
       "highest": "{frequency} Hz (highest)"
-    },
-    "rolesPanel": {
-      "heading": "Body resonances",
-      "notIdentified": "Not identified",
-      "setByYou": "set by you",
-      "move": "Move {role}",
-      "clear": "Clear {role}",
-      "moving": "Choose a peak for {role}",
-      "value": "{frequency} Hz"
     },
     "qReasons": {
       "spectral": "The peak is too broad or merges with a neighbour",
@@ -555,13 +547,13 @@
     },
     "bodyModes": {
       "heading": "Body modes",
-      "hint": "Drag a label onto another peak",
       "number": {
         "air": "T(1,1)₁",
         "top": "T(1,1)₂",
         "back": "T(1,1)₃"
       },
-      "q": "Q {spectral} · decay {decay}",
+      "spectralQ": "Q {value}",
+      "decayQ": "decay {value}",
       "pending": "…",
       "notIdentified": "Not identified",
       "setByYou": "set by you",
