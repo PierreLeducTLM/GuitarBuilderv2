@@ -2,7 +2,7 @@
 
 ## 1. Math (`packages/dsp`)
 
-- [ ] 1.1 Implement `wood/properties.ts` (`woodProperties`, decision 4) and export it. Verify unit tests:
+- [x] 1.1 Implement `wood/properties.ts` (`woodProperties`, decision 4) and export it. Verify unit tests:
   - the spec's worked examples (defaults 425.2 kg/m³ and 8.86 GPa, 357.1 kg/m³, the unit cube, the reference spruce panel at 395.9 / 11.84 / 0.82 / 0.91 GPa / 2.77 mm / 157.5 g, and the 226.5 g mass example);
   - all 28 dataset plates for density, E_L, E_C and G_LC at the dataset's precision, with a comment on why the dataset's target columns are not used
 
