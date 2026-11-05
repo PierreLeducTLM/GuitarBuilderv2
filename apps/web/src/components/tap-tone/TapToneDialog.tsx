@@ -261,8 +261,10 @@ export function TapToneDialog(props: TapToneDialogProps) {
         ] as const)
       : (["plate1", "plate2", "plate3", "plate4"] as const);
 
-  const roleFrequencies = Object.fromEntries(
-    Object.entries(roles).flatMap(([name, role]) => (role ? [[name, role.frequency]] : [])),
+  const roleMarks = Object.fromEntries(
+    Object.entries(roles).flatMap(([name, role]) =>
+      role ? [[name, { frequency: role.frequency, level: role.level }]] : [],
+    ),
   );
 
   return (
@@ -465,7 +467,8 @@ export function TapToneDialog(props: TapToneDialogProps) {
                   onSelect={choosePeak}
                   {...(props.mode === "instrument"
                     ? {
-                        roles: roleFrequencies,
+                        mode: "instrument" as const,
+                        roles: roleMarks,
                         onAssignRole: (role: RoleName, index: number) =>
                           dispatch({ type: "roleAssigned", role, index }),
                       }

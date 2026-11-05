@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import type { Peak, SpectrumPoint } from "@gb/dsp";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { formats } from "@/i18n/config";
-import { GRAPH, xOfFrequency } from "@/lib/tap-tone/graph";
+import { GRAPH, levelY, xOfFrequency } from "@/lib/tap-tone/graph";
 import en from "../../../messages/en.json";
 import { TapToneSpectrum, type TapToneSpectrumProps } from "./TapToneSpectrum";
 
@@ -20,6 +20,8 @@ const peak = (frequency: number, level: number): Peak => ({
   level,
   magnitude: 0.1,
 });
+
+const mode = (frequency: number, level: number) => ({ frequency, level });
 
 const renderSpectrum = (overrides: Partial<TapToneSpectrumProps> = {}) => {
   const onSelect = vi.fn();
@@ -45,7 +47,10 @@ const renderSpectrum = (overrides: Partial<TapToneSpectrumProps> = {}) => {
 
 const at = (frequency: number) => ({ clientX: xOfFrequency(frequency), clientY: 50, pointerId: 1 });
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe("TapToneSpectrum", () => {
   it("labels its grid at 50-600 Hz and every 20 dB from 0 to -100", () => {
@@ -113,17 +118,105 @@ describe("TapToneSpectrum", () => {
     expect(svg.getAttribute("aria-label")).toBe("Frequency spectrum, no peak detected");
   });
 
-  it("labels each role at its frequency", () => {
-    const { svg } = renderSpectrum({ roles: { air: 98.4, back: 247.5 } });
-    expect(svg.querySelector("[data-role=air]")?.textContent).toBe("Air");
+  it("draws each body mode as a chip in its colour with its frequency", () => {
+    const { svg } = renderSpectrum({
+      mode: "instrument",
+      roles: { air: mode(98.4, -25), back: mode(247.5, -30) },
+    });
+    const air = svg.querySelector("[data-role=air]");
+    expect(air?.textContent).toBe("Air 98.4");
+    expect(air?.getAttribute("class")).toContain("text-mode-air");
+    expect(svg.querySelector("[data-role=back]")?.getAttribute("class")).toContain(
+      "text-mode-back",
+    );
     expect(svg.querySelector("[data-role=back]")?.getAttribute("data-x")).toBe(
       xOfFrequency(247.5).toFixed(1),
     );
     expect(svg.querySelector("[data-role=top]")).toBeNull();
   });
 
-  it("moves a role label dropped on a peak, and puts it back when dropped elsewhere", () => {
-    const { svg, onAssignRole } = renderSpectrum({ roles: { top: 410.2 } });
+  it("joins each chip to its peak with a leader line", () => {
+    const { svg } = renderSpectrum({ mode: "instrument", roles: { air: mode(98.4, -25) } });
+    const points = svg.querySelector("[data-role=air] [data-leader]")?.getAttribute("points");
+    const last = points?.trim().split(" ").at(-1)?.split(",") ?? [];
+    expect(Number(last[0])).toBeCloseTo(xOfFrequency(98.4), 1);
+    expect(Number(last[1])).toBeLessThan(levelY(-25));
+  });
+
+  for (const width of [GRAPH.width, 358]) {
+    it(`keeps close body mode chips apart and inside the plot at ${width} px`, () => {
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          constructor(private readonly report: ResizeObserverCallback) {}
+          observe(target: Element) {
+            this.report(
+              [{ target, contentRect: DOMRect.fromRect({ width, height: 200 }) }] as never,
+              this as never,
+            );
+          }
+          disconnect() {}
+        },
+      );
+      const { svg } = renderSpectrum({
+        mode: "instrument",
+        roles: { air: mode(103.4, -16), top: mode(186.7, -14), back: mode(220.8, -21) },
+      });
+      const chips = (["air", "top", "back"] as const).map((role) => {
+        const rect = svg.querySelector(`[data-role=${role}] rect`);
+        const x = Number(rect?.getAttribute("x"));
+        return { left: x, right: x + Number(rect?.getAttribute("width")) };
+      });
+      const unit = GRAPH.width / width;
+      chips.slice(1).forEach((chip, i) => {
+        expect(chip.left - (chips[i]?.right ?? 0)).toBeGreaterThanOrEqual(6 * unit - 1e-6);
+      });
+      expect(chips[0]?.left).toBeGreaterThanOrEqual(GRAPH.left);
+      expect(chips[2]?.right).toBeLessThanOrEqual(GRAPH.left + GRAPH.plotWidth);
+    });
+  }
+
+  it("makes room above the plot for the chips in Instrument mode only", () => {
+    const { svg } = renderSpectrum({ mode: "instrument", roles: { air: mode(98.4, -25) } });
+    expect(svg.getAttribute("viewBox")?.split(" ")[1]).toMatch(/^-\d/);
+    cleanup();
+    const plate = renderSpectrum();
+    expect(plate.svg.getAttribute("viewBox")).toBe(`0 0 ${GRAPH.width} ${GRAPH.height}`);
+  });
+
+  it("labels only the selected peak and the one under the pointer in Instrument mode", () => {
+    const { svg } = renderSpectrum({ mode: "instrument", roles: {} });
+    const labels = () => [...svg.querySelectorAll("[data-peak]")].map((m) => m.textContent);
+    expect(labels()).toEqual(["181.8 Hz", "", ""]);
+    expect(svg.querySelector("[data-peak][data-state=selected] [data-ring]")).not.toBeNull();
+    fireEvent.pointerMove(svg, at(405));
+    expect(labels()).toEqual(["181.8 Hz", "410.2 Hz", ""]);
+  });
+
+  it("leaves the selected peak's frequency to its chip when it is a body mode", () => {
+    const { svg } = renderSpectrum({ mode: "instrument", roles: { top: mode(181.8, -20) } });
+    expect([...svg.querySelectorAll("[data-peak]")].map((m) => m.textContent)).toEqual([
+      "",
+      "",
+      "",
+    ]);
+  });
+
+  it("dims the other body modes while one is spotlit", () => {
+    const { svg } = renderSpectrum({
+      mode: "instrument",
+      roles: { air: mode(98.4, -25), top: mode(181.8, -20) },
+      focused: "top",
+    });
+    expect(svg.querySelector("[data-role=air]")?.getAttribute("opacity")).toBe("0.3");
+    expect(svg.querySelector("[data-role=top]")?.getAttribute("opacity")).toBe("1");
+  });
+
+  it("moves a role chip dropped on a peak, and puts it back when dropped elsewhere", () => {
+    const { svg, onAssignRole } = renderSpectrum({
+      mode: "instrument",
+      roles: { top: mode(410.2, -30) },
+    });
     const handle = svg.querySelector("[data-role=top]") ?? svg;
     fireEvent.pointerDown(handle, at(410.2));
     fireEvent.pointerMove(svg, at(600));
@@ -142,7 +235,10 @@ describe("TapToneSpectrum", () => {
   });
 
   it("does not select a peak when a role label is dropped", () => {
-    const { svg, onSelect } = renderSpectrum({ roles: { air: 181.8 } });
+    const { svg, onSelect } = renderSpectrum({
+      mode: "instrument",
+      roles: { air: mode(181.8, -20) },
+    });
     fireEvent.pointerDown(svg.querySelector("[data-role=air]") ?? svg, at(181.8));
     fireEvent.pointerUp(svg, at(410.2));
     fireEvent.click(svg, at(410.2));

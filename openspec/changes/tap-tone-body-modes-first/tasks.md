@@ -12,9 +12,9 @@ Every task is test-first: write the failing test named in the task, then the cod
 
 ## 3. Graph (`TapToneSpectrum`)
 
-- [ ] 3.1 Body mode chips: colour per mode, "<Role> <frequency>" text, leader to the peak, spread with `spreadLabels`, fixed on-screen size from the measured width, band above the plot only when roles are shown; dragging a chip still assigns the role. Verify the existing drag tests (updated to the chip) and new tests for the chip text, the spread positions and no band in Plate mode.
-- [ ] 3.2 Quiet markers in Instrument mode: unlabeled dots except the selected peak (ring and label) and the snap target (label). Verify Plate mode markers are unchanged.
-- [ ] 3.3 Spotlight: a `focused` mode dims the other modes. Verify with a test.
+- [x] 3.1 Body mode chips: colour per mode, "<Role> <frequency>" text, leader to the peak, spread with `spreadLabels`, fixed on-screen size from the measured width, band above the plot only when roles are shown; dragging a chip still assigns the role. Verify the existing drag tests (updated to the chip) and new tests for the chip text, the spread positions and no band in Plate mode.
+- [x] 3.2 Quiet markers in Instrument mode: unlabeled dots except the selected peak (ring and label) and the snap target (label). Verify Plate mode markers are unchanged.
+- [x] 3.3 Spotlight: a `focused` mode dims the other modes. Verify with a test.
 
 ## 4. Readouts and main frequency (`panels.tsx`)
 
