@@ -54,8 +54,8 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
 ## 4. Build layout, views and actions (`app/(shell)/builds/[id]/`)
 
-- [ ] 4.1 Move the build loading into `layout.tsx` with a client `BuildProvider` (build, variant, `StepStore`, display graph, `canEdit`) and add the `page.tsx`, `map/page.tsx`, `overview/page.tsx` routes rendering placeholders for their views. Verify a Playwright test that typing notes, switching views and coming back keeps the notes without a reload, and that Back returns to the previous view
-- [ ] 4.2 Validate `map/[group]` and `steps/[key]` on the server (unknown key, or a step hidden by the stored variant, redirects to `/builds/<id>`), and add the client guard in `BuildProvider` after a variant change. Verify Playwright tests for the three new Inaccessible Build Links scenarios and for a classical switch while on an SS-only step
+- [x] 4.1 Move the build loading into `layout.tsx` with a client `BuildProvider` (build, variant, `StepStore`, display graph, `canEdit`) and add the `page.tsx`, `map/page.tsx`, `overview/page.tsx` routes rendering placeholders for their views. Verify a Playwright test that typing notes, switching views and coming back keeps the notes without a reload, and that Back returns to the previous view
+- [x] 4.2 Validate `map/[group]` and `steps/[key]` on the server (unknown key, or a step hidden by the stored variant, redirects to `/builds/<id>`), and add the client guard in `BuildProvider` after a variant change. Verify Playwright tests for the three new Inaccessible Build Links scenarios and for a classical switch while on an SS-only step
 - [x] 4.3 Replace `BuildHeader` with the build's `PageBar`:
   - the return control and title;
   - type, BOBO and created chips;
@@ -93,19 +93,19 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
 ## 7. Step screen
 
-- [ ] 7.1 Turn `StepDialog` into `StepScreen`:
+- [x] 7.1 Turn `StepDialog` into `StepScreen`:
   - "Step n", the group name, the title with its completed check, `StepContext` (linked steps), Notes, `StepPhotos` and `StepMeasurements`;
   - no info hint;
   - read-only without completion controls.
 
   Keep the photo lightbox, delete confirmations and tap-tone capture as modals. Verify the existing photo and measurement component tests still pass against the screen, plus new tests for Step Context rendering and the read-only case
-- [ ] 7.2 Add the footer:
+- [x] 7.2 Add the footer:
   - Previous and Next, disabled at the ends;
   - "Done, next step" when not completed;
   - "Mark as Incomplete" when completed, which stays on the screen.
 
   Navigation uses `router.replace` and carries `from`, and `store.flushNotes` runs before leaving. Verify component tests for Step Completion Tracking and Step Navigation, and a Playwright test that ten Next presses leave a single history entry before the build page
-- [ ] 7.3 Lay out `steps/[key]/page.tsx`:
+- [x] 7.3 Lay out `steps/[key]/page.tsx`:
   - below 1024 px, full screen with the fixed bottom footer and its own compact bar; the build page bar, the summary strip and the tab bar are hidden;
   - from 1024 px, the checklist with the current row highlighted beside a sticky step panel.
 

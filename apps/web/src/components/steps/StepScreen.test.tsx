@@ -79,12 +79,12 @@ describe("StepScreen", () => {
     renderStep("FitTopBack");
     expect(screen.getByText("Step 115")).toBeTruthy();
     expect(screen.getByText("Body assembly")).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 1, name: "Fit top and back" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Fit top and back" })).toBeTruthy();
   });
 
   it("shows a check beside the title of a completed step", () => {
     renderStep("TrussRod", { states: completed("TrussRod") });
-    expect(screen.getByRole("heading", { level: 1, name: /^Truss rod\s*Completed$/ })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: /^Truss rod\s*Completed$/ })).toBeTruthy();
   });
 
   it("names what the step comes after, marked done, and what it leads to in another part", () => {
@@ -222,7 +222,7 @@ describe("StepScreen", () => {
 
   it("is in French", () => {
     renderStep("TrussRod", { locale: "fr" });
-    expect(screen.getByRole("heading", { level: 1, name: "Tige de réglage" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Tige de réglage" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Terminée, étape suivante" })).toBeTruthy();
   });
 });

@@ -49,9 +49,9 @@ function ContextList({
   const id = useId();
   return (
     <div className="flex flex-col gap-1">
-      <h2 id={id} className="text-xs font-semibold tracking-wide text-fg-faint uppercase">
+      <h3 id={id} className="text-xs font-semibold tracking-wide text-fg-faint uppercase">
         {label}
-      </h2>
+      </h3>
       <ul aria-labelledby={id} className="flex flex-col gap-0.5">
         {links.map((link) => {
           const name = t(`steps.${link.key}`);
@@ -132,7 +132,7 @@ export function StepScreen({
           </span>
           <span>{t(`groups.${group.messageKey}`)}</span>
         </span>
-        <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
+        <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
           {label}
           {state.completed ? (
             <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-teal text-on-teal">
@@ -140,7 +140,7 @@ export function StepScreen({
               <span className="sr-only">{t("sequence.completedIcon")}</span>
             </span>
           ) : null}
-        </h1>
+        </h2>
       </header>
 
       <div className="flex flex-col gap-3 rounded-xl border border-line px-3.5 py-3">
@@ -184,9 +184,9 @@ export function StepScreen({
       </section>
 
       <section aria-labelledby={`${notesId}-photos`} className="flex flex-col gap-2">
-        <h2 id={`${notesId}-photos`} className="text-base font-semibold text-fg">
+        <h3 id={`${notesId}-photos`} className="text-base font-semibold text-fg">
           {t("sequence.photos")}
-        </h2>
+        </h3>
         <StepPhotos
           buildId={buildId}
           stepKey={stepKey}
@@ -198,9 +198,9 @@ export function StepScreen({
       </section>
 
       <section aria-labelledby={`${notesId}-sound`} className="flex flex-col gap-2">
-        <h2 id={`${notesId}-sound`} className="text-base font-semibold text-fg">
+        <h3 id={`${notesId}-sound`} className="text-base font-semibold text-fg">
           {t("sequence.soundAnalysis")}
-        </h2>
+        </h3>
         <StepMeasurements
           stepKey={stepKey}
           stepLabel={label}

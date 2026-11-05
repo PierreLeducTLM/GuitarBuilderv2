@@ -77,7 +77,8 @@ test.describe("build links", () => {
     const build = await seedSteelString();
     await signIn(page, LUTHIER, `/builds/${build.id}`);
     await page.goto(`/builds/${build.id}/steps/FitTopBack`);
-    await expect(page.getByRole("dialog", { name: /Fit top and back/ })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Fit top and back" })).toBeVisible();
+    await expect(page.getByText("Step 115")).toBeVisible();
   });
 
   for (const [what, path] of [
@@ -138,7 +139,7 @@ test.describe("recent builds", () => {
     await expect(recent).toHaveText(["Newer", "Older"]);
 
     await page.goto(`/builds/${older.id}/steps/TrussRod`);
-    await page.getByRole("button", { name: en.sequence.markCompleted }).click();
+    await page.getByRole("button", { name: en.sequence.nav.doneNext }).click();
     await expect(recent).toHaveText(["Older", "Newer"]);
   });
 });
