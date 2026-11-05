@@ -530,6 +530,45 @@
       "plateLength": "Target plate length must be greater than 0",
       "plateWidth": "Target plate width must be greater than 0",
       "stiffness": "Vibrational stiffness parameter must be greater than 0"
+    },
+    "groups": {
+      "sample": "Sample Measurements",
+      "frequency": "Frequency Measurements",
+      "plate": "Target Plate Dimensions",
+      "stiffness": "Vibrational Stiffness"
+    },
+    "fields": {
+      "sampleLength": "Sample Length (L)",
+      "sampleWidth": "Sample Width (W)",
+      "sampleThickness": "Sample Thickness (h)",
+      "sampleMass": "Sample Mass (m)",
+      "freqLongitudinal": "Longitudinal (f_L)",
+      "freqCrossGrain": "Cross-grain (f_C)",
+      "freqDiagonal": "Diagonal (f_LC)",
+      "plateLength": "Plate Length (a)",
+      "plateWidth": "Plate Width (b)",
+      "stiffness": "Parameter (f)"
+    },
+    "hints": {
+      "sampleLength": "Along the grain",
+      "sampleWidth": "Across the grain",
+      "freqLongitudinal": "First bending mode along the grain",
+      "freqCrossGrain": "First bending mode across the grain",
+      "freqDiagonal": "First twisting mode",
+      "stiffness": "Typical value: 75"
+    },
+    "reset": "Reset to defaults",
+    "results": {
+      "fixInputs": "Please fix input errors to see results",
+      "density": "Calculated Density",
+      "woodDensity": "Wood Density",
+      "elastic": "Elastic Properties",
+      "eLong": "Young's Modulus (Longitudinal)",
+      "eCross": "Young's Modulus (Cross-grain)",
+      "shear": "Shear Modulus",
+      "target": "Target Specifications",
+      "thickness": "Recommended Thickness",
+      "mass": "Estimated Panel Mass"
     }
   }
 }

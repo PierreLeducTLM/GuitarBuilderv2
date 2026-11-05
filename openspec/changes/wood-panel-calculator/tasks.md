@@ -53,7 +53,7 @@
 ## 5. Page and library
 
 - [x] 5.1 Build `/wood-properties` as a Server Component reading the library (decision 5), with `loading.tsx`, the "Failed to load wood panels" state, and the page layout of decision 8 with its three area titles in both catalogs. Verify end-to-end tests for the library order, the load failure (no empty state and no "Load Default Panels"), and an administrator seeing only their own panels
-- [ ] 5.2 Build the input area: the four groups, ten fields with symbols, units, hints, defaults and `step` 0.1, the validation messages and invalid styling, and "Reset to defaults". Build the results area: the three groups with their precisions, the prominent thickness, and "Please fix input errors to see results". Verify end-to-end tests for:
+- [x] 5.2 Build the input area: the four groups, ten fields with symbols, units, hints, defaults and `step` 0.1, the validation messages and invalid styling, and "Reset to defaults". Build the results area: the three groups with their precisions, the prominent thickness, and "Please fix input errors to see results". Verify end-to-end tests for:
   - the defaults and their results;
   - real-time recalculation to 357.1 kg/m³;
   - a zero length hiding the results and showing its message;

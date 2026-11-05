@@ -530,6 +530,45 @@
       "plateLength": "La longueur de la table cible doit être supérieure à 0",
       "plateWidth": "La largeur de la table cible doit être supérieure à 0",
       "stiffness": "Le paramètre de rigidité vibratoire doit être supérieur à 0"
+    },
+    "groups": {
+      "sample": "Mesures de l'échantillon",
+      "frequency": "Fréquences mesurées",
+      "plate": "Dimensions de la table cible",
+      "stiffness": "Rigidité vibratoire"
+    },
+    "fields": {
+      "sampleLength": "Longueur de l'échantillon (L)",
+      "sampleWidth": "Largeur de l'échantillon (W)",
+      "sampleThickness": "Épaisseur de l'échantillon (h)",
+      "sampleMass": "Masse de l'échantillon (m)",
+      "freqLongitudinal": "Longitudinale (f_L)",
+      "freqCrossGrain": "Transversale (f_C)",
+      "freqDiagonal": "Diagonale (f_LC)",
+      "plateLength": "Longueur de la table (a)",
+      "plateWidth": "Largeur de la table (b)",
+      "stiffness": "Paramètre (f)"
+    },
+    "hints": {
+      "sampleLength": "Dans le sens du fil",
+      "sampleWidth": "Perpendiculaire au fil",
+      "freqLongitudinal": "Premier mode de flexion dans le sens du fil",
+      "freqCrossGrain": "Premier mode de flexion perpendiculaire au fil",
+      "freqDiagonal": "Premier mode de torsion",
+      "stiffness": "Valeur typique : 75"
+    },
+    "reset": "Réinitialiser les valeurs par défaut",
+    "results": {
+      "fixInputs": "Corrigez les erreurs de saisie pour voir les résultats",
+      "density": "Densité calculée",
+      "woodDensity": "Densité du bois",
+      "elastic": "Propriétés élastiques",
+      "eLong": "Module de Young (longitudinal)",
+      "eCross": "Module de Young (transversal)",
+      "shear": "Module de cisaillement",
+      "target": "Spécifications cibles",
+      "thickness": "Épaisseur recommandée",
+      "mass": "Masse estimée du panneau"
     }
   }
 }
