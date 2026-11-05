@@ -593,6 +593,11 @@
       "title": "Delete Wood Panel",
       "message": "Are you sure you want to delete this wood panel? This action cannot be undone.",
       "confirm": "Delete"
+    },
+    "plate": {
+      "measure": "Measure plate",
+      "quality": "Spectral Q {spectral} · Decay Q {decay}",
+      "missing": "—"
     }
   }
 }

@@ -110,12 +110,13 @@ describe("stored spectra", () => {
 });
 
 describe("calculator state", () => {
-  it("starts on the defaults, without a name, a loaded panel or spectra", () => {
+  it("starts on the defaults, without a name, a loaded panel, spectra or Q values", () => {
     expect(INITIAL_CALCULATOR).toEqual({
       inputs: DEFAULT_INPUTS,
       name: "",
       loadedId: null,
       spectra: {},
+      quality: {},
     });
   });
 
@@ -140,6 +141,7 @@ describe("calculator state", () => {
       name: "Sitka #3",
       loadedId: "p1",
       spectra: { longitudinal },
+      quality: {},
     });
   });
 
@@ -172,5 +174,103 @@ describe("calculator state", () => {
     const before = state({ name: "Sitka #3", loadedId: "p1" });
     expect(calculatorReducer(before, { type: "deleted", id: "p2" })).toBe(before);
     expect(calculatorReducer(before, { type: "deleted", id: "p1" })).toEqual(INITIAL_CALCULATOR);
+  });
+});
+
+describe("plate measurement", () => {
+  const take = (frequency: number, overrides: Partial<SpectrumRecord> = {}) => ({
+    frequency,
+    spectrum: spectrum(overrides),
+    spectralQ: 64.3,
+    decayQ: 71.8,
+  });
+
+  it("writes each measured frequency to one decimal and keeps its spectrum and Q values", () => {
+    const before = state({
+      inputs: typed({ sampleMass: "30" }),
+      spectra: { diagonal: spectrum({ sampleRate: 44100 }) },
+    });
+    const after = calculatorReducer(before, {
+      type: "measured",
+      takes: {
+        longitudinal: take(181.82),
+        crossGrain: { ...take(92.75, { fftSize: 32768 }), spectralQ: 41.2, decayQ: null },
+      },
+    });
+    expect(after.inputs).toEqual(
+      typed({ sampleMass: "30", freqLongitudinal: "181.8", freqCrossGrain: "92.8" }),
+    );
+    expect(after.spectra).toEqual({
+      longitudinal: spectrum(),
+      crossGrain: spectrum({ fftSize: 32768 }),
+      diagonal: spectrum({ sampleRate: 44100 }),
+    });
+    expect(after.quality).toEqual({
+      longitudinal: { spectralQ: 64.3, decayQ: 71.8 },
+      crossGrain: { spectralQ: 41.2, decayQ: null },
+    });
+  });
+
+  it("keeps the previous Q values of a take that was not measured again", () => {
+    const measured = calculatorReducer(state(), {
+      type: "measured",
+      takes: { longitudinal: take(181.82) },
+    });
+    const again = calculatorReducer(measured, {
+      type: "measured",
+      takes: { diagonal: take(120.44) },
+    });
+    expect(Object.keys(again.quality).sort()).toEqual(["diagonal", "longitudinal"]);
+  });
+
+  it("clears a take's Q values when its frequency is typed, keeping its spectrum", () => {
+    const measured = calculatorReducer(state(), {
+      type: "measured",
+      takes: { longitudinal: take(181.82), crossGrain: take(92.71) },
+    });
+    const typedOver = calculatorReducer(measured, {
+      type: "edited",
+      key: "freqLongitudinal",
+      value: "182",
+    });
+    expect(typedOver.quality).toEqual({ crossGrain: { spectralQ: 64.3, decayQ: 71.8 } });
+    expect(typedOver.spectra.longitudinal).toEqual(spectrum());
+    expect(
+      calculatorReducer(measured, { type: "edited", key: "freqCrossGrain", value: "93" }).quality,
+    ).toEqual({ longitudinal: { spectralQ: 64.3, decayQ: 71.8 } });
+    expect(
+      calculatorReducer(measured, { type: "edited", key: "freqDiagonal", value: "121" }).quality,
+    ).toBe(measured.quality);
+    expect(
+      calculatorReducer(measured, { type: "edited", key: "sampleMass", value: "30" }).quality,
+    ).toBe(measured.quality);
+  });
+
+  it("clears the Q values on load, reset and deselect, and keeps them after a save", () => {
+    const measured = calculatorReducer(state({ loadedId: "p1", name: "Sitka" }), {
+      type: "measured",
+      takes: { longitudinal: take(181.82) },
+    });
+    expect(
+      calculatorReducer(measured, {
+        type: "loaded",
+        id: "p2",
+        name: "Maple",
+        panel: stored(),
+        spectra: {},
+      }).quality,
+    ).toEqual({});
+    expect(calculatorReducer(measured, { type: "reset" }).quality).toEqual({});
+    expect(calculatorReducer(measured, { type: "deleted", id: "p1" }).quality).toEqual({});
+    expect(calculatorReducer(measured, { type: "saved" }).quality).toBe(measured.quality);
+  });
+
+  it("never sends Q values with the panel", () => {
+    const measured = calculatorReducer(state({ name: "Sitka" }), {
+      type: "measured",
+      takes: { longitudinal: take(181.82) },
+    });
+    expect(panelPayload(measured).spectra).toEqual({ longitudinal: spectrum() });
+    expect(JSON.stringify(panelPayload(measured))).not.toContain("64.3");
   });
 });

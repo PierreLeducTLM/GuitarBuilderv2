@@ -81,7 +81,7 @@
 
 ## 6. Plate measurement
 
-- [ ] 6.1 Add "Measure plate" under Frequency Measurements, opening `TapToneDialog` in Plate mode with the translated "Plate measurement" label, the fields' current values and their saved records. On Confirm:
+- [x] 6.1 Add "Measure plate" under Frequency Measurements, opening `TapToneDialog` in Plate mode with the translated "Plate measurement" label, the fields' current values and their saved records. On Confirm:
   - write each measured take's frequency rounded to 1 decimal and keep its record per field;
   - leave the takes that were not measured untouched;
   - show the Q line ("Spectral Q … · Decay Q …", "—" when missing) in page state only, cleared on typing in that field, on load, on reset and on deselect.

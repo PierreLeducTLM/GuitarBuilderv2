@@ -1,11 +1,13 @@
 "use client";
 
 import { woodProperties } from "@gb/dsp";
-import { Panel } from "@gb/ui";
+import { Button, Panel } from "@gb/ui";
+import { AudioLines } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useReducer } from "react";
+import { type ReactNode, useReducer, useState } from "react";
+import { TapToneDialog } from "@/components/tap-tone/TapToneDialog";
 import { parseInputs, validateInputs } from "@/lib/wood/calculator";
-import { calculatorReducer, INITIAL_CALCULATOR } from "@/lib/wood/panel";
+import { type CalculatorState, calculatorReducer, INITIAL_CALCULATOR } from "@/lib/wood/panel";
 import type { WoodPanelSummary } from "@/lib/wood/types";
 import { useWoodPanels } from "./useWoodPanels";
 import { WoodInputs } from "./WoodInputs";
@@ -36,11 +38,25 @@ function Area({
   );
 }
 
+const positive = (value: number) => (value > 0 && Number.isFinite(value) ? [value] : []);
+
+/** The fields' current values, as the reader preselects the nearest peak (Tap-Tone Spectrum Review). */
+const plateValues = (inputs: CalculatorState["inputs"]) => {
+  const values = parseInputs(inputs);
+  return Object.fromEntries([
+    ...positive(values.fLongHz).map((value) => ["longitudinal", value] as const),
+    ...positive(values.fCrossHz).map((value) => ["crossGrain", value] as const),
+    ...positive(values.fDiagHz).map((value) => ["diagonal", value] as const),
+  ]);
+};
+
 /** wood-panel-properties: the calculator page with its three areas. */
 export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }) {
   const t = useTranslations("wood");
   const [state, dispatch] = useReducer(calculatorReducer, INITIAL_CALCULATOR);
   const actions = useWoodPanels(state, dispatch);
+  const [measuring, setMeasuring] = useState(false);
+  const tTapTone = useTranslations("tapTone");
   const errors = validateInputs(state.inputs);
   const properties =
     Object.keys(errors).length === 0 ? woodProperties(parseInputs(state.inputs)) : null;
@@ -53,6 +69,20 @@ export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }
           <WoodInputs
             inputs={state.inputs}
             errors={errors}
+            quality={state.quality}
+            groupExtras={{
+              frequency: (
+                <div>
+                  <Button
+                    variant="secondary"
+                    icon={<AudioLines className="size-4" />}
+                    onClick={() => setMeasuring(true)}
+                  >
+                    {t("plate.measure")}
+                  </Button>
+                </div>
+              ),
+            }}
             onChange={(key, value) => dispatch({ type: "edited", key, value })}
             onReset={() => dispatch({ type: "reset" })}
           />
@@ -79,6 +109,20 @@ export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }
           loadingDefaults={actions.loadingDefaults}
         />
       </Area>
+      {measuring ? (
+        <TapToneDialog
+          open
+          mode="plate"
+          label={tTapTone("plateLabel")}
+          currentValues={plateValues(state.inputs)}
+          savedRecords={state.spectra}
+          onConfirm={(takes) => {
+            dispatch({ type: "measured", takes });
+            setMeasuring(false);
+          }}
+          onCancel={() => setMeasuring(false)}
+        />
+      ) : null}
     </div>
   );
 }

@@ -1,4 +1,10 @@
-import { type SpectrumRecord, WOOD_SPECTRUM_KEYS, type WoodPanelSpectra } from "@gb/db";
+import {
+  type SpectrumRecord,
+  WOOD_SPECTRUM_KEYS,
+  type WoodPanelSpectra,
+  type WoodSpectrumKey,
+} from "@gb/db";
+import type { TapToneRecord } from "@gb/dsp";
 import { isRecord, toSpectrum } from "@/lib/sequence/state";
 import { DEFAULT_INPUTS, type FieldKey, parseInputs, type WoodInputStrings } from "./calculator";
 
@@ -85,11 +91,29 @@ export const spectraFromStored = (value: unknown): WoodPanelSpectra => {
   );
 };
 
+/** The frequency field each plate take measures. */
+export const TAKE_FIELDS: Readonly<Record<WoodSpectrumKey, FieldKey>> = {
+  longitudinal: "freqLongitudinal",
+  crossGrain: "freqCrossGrain",
+  diagonal: "freqDiagonal",
+};
+
+/** A confirmed take's Q values, shown in the page only (Measured Q Display). */
+export interface MeasuredQuality {
+  spectralQ: number | null;
+  decayQ: number | null;
+}
+
+export type MeasuredTakes = Partial<
+  Record<WoodSpectrumKey, MeasuredQuality & { frequency: number; spectrum: TapToneRecord }>
+>;
+
 export interface CalculatorState {
   inputs: WoodInputStrings;
   name: string;
   loadedId: string | null;
   spectra: WoodPanelSpectra;
+  quality: Partial<Record<WoodSpectrumKey, MeasuredQuality>>;
 }
 
 export const INITIAL_CALCULATOR: CalculatorState = {
@@ -97,7 +121,55 @@ export const INITIAL_CALCULATOR: CalculatorState = {
   name: "",
   loadedId: null,
   spectra: {},
+  quality: {},
 };
+
+const spectrumFromReader = (record: TapToneRecord): SpectrumRecord => ({
+  frequencies: [...record.frequencies],
+  magnitudes: [...record.magnitudes],
+  magnitudesDb: [...record.magnitudesDb],
+  sampleRate: record.sampleRate,
+  fftSize: record.fftSize,
+  binWidth: record.binWidth,
+});
+
+const measuredEntries = (takes: MeasuredTakes) =>
+  WOOD_SPECTRUM_KEYS.flatMap((key) => {
+    const take = takes[key];
+    return take ? [{ key, take }] : [];
+  });
+
+function withMeasurements(state: CalculatorState, takes: MeasuredTakes): CalculatorState {
+  const measured = measuredEntries(takes);
+  return {
+    ...state,
+    inputs: {
+      ...state.inputs,
+      ...Object.fromEntries(
+        measured.map(({ key, take }) => [TAKE_FIELDS[key], take.frequency.toFixed(1)]),
+      ),
+    },
+    spectra: {
+      ...state.spectra,
+      ...Object.fromEntries(
+        measured.map(({ key, take }) => [key, spectrumFromReader(take.spectrum)]),
+      ),
+    },
+    quality: {
+      ...state.quality,
+      ...Object.fromEntries(
+        measured.map(({ key, take }) => [key, { spectralQ: take.spectralQ, decayQ: take.decayQ }]),
+      ),
+    },
+  };
+}
+
+/** Typing a frequency by hand clears that take's Q values; its spectrum stays. */
+function withoutQualityOf(state: CalculatorState, field: FieldKey): CalculatorState["quality"] {
+  const take = WOOD_SPECTRUM_KEYS.find((key) => TAKE_FIELDS[key] === field);
+  if (!take || !state.quality[take]) return state.quality;
+  return Object.fromEntries(Object.entries(state.quality).filter(([key]) => key !== take));
+}
 
 export type CalculatorEvent =
   | { type: "edited"; key: FieldKey; value: string }
@@ -109,6 +181,7 @@ export type CalculatorEvent =
       panel: StoredPanelInputs;
       spectra: WoodPanelSpectra;
     }
+  | { type: "measured"; takes: MeasuredTakes }
   | { type: "saved" }
   | { type: "reset" }
   | { type: "deleted"; id: string };
@@ -116,7 +189,11 @@ export type CalculatorEvent =
 export function calculatorReducer(state: CalculatorState, event: CalculatorEvent): CalculatorState {
   switch (event.type) {
     case "edited":
-      return { ...state, inputs: { ...state.inputs, [event.key]: event.value } };
+      return {
+        ...state,
+        inputs: { ...state.inputs, [event.key]: event.value },
+        quality: withoutQualityOf(state, event.key),
+      };
     case "named":
       return { ...state, name: event.name };
     case "loaded":
@@ -125,7 +202,10 @@ export function calculatorReducer(state: CalculatorState, event: CalculatorEvent
         name: event.name,
         loadedId: event.id,
         spectra: event.spectra,
+        quality: {},
       };
+    case "measured":
+      return withMeasurements(state, event.takes);
     case "saved":
       return { ...state, name: "", loadedId: null };
     case "reset":

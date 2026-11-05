@@ -593,6 +593,11 @@
       "title": "Supprimer le panneau de bois",
       "message": "Voulez-vous vraiment supprimer ce panneau de bois ? Cette action est irréversible.",
       "confirm": "Supprimer"
+    },
+    "plate": {
+      "measure": "Mesurer la plaque",
+      "quality": "Q spectral {spectral} · Q de décroissance {decay}",
+      "missing": "—"
     }
   }
 }
