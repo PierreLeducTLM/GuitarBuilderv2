@@ -3,13 +3,14 @@ import { cx, TraceMark } from "@gb/ui";
 import type { Route } from "next";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import type { RecentBuild } from "@/lib/builds/types";
 import {
   activeEntry,
   adminEntriesFor,
   DEFAULT_ROUTE,
   destinations,
   type EntryId,
+  isActive,
 } from "@/lib/routes";
 import { entryIcons } from "./navigation";
 
@@ -17,8 +18,8 @@ export interface SidebarProps {
   pathname: string;
   role: AppRole;
   email: string;
-  /** The user's recent builds, listed under Builds. */
-  recentBuilds: ReactNode;
+  /** The user's recent builds, most recent first, listed under Builds. */
+  recentBuilds: readonly RecentBuild[];
 }
 
 function Entry({
@@ -63,6 +64,7 @@ export function Sidebar({ pathname, role, email, recentBuilds }: SidebarProps) {
   const t = useTranslations();
   const active = activeEntry(pathname);
   const admin = adminEntriesFor(role);
+  const viewedBuild = recentBuilds.find((build) => isActive(pathname, `/builds/${build.id}`));
   const [builds, tools, assistant] = destinations;
   return (
     <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col gap-5 border-r border-line bg-panel px-3 py-4 lg:flex">
@@ -85,9 +87,31 @@ export function Sidebar({ pathname, role, email, recentBuilds }: SidebarProps) {
             id={builds.id}
             href={builds.href}
             label={t("nav.builds")}
-            current={active === builds.id}
+            current={active === builds.id && !viewedBuild}
           />
-          {recentBuilds}
+          {recentBuilds.length > 0 ? (
+            <ul aria-label={t("nav.recentBuilds")} className="flex flex-col gap-0.5">
+              {recentBuilds.map((build) => {
+                const current = build === viewedBuild;
+                return (
+                  <li key={build.id}>
+                    <Link
+                      href={`/builds/${build.id}` as Route}
+                      aria-current={current ? "page" : undefined}
+                      className={cx(
+                        "ml-4 flex min-h-9 items-center rounded-lg px-2.5 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus",
+                        current
+                          ? "bg-selected font-semibold text-fg"
+                          : "text-fg-dim hover:bg-raised hover:text-fg",
+                      )}
+                    >
+                      <span className="truncate">{build.name}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
         </div>
         <div className="flex flex-col gap-0.5">
           <Entry

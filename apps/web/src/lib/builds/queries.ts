@@ -1,7 +1,7 @@
 import "server-only";
 import { toGuitarType } from "@gb/db";
 import { createClient } from "@/lib/supabase/server";
-import type { BuildDetailData, BuildSummary } from "./types";
+import type { BuildDetailData, BuildSummary, RecentBuild } from "./types";
 import { isUuid } from "./validation";
 
 /**
@@ -23,6 +23,22 @@ export async function listOwnBuilds(userId: string): Promise<BuildSummary[] | nu
     guitarType: toGuitarType(row.guitar_type),
     createdAt: row.created_at,
   }));
+}
+
+/**
+ * The user's `count` most recently changed builds, for the sidebar. Own builds only,
+ * like the list. A failed query gives no builds rather than breaking the navigation.
+ */
+export async function listRecentBuilds(userId: string, count: number): Promise<RecentBuild[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("builds")
+    .select("id, name")
+    .eq("owner_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(count);
+  if (error || !data) return [];
+  return data.map((row) => ({ id: row.id, name: row.name }));
 }
 
 /** One build the user may read, or null when it does not exist or is not readable. */

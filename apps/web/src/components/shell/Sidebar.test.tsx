@@ -13,7 +13,7 @@ const renderSidebar = (props: Partial<Props> = {}, locale?: "en" | "fr") =>
       pathname="/builds"
       role="user"
       email="luthier@example.com"
-      recentBuilds={<p>recent builds slot</p>}
+      recentBuilds={[]}
       {...props}
     />,
     { locale },
@@ -49,13 +49,53 @@ describe("Sidebar", () => {
     expect(within(sidebar()).getByRole("navigation", { name: "Navigation" })).toBeTruthy();
   });
 
-  it("puts the recent builds under Builds and before Tools", () => {
+  it("lists the recent builds under Builds and before Tools, in the order given", () => {
+    renderSidebar({
+      recentBuilds: [
+        { id: "b2", name: "OM Cedar" },
+        { id: "b1", name: "Parlour" },
+      ],
+    });
+    const names = within(sidebar())
+      .getAllByRole("link")
+      .map((link) => link.textContent);
+    expect(names.slice(1, 5)).toEqual(["Builds", "OM Cedar", "Parlour", "Tools"]);
+    expect(screen.getByRole("link", { name: "OM Cedar" }).getAttribute("href")).toBe("/builds/b2");
+  });
+
+  it("highlights the build being viewed instead of Builds", () => {
+    renderSidebar({
+      pathname: "/builds/b1/steps/TopPanel",
+      recentBuilds: [
+        { id: "b2", name: "OM Cedar" },
+        { id: "b1", name: "Parlour" },
+      ],
+    });
+    const current = within(sidebar())
+      .getAllByRole("link")
+      .filter((link) => link.getAttribute("aria-current") === "page");
+    expect(current.map((link) => link.textContent)).toEqual(["Parlour"]);
+  });
+
+  it("keeps Builds highlighted on a build that is not among the recent ones", () => {
+    renderSidebar({ pathname: "/builds/b9", recentBuilds: [{ id: "b1", name: "Parlour" }] });
+    expect(screen.getByRole("link", { name: "Builds" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: "Parlour" }).getAttribute("aria-current")).toBeNull();
+  });
+
+  it("does not take a build whose id merely starts the same for the one being viewed", () => {
+    renderSidebar({ pathname: "/builds/b10", recentBuilds: [{ id: "b1", name: "Parlour" }] });
+    expect(screen.getByRole("link", { name: "Parlour" }).getAttribute("aria-current")).toBeNull();
+  });
+
+  it("labels the recent builds list", () => {
+    renderSidebar({ recentBuilds: [{ id: "b1", name: "Parlour" }] });
+    expect(screen.getByRole("list", { name: "Recent builds" })).toBeTruthy();
+  });
+
+  it("shows no recent builds list without builds", () => {
     renderSidebar();
-    const slot = screen.getByText("recent builds slot");
-    const builds = screen.getByRole("link", { name: "Builds" });
-    const tools = screen.getByRole("link", { name: "Tools" });
-    expect(builds.compareDocumentPosition(slot) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(slot.compareDocumentPosition(tools) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByRole("list", { name: "Recent builds" })).toBeNull();
   });
 
   it("shows no admin entries to a regular user", () => {
