@@ -231,6 +231,23 @@
       "defaultDescription": "Analyse de résonance"
     }
   },
+  "groups": {
+    "trussRod": "Tige de réglage",
+    "fretboard": "Touche",
+    "neck": "Manche",
+    "topPanel": "Table d'harmonie",
+    "braces": "Barres et plaque de chevalet",
+    "backPanel": "Fond",
+    "sides": "Éclisses et bordures",
+    "endBlocks": "Tasseaux et contre-éclisses",
+    "bridge": "Chevalet",
+    "nutSaddle": "Sillets de tête et de chevalet",
+    "neckAssembly": "Assemblage du manche",
+    "bodyFinish": "Finition de la caisse",
+    "heelAssembly": "Assemblage du talon",
+    "bodyAssembly": "Assemblage de la caisse",
+    "finalAssembly": "Assemblage final"
+  },
   "steps": {
     "TrussRod": "Tige de réglage",
     "MakeTrussNut": "Fabriquer l'écrou de la tige de réglage",

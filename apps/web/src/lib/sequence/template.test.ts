@@ -26,6 +26,8 @@ function specSteps(): { key: string; label: string; group: number }[] {
   const steps: { key: string; label: string; group: number }[] = [];
   let group = 0;
   for (const { title, body } of groupRequirements()) {
+    // Template Group Names names the groups; it holds no steps.
+    if (title === "Names") continue;
     // The bridge's classical branch continues group 9.
     if (title !== "Bridge Classical Branch") group++;
     const list = body.split("#### Scenario")[0] as string;

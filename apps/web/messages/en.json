@@ -231,6 +231,23 @@
       "defaultDescription": "Resonance Analysis"
     }
   },
+  "groups": {
+    "trussRod": "Truss rod",
+    "fretboard": "Fretboard",
+    "neck": "Neck",
+    "topPanel": "Top panel",
+    "braces": "Braces and bridge plate",
+    "backPanel": "Back panel",
+    "sides": "Sides and bindings",
+    "endBlocks": "End blocks and linings",
+    "bridge": "Bridge",
+    "nutSaddle": "Nut and saddle",
+    "neckAssembly": "Neck assembly",
+    "bodyFinish": "Body finish setup",
+    "heelAssembly": "Heel assembly",
+    "bodyAssembly": "Body assembly",
+    "finalAssembly": "Final assembly"
+  },
   "steps": {
     "TrussRod": "Truss rod",
     "MakeTrussNut": "Make truss rod nut",

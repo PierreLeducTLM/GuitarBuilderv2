@@ -151,7 +151,7 @@ export interface TemplateStep {
   key: StepKey;
   /** Template position, 1-132 (Step Numbers). */
   number: number;
-  /** Template group, 1-15. Groups organize the template but are not displayed. */
+  /** Template group, 1-15 (see groups.ts). */
   group: number;
   /** The only guitar type the step applies to, or null when it applies to both. */
   guitarType: GuitarType | null;

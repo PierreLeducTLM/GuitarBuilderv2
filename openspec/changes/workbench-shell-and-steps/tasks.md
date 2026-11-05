@@ -36,7 +36,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
 
 ## 3. Template groups and derived structure (`apps/web/src/lib/sequence/`)
 
-- [ ] 3.1 Add `groups.ts` (15 groups: id, URL key, message key) and the `groups.<key>` names in both catalogs. Verify a conformance test that parses the Template Group Names scenario in this change's delta (moved to the main spec at archive) and matches every key and English and French name
+- [x] 3.1 Add `groups.ts` (15 groups: id, URL key, message key) and the `groups.<key>` names in both catalogs. Verify a conformance test that parses the Template Group Names scenario in this change's delta (moved to the main spec at archive) and matches every key and English and French name
 - [ ] 3.2 Implement `groupGraph(displayGraph, states)`: per group, the displayed steps, completed and total counts, the state (done, ready, not started) and the feeding groups; assembly groups in depth order. Verify unit tests for:
   - the Build Map scenarios (assembly order and inputs, "Truss rod 6/7" ready, "Neck assembly 0/7");
   - feeds that are identical across all six variants
