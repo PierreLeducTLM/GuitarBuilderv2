@@ -32,7 +32,7 @@
 
 ## 3. Calculator logic (`apps/web/src/lib/wood/`)
 
-- [ ] 3.1 Implement the defaults, `parseInputs`, `validateInputs` (the ten message keys), result formatting (1 and 2 decimals in the user's locale) and the PDF file-name function. Verify unit tests:
+- [x] 3.1 Implement the defaults, `parseInputs`, `validateInputs` (the ten message keys), result formatting (1 and 2 decimals in the user's locale) and the PDF file-name function. Verify unit tests:
   - the default strings;
   - empty and non-numeric as missing;
   - "Sample length must be greater than 0" and the stiffness message;

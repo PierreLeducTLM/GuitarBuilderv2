@@ -502,5 +502,19 @@
       "fitEnds": "fin de l'ajustement",
       "noise": "bruit de fond"
     }
+  },
+  "wood": {
+    "validation": {
+      "sampleLength": "La longueur de l'échantillon doit être supérieure à 0",
+      "sampleWidth": "La largeur de l'échantillon doit être supérieure à 0",
+      "sampleThickness": "L'épaisseur de l'échantillon doit être supérieure à 0",
+      "sampleMass": "La masse de l'échantillon doit être supérieure à 0",
+      "freqLongitudinal": "La fréquence longitudinale doit être supérieure à 0",
+      "freqCrossGrain": "La fréquence en travers doit être supérieure à 0",
+      "freqDiagonal": "La fréquence diagonale doit être supérieure à 0",
+      "plateLength": "La longueur de la table cible doit être supérieure à 0",
+      "plateWidth": "La largeur de la table cible doit être supérieure à 0",
+      "stiffness": "Le paramètre de rigidité vibratoire doit être supérieur à 0"
+    }
   }
 }

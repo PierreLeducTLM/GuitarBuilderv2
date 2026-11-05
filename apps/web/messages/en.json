@@ -502,5 +502,19 @@
       "fitEnds": "fit ends here",
       "noise": "noise floor"
     }
+  },
+  "wood": {
+    "validation": {
+      "sampleLength": "Sample length must be greater than 0",
+      "sampleWidth": "Sample width must be greater than 0",
+      "sampleThickness": "Sample thickness must be greater than 0",
+      "sampleMass": "Sample mass must be greater than 0",
+      "freqLongitudinal": "Longitudinal frequency must be greater than 0",
+      "freqCrossGrain": "Cross-grain frequency must be greater than 0",
+      "freqDiagonal": "Diagonal frequency must be greater than 0",
+      "plateLength": "Target plate length must be greater than 0",
+      "plateWidth": "Target plate width must be greater than 0",
+      "stiffness": "Vibrational stiffness parameter must be greater than 0"
+    }
   }
 }
