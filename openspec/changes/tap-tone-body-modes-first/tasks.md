@@ -8,7 +8,7 @@ Every task is test-first: write the failing test named in the task, then the cod
 
 ## 2. Label placement (`apps/web/src/lib/tap-tone/graph.ts`)
 
-- [ ] 2.1 `spreadLabels({ centers, width, gap, min, max })`. Verify unit tests for: labels far apart stay on their peaks; two touching labels are centred on the mean of their peaks, `gap` apart; the phone case (103.4 / 186.7 / 220.8 Hz at 358 px) keeps order, gap and bounds; a cluster pushed past either edge is shifted inside; a chain that only touches after a first merge merges again; an empty list.
+- [x] 2.1 `spreadLabels({ centers, width, gap, min, max })`. Verify unit tests for: labels far apart stay on their peaks; two touching labels are centred on the mean of their peaks, `gap` apart; the phone case (103.4 / 186.7 / 220.8 Hz at 358 px) keeps order, gap and bounds; a cluster pushed past either edge is shifted inside; a chain that only touches after a first merge merges again; an empty list. Mutation: 98.4 %; the one survivor (`>` to `>=` at exactly the gap) is equivalent, since merging groups that already sit exactly `gap` apart leaves every label where it was.
 
 ## 3. Graph (`TapToneSpectrum`)
 

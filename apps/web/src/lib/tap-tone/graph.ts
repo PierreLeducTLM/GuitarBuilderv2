@@ -61,3 +61,54 @@ export const snapTargetIndex = (peaks: readonly Peak[], frequency: number): numb
   const peak = nearest === null ? undefined : peaks[nearest];
   return peak && Math.abs(peak.frequency - frequency) <= GRAPH.snapHz ? nearest : null;
 };
+
+type Label = { readonly index: number; readonly wanted: number };
+type LabelGroup = { readonly labels: readonly Label[]; readonly center: number };
+
+/** Centres for same-width labels on one row: as close to where each wants to be, never closer than `gap`, inside `min`..`max`, in their given order. */
+export const spreadLabels = ({
+  centers,
+  width,
+  gap,
+  min,
+  max,
+}: {
+  centers: readonly number[];
+  width: number;
+  gap: number;
+  min: number;
+  max: number;
+}): number[] => {
+  const span = (count: number) => count * width + (count - 1) * gap;
+  const group = (labels: readonly Label[]): LabelGroup => {
+    const half = span(labels.length) / 2;
+    const mean = labels.reduce((sum, label) => sum + label.wanted, 0) / labels.length;
+    return { labels, center: clamp(mean, min + half, max - half) };
+  };
+  const touches = (left: LabelGroup, right: LabelGroup) =>
+    left.center + span(left.labels.length) / 2 + gap > right.center - span(right.labels.length) / 2;
+  const settle = (groups: readonly LabelGroup[]): readonly LabelGroup[] => {
+    const at = groups.findIndex((left, i) => {
+      const right = groups[i + 1];
+      return right !== undefined && touches(left, right);
+    });
+    const left = groups[at];
+    const right = groups[at + 1];
+    if (!left || !right) return groups;
+    return settle([
+      ...groups.slice(0, at),
+      group([...left.labels, ...right.labels]),
+      ...groups.slice(at + 2),
+    ]);
+  };
+  const sorted = centers
+    .map((wanted, index) => ({ index, wanted }))
+    .toSorted((a, b) => a.wanted - b.wanted);
+  const placed = settle(sorted.map((label) => group([label]))).flatMap((g) =>
+    g.labels.map((label, i) => ({
+      index: label.index,
+      center: g.center - span(g.labels.length) / 2 + width / 2 + i * (width + gap),
+    })),
+  );
+  return placed.toSorted((a, b) => a.index - b.index).map((label) => label.center);
+};
