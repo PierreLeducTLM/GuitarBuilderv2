@@ -504,6 +504,21 @@
     }
   },
   "wood": {
+    "title": "Wood Panel Properties",
+    "loading": "Loading wood panels...",
+    "areas": {
+      "inputs": "Input Measurements",
+      "results": "Calculated Results",
+      "library": "Saved Wood Panels"
+    },
+    "library": {
+      "loadFailed": "Failed to load wood panels",
+      "empty": "No saved wood panels yet",
+      "emptyHint": "Calculate and save your first wood panel to see it here",
+      "loadDefaults": "Load Default Panels",
+      "targetThickness": "Target thickness",
+      "estimatedMass": "Est. Mass"
+    },
     "validation": {
       "sampleLength": "Sample length must be greater than 0",
       "sampleWidth": "Sample width must be greater than 0",

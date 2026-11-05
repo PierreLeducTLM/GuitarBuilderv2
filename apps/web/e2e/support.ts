@@ -38,6 +38,13 @@ export const fakeSupabase = {
     failUploadsMatching?: string | null;
     uploadDelayMs?: number;
     failStorageRemove?: boolean;
+    failWoodList?: boolean;
+    failWoodLoad?: boolean;
+    failWoodSave?: boolean;
+    woodSaveDelayMs?: number;
+    failWoodDelete?: boolean;
+    failLoadDefaults?: boolean;
+    loadDefaultsDelayMs?: number;
   }) {
     await fetch(`${FAKE_SUPABASE}/__test/config`, { method: "POST", body: JSON.stringify(config) });
   },
@@ -52,6 +59,25 @@ export const fakeSupabase = {
   /** Every stored build, of every user. */
   async builds(): Promise<StoredBuild[]> {
     return (await (await fetch(`${FAKE_SUPABASE}/__test/builds`)).json()) as StoredBuild[];
+  },
+  /** Creates a wood panel directly, as if it had been saved earlier. */
+  async seedWoodPanel(panel: SeedWoodPanel): Promise<StoredWoodPanel> {
+    const response = await fetch(`${FAKE_SUPABASE}/__test/wood_panels`, {
+      method: "POST",
+      body: JSON.stringify({ ...SPRUCE, ...panel }),
+    });
+    return (await response.json()) as StoredWoodPanel;
+  },
+  /** Every stored wood panel, of every user. */
+  async woodPanels(): Promise<StoredWoodPanel[]> {
+    return (await (await fetch(`${FAKE_SUPABASE}/__test/wood_panels`)).json()) as StoredWoodPanel[];
+  },
+  /** Fills the reference panel set. */
+  async seedDefaultWoodPanels(panels: Omit<SeedWoodPanel, "ownerEmail">[]) {
+    await fetch(`${FAKE_SUPABASE}/__test/default_wood_panels`, {
+      method: "POST",
+      body: JSON.stringify({ panels: panels.map((panel) => ({ ...SPRUCE, ...panel })) }),
+    });
   },
   /** Every stored photo file path. */
   async objects(): Promise<string[]> {
@@ -87,6 +113,41 @@ export interface StoredBuild {
       roles?: Record<string, { frequency: number; origin: string }>;
     }[];
   }[];
+  created_at: string;
+  updated_at: string;
+}
+
+/** The reference spruce panel of the spec: 395.9 kg/m³, 2.77 mm and 157.5 g. */
+export const SPRUCE = {
+  sample_length_mm: 605,
+  sample_width_mm: 238,
+  sample_thickness_mm: 4,
+  sample_mass_g: 228,
+  freq_longitudinal_hz: 61.6,
+  freq_cross_grain_hz: 105,
+  freq_diagonal_hz: 38.2,
+  plate_length_mm: 500,
+  plate_width_mm: 380,
+  stiffness_parameter: 75,
+};
+
+export type WoodInputColumns = typeof SPRUCE;
+
+export interface SeedWoodPanel extends Partial<WoodInputColumns> {
+  ownerEmail: string;
+  name: string;
+  created_at?: string;
+  spectra?: Record<string, unknown>;
+  id?: string;
+}
+
+export interface StoredWoodPanel extends WoodInputColumns {
+  id: string;
+  owner_id: string | null;
+  name: string;
+  spectra: Record<string, unknown>;
+  target_thickness_mm: number;
+  estimated_mass_g: number;
   created_at: string;
   updated_at: string;
 }

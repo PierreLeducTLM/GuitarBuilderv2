@@ -504,6 +504,21 @@
     }
   },
   "wood": {
+    "title": "Propriétés des panneaux de bois",
+    "loading": "Chargement des panneaux de bois...",
+    "areas": {
+      "inputs": "Mesures d'entrée",
+      "results": "Résultats calculés",
+      "library": "Panneaux de bois enregistrés"
+    },
+    "library": {
+      "loadFailed": "Impossible de charger les panneaux de bois",
+      "empty": "Aucun panneau de bois enregistré",
+      "emptyHint": "Calculez et enregistrez votre premier panneau de bois pour le voir ici",
+      "loadDefaults": "Charger les panneaux par défaut",
+      "targetThickness": "Épaisseur cible",
+      "estimatedMass": "Masse est."
+    },
     "validation": {
       "sampleLength": "La longueur de l'échantillon doit être supérieure à 0",
       "sampleWidth": "La largeur de l'échantillon doit être supérieure à 0",
