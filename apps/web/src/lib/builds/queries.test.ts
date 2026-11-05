@@ -21,7 +21,11 @@ function fakeClient(result: { data: unknown; error: unknown }) {
       },
     },
   );
-  return { client: { from: (table: string) => (calls.push(["from", table]), query) }, calls };
+  const from = (table: string) => {
+    calls.push(["from", table]);
+    return query;
+  };
+  return { client: { from }, calls };
 }
 
 const server = vi.hoisted(() => ({ client: undefined as unknown }));
