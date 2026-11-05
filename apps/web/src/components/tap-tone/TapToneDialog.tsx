@@ -35,6 +35,7 @@ import {
   isSupportedAudioFile,
   prepareAudio,
 } from "./audio";
+import { CaptureDiagnostics } from "./CaptureDiagnostics";
 import { MAX_RECORDING_SECONDS, useAudioInputs, usePlayback, useRecorder } from "./hooks";
 import { Oscilloscope } from "./Oscilloscope";
 import { PeakInspector } from "./PeakInspector";
@@ -112,6 +113,12 @@ export function TapToneDialog(props: TapToneDialogProps) {
     () =>
       typeof window !== "undefined" &&
       isMobileDevice({ navigator, hasTouchEvents: "ontouchstart" in window }),
+    [],
+  );
+  const diagnostics = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).has("captureDiagnostics"),
     [],
   );
   const { analyse } = useTakeAnalysis(dispatch);
@@ -409,6 +416,8 @@ export function TapToneDialog(props: TapToneDialogProps) {
           </div>
         </div>
       ) : null}
+
+      {diagnostics && !recording ? <CaptureDiagnostics deviceId={inputs.selected} /> : null}
 
       {recording ? (
         <div className="flex flex-col gap-3">
