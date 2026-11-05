@@ -244,6 +244,14 @@
       "label": "Steps",
       "readyNow": "Ready now",
       "groupProgress": "{completed}/{total}"
+    },
+    "map": {
+      "label": "Build map",
+      "parts": "Parts: start in any order",
+      "assembly": "Assembly",
+      "from": "from {groups}",
+      "tile": "{name}, {completed} of {total} steps, {state}",
+      "loading": "Loading map..."
     }
   },
   "groups": {

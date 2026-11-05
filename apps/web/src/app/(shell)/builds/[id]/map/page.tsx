@@ -1,5 +1,5 @@
-import { SectionPlaceholderPanel } from "@/components/shell/SectionPlaceholder";
+import { MapView } from "@/components/builds/MapView";
 
 export default function BuildMapPage() {
-  return <SectionPlaceholderPanel />;
+  return <MapView />;
 }

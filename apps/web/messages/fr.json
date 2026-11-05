@@ -244,6 +244,14 @@
       "label": "Étapes",
       "readyNow": "Prêtes maintenant",
       "groupProgress": "{completed}/{total}"
+    },
+    "map": {
+      "label": "Carte de la fabrication",
+      "parts": "Pièces : dans n’importe quel ordre",
+      "assembly": "Assemblage",
+      "from": "venant de {groups}",
+      "tile": "{name}, {completed} étapes sur {total}, {state}",
+      "loading": "Chargement de la carte..."
     }
   },
   "groups": {
