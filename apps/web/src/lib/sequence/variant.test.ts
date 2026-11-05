@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TEMPLATE_STEPS } from "./template";
-import { type BuildVariant, displayGraph, stepApplies } from "./variant";
+import { type BuildVariant, displayedStepKey, displayGraph, stepApplies } from "./variant";
 
 const has = (variant: BuildVariant, from: string, to: string) =>
   displayGraph(variant).arrows.some(([a, b]) => a === from && b === to);
@@ -102,5 +102,23 @@ describe("hidden step bridging", () => {
         }
       }
     }
+  });
+});
+
+describe("displayedStepKey", () => {
+  const classical = { guitarType: "classical", boboNeck: false } as const;
+
+  it("accepts a step the build shows", () => {
+    expect(displayedStepKey(classical, "FabricateCLBridge")).toBe("FabricateCLBridge");
+  });
+
+  it("refuses a step the variant hides", () => {
+    expect(displayedStepKey(classical, "FabricateBridge")).toBeNull();
+    expect(displayedStepKey(classical, "BOBOFitLoose")).toBeNull();
+  });
+
+  it("refuses anything that is not a step key", () => {
+    expect(displayedStepKey(classical, "NoSuchStep")).toBeNull();
+    expect(displayedStepKey(classical, "topPanel")).toBeNull();
   });
 });

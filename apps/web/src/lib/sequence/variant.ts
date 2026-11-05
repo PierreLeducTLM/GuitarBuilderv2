@@ -1,7 +1,14 @@
 // Which template steps a build shows, and the arrows between them
 // (build-sequence: Step Applicability by Variant, Hidden Step Bridging).
 import type { GuitarType } from "@gb/db";
-import { type StepKey, TEMPLATE_ARROWS, TEMPLATE_STEPS, type TemplateStep } from "./template";
+import {
+  isStepKey,
+  type StepKey,
+  TEMPLATE_ARROWS,
+  TEMPLATE_STEPS,
+  type TemplateStep,
+  templateStep,
+} from "./template";
 
 /** A build's construction variant (guitar-builds: Change Construction Variant). */
 export interface BuildVariant {
@@ -130,4 +137,9 @@ export function displayGraph(variant: BuildVariant): DisplayGraph {
     cache.set(key, graph);
   }
   return graph;
+}
+
+/** `value` as a step key when it names a step the variant shows, else null. */
+export function displayedStepKey(variant: BuildVariant, value: string): StepKey | null {
+  return isStepKey(value) && stepApplies(templateStep(value), variant) ? value : null;
 }
