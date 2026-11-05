@@ -13,13 +13,14 @@ const peaksAt = (...frequencies: number[]) =>
   frequencies.map((frequency, i) => ({ index: i, frequency, level: -20 - i, magnitude: 0.1 }));
 
 describe("spectrum graph geometry", () => {
-  it("maps 30-1000 Hz linearly across the plot and clamps outside it", () => {
+  it("maps 30-600 Hz linearly across the plot and clamps outside it", () => {
     expect(xOfFrequency(30)).toBe(GRAPH.left);
+    expect(xOfFrequency(600)).toBe(GRAPH.left + GRAPH.plotWidth);
     expect(xOfFrequency(1000)).toBe(GRAPH.left + GRAPH.plotWidth);
-    expect(xOfFrequency(515)).toBeCloseTo(GRAPH.left + GRAPH.plotWidth / 2, 9);
-    expect(frequencyAtX(xOfFrequency(600))).toBeCloseTo(600, 9);
+    expect(xOfFrequency(315)).toBeCloseTo(GRAPH.left + GRAPH.plotWidth / 2, 9);
+    expect(frequencyAtX(xOfFrequency(410))).toBeCloseTo(410, 9);
     expect(frequencyAtX(0)).toBe(30);
-    expect(frequencyAtX(GRAPH.width)).toBe(1000);
+    expect(frequencyAtX(GRAPH.width)).toBe(600);
   });
 
   it("maps -100 to 0 dB from the bottom to the top and clamps levels outside it", () => {
@@ -30,10 +31,12 @@ describe("spectrum graph geometry", () => {
     expect(levelY(3)).toBe(GRAPH.top);
   });
 
-  it("draws the trace through every point in order", () => {
+  it("draws the trace through every point on the axis in order", () => {
     const path = tracePath([
       { frequency: 30, magnitude: 1, db: 0 },
-      { frequency: 1000, magnitude: 0, db: -120 },
+      { frequency: 600, magnitude: 0, db: -120 },
+      { frequency: 600.1, magnitude: 0, db: -20 },
+      { frequency: 1000, magnitude: 0, db: -40 },
     ]);
     expect(path).toBe(
       `${GRAPH.left.toFixed(1)},${GRAPH.top.toFixed(1)} ${(GRAPH.left + GRAPH.plotWidth).toFixed(1)},${(GRAPH.top + GRAPH.plotHeight).toFixed(1)}`,
@@ -56,5 +59,12 @@ describe("peak picking on the graph", () => {
     expect(nearestPeakIndex(peaks, 300)).toBe(1);
     expect(nearestPeakIndex(peaks, 290)).toBe(0);
     expect(nearestPeakIndex([], 300)).toBeNull();
+  });
+
+  it("ignores peaks beyond the frequency axis", () => {
+    const peaks = peaksAt(720.4, 410.2);
+    expect(nearestPeakIndex(peaks, 600)).toBe(1);
+    expect(nearestPeakIndex(peaksAt(720.4), 600)).toBeNull();
+    expect(snapTargetIndex(peaksAt(610), 600)).toBeNull();
   });
 });

@@ -15,11 +15,11 @@ export const GRAPH = {
   plotWidth: WIDTH - LEFT - RIGHT,
   plotHeight: HEIGHT - TOP - BOTTOM,
   minHz: 30,
-  maxHz: 1000,
+  maxHz: 600,
   minDb: -100,
   maxDb: 0,
   snapHz: 20,
-  gridHz: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+  gridHz: [50, 100, 200, 300, 400, 500, 600],
   gridDb: [0, -20, -40, -60, -80, -100],
 } as const;
 
@@ -38,11 +38,17 @@ export const levelY = (db: number) =>
   ((GRAPH.maxDb - clamp(db, GRAPH.minDb, GRAPH.maxDb)) / (GRAPH.maxDb - GRAPH.minDb)) *
     GRAPH.plotHeight;
 
+export const onAxis = (frequency: number) => frequency >= GRAPH.minHz && frequency <= GRAPH.maxHz;
+
 export const tracePath = (points: readonly SpectrumPoint[]) =>
-  points.map((p) => `${xOfFrequency(p.frequency).toFixed(1)},${levelY(p.db).toFixed(1)}`).join(" ");
+  points
+    .filter((p) => onAxis(p.frequency))
+    .map((p) => `${xOfFrequency(p.frequency).toFixed(1)},${levelY(p.db).toFixed(1)}`)
+    .join(" ");
 
 export const nearestPeakIndex = (peaks: readonly Peak[], frequency: number): number | null =>
   peaks.reduce<number | null>((best, peak, i) => {
+    if (!onAxis(peak.frequency)) return best;
     const bestPeak = best === null ? undefined : peaks[best];
     return !bestPeak ||
       Math.abs(peak.frequency - frequency) < Math.abs(bestPeak.frequency - frequency)
