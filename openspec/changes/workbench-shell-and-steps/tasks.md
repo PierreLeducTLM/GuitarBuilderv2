@@ -9,7 +9,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
   - `/builds/x/steps/TopPanel` making Builds active;
   - `/wood-properties` making the Tools tab and the Wood panels entry active;
   - admin entries filtered for the user role
-- [ ] 1.2 Extend `classifyPath` and `safeNextPath` for:
+- [x] 1.2 Extend `classifyPath` and `safeNextPath` for:
   - `/builds/<id>` followed by nothing, `/map`, `/map/<group>`, `/overview` or `/steps/<key>`;
   - `/tools` and `/you`.
 

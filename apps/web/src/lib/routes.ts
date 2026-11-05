@@ -91,10 +91,25 @@ export function classifyPath(pathname: string): RouteKind {
   if (path === SIGN_IN_ROUTE) return "signIn";
   if (path === "/auth/confirm") return "authCallback";
   if (path === "/references" || path === "/admin") return "adminSection";
-  if (/^\/builds(\/[^/]+)?$/.test(path)) return "section";
-  if (path === "/chat" || path === "/simulator" || path === "/wood-properties") return "section";
+  if (BUILD_PATH.test(path)) return "section";
+  if (TOP_LEVEL_SECTIONS.has(path)) return "section";
   return "unknown";
 }
+
+/**
+ * `/builds`, a build and its views, part flows and steps (guitar-builds: Build Deep
+ * Links). Keys are checked by shape only; the build pages check them against the template.
+ */
+const BUILD_PATH =
+  /^\/builds(\/[^/]+(\/map(\/[a-z-]{1,40})?|\/overview|\/steps\/[A-Za-z0-9]{1,64})?)?$/;
+
+const TOP_LEVEL_SECTIONS: ReadonlySet<string> = new Set([
+  "/tools",
+  "/you",
+  "/chat",
+  "/simulator",
+  "/wood-properties",
+]);
 
 /**
  * Accepts a post-sign-in destination only if it is a path on this site; anything

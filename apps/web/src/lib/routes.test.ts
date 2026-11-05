@@ -122,6 +122,14 @@ describe("classifyPath", () => {
     ["/builds", "section"],
     ["/builds/", "section"],
     ["/builds/7f3c-example", "section"],
+    ["/builds/7f3c-example/map", "section"],
+    ["/builds/7f3c-example/map/truss-rod", "section"],
+    ["/builds/7f3c-example/overview", "section"],
+    ["/builds/7f3c-example/steps/TopPanel", "section"],
+    ["/builds/7f3c-example/steps/CLGlueBOBO1/", "section"],
+    ["/tools", "section"],
+    ["/tools//", "section"],
+    ["/you", "section"],
     ["/chat", "section"],
     ["/simulator", "section"],
     ["/wood-properties", "section"],
@@ -132,6 +140,19 @@ describe("classifyPath", () => {
     ["/auth/confirm", "authCallback"],
     ["/does-not-exist", "unknown"],
     ["/builds/a/b", "unknown"],
+    ["/builds/x/extra", "unknown"],
+    ["/builds/x/steps", "unknown"],
+    ["/builds/x/steps/a b", "unknown"],
+    ["/builds/x/steps/Top-Panel", "unknown"],
+    ["/builds/x/steps/A/B", "unknown"],
+    ["/builds/x/map/UPPER", "unknown"],
+    ["/builds/x/map/truss_rod", "unknown"],
+    ["/builds/x/map/a/b", "unknown"],
+    ["/builds/x/overview/more", "unknown"],
+    ["/x/builds", "unknown"],
+    ["/x/story/abc", "unknown"],
+    ["/tools/wood", "unknown"],
+    ["/you/settings", "unknown"],
     ["/admin/users", "unknown"],
     ["/story", "unknown"],
     ["/story/a/b", "unknown"],
@@ -145,6 +166,10 @@ describe("safeNextPath", () => {
     expect(safeNextPath("/chat")).toBe("/chat");
     expect(safeNextPath("/references?doc=12")).toBe("/references?doc=12");
     expect(safeNextPath("/builds/7f3c")).toBe("/builds/7f3c");
+    expect(safeNextPath("/builds/x/steps/TopPanel")).toBe("/builds/x/steps/TopPanel");
+    expect(safeNextPath("/builds/x/map/top-panel?from=map")).toBe(
+      "/builds/x/map/top-panel?from=map",
+    );
   });
 
   it.each([
