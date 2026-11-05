@@ -10,6 +10,7 @@ import { parseInputs, validateInputs } from "@/lib/wood/calculator";
 import { type CalculatorState, calculatorReducer, INITIAL_CALCULATOR } from "@/lib/wood/panel";
 import type { WoodPanelSummary } from "@/lib/wood/types";
 import { useWoodPanels } from "./useWoodPanels";
+import { useWoodReport } from "./useWoodReport";
 import { WoodInputs } from "./WoodInputs";
 import { WoodLibrary } from "./WoodLibrary";
 import { WoodResults } from "./WoodResults";
@@ -55,6 +56,7 @@ export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }
   const t = useTranslations("wood");
   const [state, dispatch] = useReducer(calculatorReducer, INITIAL_CALCULATOR);
   const actions = useWoodPanels(state, dispatch);
+  const downloadReport = useWoodReport(state);
   const [measuring, setMeasuring] = useState(false);
   const tTapTone = useTranslations("tapTone");
   const errors = validateInputs(state.inputs);
@@ -107,6 +109,7 @@ export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }
           onDelete={actions.remove}
           onLoadDefaults={actions.loadDefaults}
           loadingDefaults={actions.loadingDefaults}
+          onReport={(panel) => downloadReport(panel.name)}
         />
       </Area>
       {measuring ? (

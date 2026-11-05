@@ -598,6 +598,43 @@
       "measure": "Mesurer la plaque",
       "quality": "Q spectral {spectral} · Q de décroissance {decay}",
       "missing": "—"
+    },
+    "report": {
+      "action": "PDF",
+      "generating": "Génération du rapport PDF...",
+      "downloaded": "PDF téléchargé avec succès !",
+      "failed": "Impossible de générer le PDF. Veuillez réessayer.",
+      "title": "Rapport d'analyse du panneau de bois",
+      "generatedOn": "Généré le {date}",
+      "inputParameters": "Paramètres d'entrée",
+      "calculatedResults": "Résultats calculés",
+      "analysis": "Analyse IA",
+      "groups": {
+        "sample": "Mesures de l'échantillon",
+        "frequency": "Fréquences mesurées",
+        "plate": "Dimensions de la table cible",
+        "stiffness": "Paramètre de rigidité vibratoire",
+        "elastic": "Propriétés élastiques",
+        "target": "Spécifications cibles"
+      },
+      "labels": {
+        "length": "Longueur (L)",
+        "width": "Largeur (W)",
+        "thickness": "Épaisseur (h)",
+        "mass": "Masse (m)",
+        "density": "Densité (ρ)",
+        "longitudinal": "Longitudinale (f_L)",
+        "crossGrain": "Transversale (f_C)",
+        "diagonal": "Diagonale (f_LC)",
+        "plateLength": "Longueur de la table (a)",
+        "plateWidth": "Largeur de la table (b)",
+        "stiffness": "Paramètre (f)",
+        "eLong": "Module de Young (longitudinal, E_L)",
+        "eCross": "Module de Young (transversal, E_C)",
+        "shear": "Module de cisaillement (G_LC)",
+        "targetThickness": "Épaisseur recommandée",
+        "estimatedMass": "Masse estimée du panneau"
+      }
     }
   }
 }

@@ -1,4 +1,5 @@
 // wood-panel-properties end to end: the calculator page, its library and the reference panels.
+import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 import { ADMIN, en, errorToast, fakeSupabase, fr, LUTHIER, seedAccounts, signIn } from "./support";
 
@@ -380,6 +381,71 @@ test.describe("deleting panels", () => {
     await deleteDialog(page).getByRole("button", { name: en.wood.deleteDialog.confirm }).click();
     await expect(errorToast(page)).toContainText(en.wood.library.deleteFailed);
     await expect(entry(page, "Sitka #3")).toHaveCount(1);
+  });
+});
+
+test.describe("PDF report", () => {
+  test("downloads the loaded panel's report, named after it and the local date", async ({
+    page,
+  }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await expect(library(page).getByRole("button", { name: en.wood.report.action })).toHaveCount(0);
+    await openEntry(page, "Sitka #3");
+    const downloading = page.waitForEvent("download");
+    await entry(page, "Sitka #3").getByRole("button", { name: en.wood.report.action }).click();
+    await expect(toasts(page).getByRole("status").first()).toContainText(en.wood.report.generating);
+    const download = await downloading;
+    const today = await page.evaluate(() =>
+      new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date()),
+    );
+    expect(download.suggestedFilename()).toBe(`Sitka #3_${today}.pdf`);
+    const path = await download.path();
+    expect(readFileSync(path).subarray(0, 5).toString("latin1")).toBe("%PDF-");
+    await expect(toasts(page).getByText(en.wood.report.downloaded)).toBeVisible();
+  });
+
+  test("names the report after the name field, or the loaded panel when it is empty", async ({
+    page,
+  }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await openEntry(page, "Sitka #3");
+    await expect(nameField(page)).toHaveValue("Sitka #3");
+    const pdf = entry(page, "Sitka #3").getByRole("button", { name: en.wood.report.action });
+
+    await nameField(page).fill("Sitka top: v2");
+    const renamed = page.waitForEvent("download");
+    await pdf.click();
+    expect((await renamed).suggestedFilename()).toMatch(/^Sitka top- v2_\d{4}-\d{2}-\d{2}\.pdf$/);
+
+    await nameField(page).fill("  ");
+    const fallback = page.waitForEvent("download");
+    await pdf.click();
+    expect((await fallback).suggestedFilename()).toMatch(/^Sitka #3_\d{4}-\d{2}-\d{2}\.pdf$/);
+  });
+
+  test("produces no report from invalid inputs", async ({ page }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await signIn(page, LUTHIER, WOOD);
+    await openEntry(page, "Sitka #3");
+    await expect(nameField(page)).toHaveValue("Sitka #3");
+    await field(page, "sampleLength").fill("0");
+    await entry(page, "Sitka #3").getByRole("button", { name: en.wood.report.action }).click();
+    await expect(errorToast(page)).toContainText(en.wood.report.failed);
+  });
+
+  test("says when the report cannot be produced", async ({ page }) => {
+    await fakeSupabase.seedWoodPanel({ ownerEmail: LUTHIER.email, name: "Sitka #3" });
+    await page.route("**/fonts/pdf/*.ttf", (route) => route.abort());
+    await signIn(page, LUTHIER, WOOD);
+    await openEntry(page, "Sitka #3");
+    await entry(page, "Sitka #3").getByRole("button", { name: en.wood.report.action }).click();
+    await expect(errorToast(page)).toContainText(en.wood.report.failed);
   });
 });
 

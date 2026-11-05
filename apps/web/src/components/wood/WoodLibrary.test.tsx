@@ -38,6 +38,7 @@ function renderLibrary(
         onDelete={onDelete}
         onLoadDefaults={vi.fn()}
         loadingDefaults={false}
+        onReport={vi.fn()}
       />
     </NextIntlClientProvider>,
   );

@@ -26,10 +26,12 @@ const missing = (path: string, texts: readonly string[]) => {
 };
 
 describe("PDF report fonts", () => {
-  it("draws every character of the wood texts in English and French in Space Grotesk", () => {
+  it("draws every character of the wood texts in English and French, ρ falling back to Mono", () => {
     const texts = [...strings(en.wood), ...strings(fr.wood)];
-    expect(missing(REPORT_FONTS.words.regular, texts)).toEqual([]);
-    expect(missing(REPORT_FONTS.words.bold, texts)).toEqual([]);
+    expect(missing(REPORT_FONTS.words.regular, texts)).toEqual(["ρ"]);
+    expect(missing(REPORT_FONTS.words.bold, texts)).toEqual(["ρ"]);
+    expect(missing(REPORT_FONTS.figures.regular, ["ρ"])).toEqual([]);
+    expect(missing(REPORT_FONTS.figures.bold, ["ρ"])).toEqual([]);
   });
 
   it("draws the numbers, units and symbols, including ρ, ³ and –, in JetBrains Mono", () => {

@@ -598,6 +598,43 @@
       "measure": "Measure plate",
       "quality": "Spectral Q {spectral} · Decay Q {decay}",
       "missing": "—"
+    },
+    "report": {
+      "action": "PDF",
+      "generating": "Generating PDF report...",
+      "downloaded": "PDF downloaded successfully!",
+      "failed": "Failed to generate PDF. Please try again.",
+      "title": "Wood Panel Analysis Report",
+      "generatedOn": "Generated on {date}",
+      "inputParameters": "Input Parameters",
+      "calculatedResults": "Calculated Results",
+      "analysis": "AI Analysis",
+      "groups": {
+        "sample": "Sample Measurements",
+        "frequency": "Frequency Measurements",
+        "plate": "Target Plate Dimensions",
+        "stiffness": "Vibrational Stiffness Parameter",
+        "elastic": "Elastic Properties",
+        "target": "Target Specifications"
+      },
+      "labels": {
+        "length": "Length (L)",
+        "width": "Width (W)",
+        "thickness": "Thickness (h)",
+        "mass": "Mass (m)",
+        "density": "Density (ρ)",
+        "longitudinal": "Longitudinal (f_L)",
+        "crossGrain": "Cross-grain (f_C)",
+        "diagonal": "Diagonal (f_LC)",
+        "plateLength": "Plate Length (a)",
+        "plateWidth": "Plate Width (b)",
+        "stiffness": "Parameter (f)",
+        "eLong": "Young's Modulus (Longitudinal, E_L)",
+        "eCross": "Young's Modulus (Cross-grain, E_C)",
+        "shear": "Shear Modulus (G_LC)",
+        "targetThickness": "Recommended Thickness",
+        "estimatedMass": "Estimated Panel Mass"
+      }
     }
   }
 }

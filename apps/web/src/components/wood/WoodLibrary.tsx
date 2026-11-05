@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Chip, cx, IconButton } from "@gb/ui";
-import { CircleAlert, Library, Trash2, Trees } from "lucide-react";
+import { CircleAlert, FileDown, Library, Trash2, Trees } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { formatValue } from "@/lib/wood/calculator";
 import type { WoodPanelSummary } from "@/lib/wood/types";
@@ -13,6 +13,7 @@ export interface WoodLibraryProps {
   onDelete: (panel: WoodPanelSummary) => void;
   onLoadDefaults: () => void;
   loadingDefaults: boolean;
+  onReport: (panel: WoodPanelSummary) => void;
 }
 
 /** wood-panel-properties: Saved Panel Library and Library Load Failures. */
@@ -23,8 +24,10 @@ export function WoodLibrary({
   onDelete,
   onLoadDefaults,
   loadingDefaults,
+  onReport,
 }: WoodLibraryProps) {
   const t = useTranslations("wood.library");
+  const tReport = useTranslations("wood.report");
   const format = useFormatter();
   const locale = useLocale();
 
@@ -111,6 +114,13 @@ export function WoodLibrary({
             {loaded ? (
               <div className="flex flex-wrap items-center gap-2">
                 <Chip tone="signal">{t("currentlyEditing")}</Chip>
+                <Button
+                  variant="secondary"
+                  icon={<FileDown className="size-4" />}
+                  onClick={() => onReport(panel)}
+                >
+                  {tReport("action")}
+                </Button>
               </div>
             ) : null}
           </li>

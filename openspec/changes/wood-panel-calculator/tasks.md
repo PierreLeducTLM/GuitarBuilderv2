@@ -98,7 +98,7 @@
 ## 7. PDF report
 
 - [x] 7.1 Add `pdf-lib` and `@pdf-lib/fontkit` pinned exactly to the newest releases at least two weeks old. Add the static Space Grotesk and JetBrains Mono Regular and Bold TTF files with `OFL.txt` under `apps/web/public/fonts/pdf/`. Verify the glyph-coverage unit test of design decision 10 passes for both catalogs
-- [ ] 7.2 Implement `reportContent` and `renderReport` (decision 7), and the "PDF" action with its three notifications and the dynamic import. Verify:
+- [x] 7.2 Implement `reportContent` and `renderReport` (decision 7), and the "PDF" action with its three notifications and the dynamic import. Verify:
   - unit tests of `reportContent` against the Input Parameters and Calculated Results scenarios in English and French;
   - a Node test that `renderReport` produces a valid PDF that pdf-lib can load again, with the expected page count;
   - an end-to-end test that "PDF" on "Sitka #3" downloads "Sitka #3_<local date>.pdf" starting with `%PDF` and shows "PDF downloaded successfully!"
