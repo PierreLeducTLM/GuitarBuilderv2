@@ -40,6 +40,7 @@ export const TOP_MIN_HZ = 140;
 export const TOP_MIN_AIR_RATIO = 1.4;
 export const TOP_MAX_HZ = 300;
 export const BACK_MIN_ABOVE_TOP_HZ = 15;
+export const BACK_AIR_RATIO = 2;
 export const BACK_MAX_HZ = 400;
 export const BODY_SPLIT_HZ = 15;
 export const ROLE_REATTACH_HZ = 3;

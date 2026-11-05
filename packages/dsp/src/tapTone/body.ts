@@ -1,6 +1,7 @@
 import { type SpectralQ, spectralQ } from "./bandwidthQ.ts";
 import {
   AIR_RANGE_HZ,
+  BACK_AIR_RATIO,
   BACK_MAX_HZ,
   BACK_MIN_ABOVE_TOP_HZ,
   BODY_BAND_HZ,
@@ -69,6 +70,20 @@ const candidates = (points: readonly SpectrumPoint[]): readonly Candidate[] => {
 const lowestIn = (all: readonly Candidate[], from: number, to: number) =>
   all.find((c) => c.frequency >= from && c.frequency <= to);
 
+const ratioDistance = (frequency: number, target: number) =>
+  Math.max(frequency / target, target / frequency);
+
+const nearestIn = (all: readonly Candidate[], from: number, to: number, target: number) =>
+  all
+    .filter((c) => c.frequency >= from && c.frequency <= to)
+    .reduce<Candidate | undefined>(
+      (best, c) =>
+        best && ratioDistance(best.frequency, target) <= ratioDistance(c.frequency, target)
+          ? best
+          : c,
+      undefined,
+    );
+
 const reliable = (
   all: readonly Candidate[],
   chosen: Candidate | undefined,
@@ -91,9 +106,18 @@ export const identifyBodyResonances = (points: readonly SpectrumPoint[]): BodyRe
         lowestIn(all, Math.max(TOP_MIN_HZ, TOP_MIN_AIR_RATIO * air.frequency), TOP_MAX_HZ),
       )
     : null;
-  const back = top
-    ? reliable(all, lowestIn(all, top.frequency + BACK_MIN_ABOVE_TOP_HZ, BACK_MAX_HZ))
-    : null;
+  const back =
+    air && top
+      ? reliable(
+          all,
+          nearestIn(
+            all,
+            top.frequency + BACK_MIN_ABOVE_TOP_HZ,
+            BACK_MAX_HZ,
+            BACK_AIR_RATIO * air.frequency,
+          ),
+        )
+      : null;
   return { air, top, back };
 };
 

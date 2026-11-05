@@ -131,21 +131,40 @@ describe("body resonance candidates", () => {
   });
 });
 
-describe("body resonance candidates, exact edges on a 1 Hz grid", () => {
-  const integerGrid = (
-    at: Readonly<Record<number, number>>,
-    floor = -100,
-  ): readonly SpectrumPoint[] =>
-    Array.from({ length: 971 }, (_, i) => {
-      const frequency = 30 + i;
-      const db = at[frequency] ?? floor;
-      return { frequency, magnitude: 10 ** (db / 20), db };
-    });
-  const roles = (at: Readonly<Record<number, number>>) => {
-    const { air, top, back } = identifyBodyResonances(integerGrid(at));
-    return [air?.frequency ?? null, top?.frequency ?? null, back?.frequency ?? null];
-  };
+const integerGrid = (
+  at: Readonly<Record<number, number>>,
+  floor = -100,
+): readonly SpectrumPoint[] =>
+  Array.from({ length: 971 }, (_, i) => {
+    const frequency = 30 + i;
+    const db = at[frequency] ?? floor;
+    return { frequency, magnitude: 10 ** (db / 20), db };
+  });
 
+const roles = (at: Readonly<Record<number, number>>) => {
+  const { air, top, back } = identifyBodyResonances(integerGrid(at));
+  return [air?.frequency ?? null, top?.frequency ?? null, back?.frequency ?? null];
+};
+
+describe("Back near the air octave", () => {
+  it("takes the candidate above Top nearest 2 x f_air, not the lowest one", () => {
+    expect(roles({ 100: -20, 150: -22, 170: -24, 205: -25 })).toEqual([100, 150, 205]);
+  });
+
+  it("measures nearness as a frequency ratio, not in Hz", () => {
+    expect(roles({ 100: -20, 150: -22, 170: -24, 232: -25 })).toEqual([100, 150, 232]);
+  });
+
+  it("keeps the lower candidate when two are equally far from the octave", () => {
+    expect(roles({ 100: -20, 140: -22, 160: -24, 250: -25 })).toEqual([100, 140, 160]);
+  });
+
+  it("still takes the lowest candidate above Top when they all lie above the octave", () => {
+    expect(roles({ 98: -20, 197: -22, 248: -24, 330: -25 })).toEqual([98, 197, 248]);
+  });
+});
+
+describe("body resonance candidates, exact edges on a 1 Hz grid", () => {
   it("includes 60 and 400 Hz in the band that sets the 30 dB range", () => {
     expect(roles({ 60: -10, 100: -45 })[0]).toBeNull();
     expect(roles({ 400: -10, 100: -45 })[0]).toBeNull();
