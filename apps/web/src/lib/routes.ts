@@ -46,6 +46,13 @@ export type DestinationId = Destination["id"];
 export type AdminEntry = (typeof adminEntries)[number];
 export type EntryId = DestinationId | Destination["sections"][number]["id"] | AdminEntry["id"];
 
+/** The destination a section sits under (its page bar returns there), if any. */
+export function parentOf(id: EntryId): Destination | undefined {
+  return destinations.find((destination) =>
+    destination.sections.some((section) => section.id === id),
+  );
+}
+
 /** app-shell: Admin-Only Sections. Until the role is known, pass `null`: nothing is shown. */
 export function adminEntriesFor(role: AppRole | null): readonly AdminEntry[] {
   return role === "admin" ? adminEntries : [];

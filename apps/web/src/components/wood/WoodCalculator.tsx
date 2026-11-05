@@ -5,7 +5,9 @@ import { Button, Panel } from "@gb/ui";
 import { AudioLines } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useReducer, useState } from "react";
+import { PageBar } from "@/components/shell/PageBar";
 import { TapToneDialog } from "@/components/tap-tone/TapToneDialog";
+import { parentOf } from "@/lib/routes";
 import { parseInputs, validateInputs } from "@/lib/wood/calculator";
 import { type CalculatorState, calculatorReducer, INITIAL_CALCULATOR } from "@/lib/wood/panel";
 import type { WoodPanelSummary } from "@/lib/wood/types";
@@ -59,13 +61,18 @@ export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }
   const downloadReport = useWoodReport(state);
   const [measuring, setMeasuring] = useState(false);
   const tTapTone = useTranslations("tapTone");
+  const tNav = useTranslations("nav");
+  const tools = parentOf("woodPanels");
   const errors = validateInputs(state.inputs);
   const properties =
     Object.keys(errors).length === 0 ? woodProperties(parseInputs(state.inputs)) : null;
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-4xl font-semibold tracking-tight text-fg sm:text-5xl">{t("title")}</h1>
+      <PageBar
+        title={t("title")}
+        back={tools ? { href: tools.href, label: tNav(tools.id) } : undefined}
+      />
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <Area id="wood-inputs-title" title={t("areas.inputs")}>
           <WoodInputs

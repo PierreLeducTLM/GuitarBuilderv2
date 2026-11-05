@@ -6,6 +6,7 @@ import {
   classifyPath,
   destinations,
   isActive,
+  parentOf,
   safeNextPath,
   sectionsFor,
   signInUrl,
@@ -31,6 +32,19 @@ describe("destinations", () => {
       [],
       [],
     ]);
+  });
+});
+
+describe("parentOf", () => {
+  it("gives Tools for the tools' sections", () => {
+    expect(parentOf("woodPanels")?.id).toBe("tools");
+    expect(parentOf("simulator")?.id).toBe("tools");
+  });
+
+  it("gives nothing for destinations and admin entries", () => {
+    expect(parentOf("tools")).toBeUndefined();
+    expect(parentOf("assistant")).toBeUndefined();
+    expect(parentOf("admin")).toBeUndefined();
   });
 });
 
