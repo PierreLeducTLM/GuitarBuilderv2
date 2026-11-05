@@ -261,6 +261,20 @@
       "previous": "Previous part: {group}",
       "next": "Next part: {group}",
       "steps": "Steps of {group}"
+    },
+    "context": {
+      "after": "After",
+      "leadsTo": "Leads to",
+      "starting": "Starting step of {group}",
+      "last": "Last step of the build",
+      "inGroup": "{step} ({group})"
+    },
+    "nav": {
+      "previous": "Previous step",
+      "next": "Next step",
+      "doneNext": "Done, next step",
+      "back": "Steps",
+      "label": "Step navigation"
     }
   },
   "groups": {

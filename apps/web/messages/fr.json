@@ -261,6 +261,20 @@
       "previous": "Partie précédente : {group}",
       "next": "Partie suivante : {group}",
       "steps": "Étapes : {group}"
+    },
+    "context": {
+      "after": "Après",
+      "leadsTo": "Mène à",
+      "starting": "Première étape : {group}",
+      "last": "Dernière étape de la fabrication",
+      "inGroup": "{step} ({group})"
+    },
+    "nav": {
+      "previous": "Étape précédente",
+      "next": "Étape suivante",
+      "doneNext": "Terminée, étape suivante",
+      "back": "Étapes",
+      "label": "Navigation entre les étapes"
     }
   },
   "groups": {

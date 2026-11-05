@@ -1,5 +1,6 @@
 "use client";
 
+import { cx } from "@gb/ui";
 import { Eye } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -16,34 +17,38 @@ export function BuildFrame({ children }: { children: ReactNode }) {
   const t = useTranslations("builds");
   const pathname = usePathname();
   const { build, canEdit, variant, setVariant, graph, states } = useBuild();
+  // A step fills a phone's screen: the build's own bars are left out below 1024 px.
+  const onStep = pathname.startsWith(`/builds/${build.id}/steps/`);
   const { requestDelete, deleting } = useDeleteBuild(build.id);
   const [changingConstruction, setChangingConstruction] = useState(false);
   return (
     <div className="flex flex-col gap-6">
-      <BuildPageBar
-        name={build.name}
-        createdAt={build.createdAt}
-        variant={variant}
-        canEdit={canEdit}
-        deleting={deleting}
-        onDelete={requestDelete}
-        onChangeConstruction={() => setChangingConstruction(true)}
-      />
-      <ConstructionDialog
-        buildId={build.id}
-        variant={variant}
-        open={changingConstruction}
-        onOpenChange={setChangingConstruction}
-        onChanged={setVariant}
-      />
-      {canEdit ? null : (
-        <p className="flex items-center gap-2 rounded-xl border border-admin-ink bg-admin-soft px-3.5 py-2.5 text-sm text-admin-ink">
-          <Eye aria-hidden="true" className="size-4 shrink-0" />
-          {t("detail.readOnly")}
-        </p>
-      )}
-      <SummaryStrip buildId={build.id} graph={graph} states={states} />
-      <ViewSwitcher buildId={build.id} pathname={pathname} />
+      <div className={cx("flex-col gap-6", onStep ? "hidden lg:flex" : "flex")}>
+        <BuildPageBar
+          name={build.name}
+          createdAt={build.createdAt}
+          variant={variant}
+          canEdit={canEdit}
+          deleting={deleting}
+          onDelete={requestDelete}
+          onChangeConstruction={() => setChangingConstruction(true)}
+        />
+        <ConstructionDialog
+          buildId={build.id}
+          variant={variant}
+          open={changingConstruction}
+          onOpenChange={setChangingConstruction}
+          onChanged={setVariant}
+        />
+        {canEdit ? null : (
+          <p className="flex items-center gap-2 rounded-xl border border-admin-ink bg-admin-soft px-3.5 py-2.5 text-sm text-admin-ink">
+            <Eye aria-hidden="true" className="size-4 shrink-0" />
+            {t("detail.readOnly")}
+          </p>
+        )}
+        <SummaryStrip buildId={build.id} graph={graph} states={states} />
+        <ViewSwitcher buildId={build.id} pathname={pathname} />
+      </div>
       {children}
     </div>
   );
