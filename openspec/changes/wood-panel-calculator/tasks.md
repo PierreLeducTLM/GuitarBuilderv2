@@ -110,7 +110,7 @@
   - the PDF fonts and their licence.
 
   Verify each documented command runs as written
-- [ ] 8.2 Run `pnpm check`, `pnpm build`, the database tests (`supabase test db`, and `pnpm test:db` where pgTAP is installed), `pnpm test:e2e` and `openspec validate --strict`. Verify all pass
+- [x] 8.2 Run `pnpm check`, `pnpm build`, the database tests (`supabase test db`, and `pnpm test:db` where pgTAP is installed), `pnpm test:e2e` and `openspec validate --strict`. Verify all pass
 
 ## Workflow follow-up
 

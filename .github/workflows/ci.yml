@@ -78,3 +78,6 @@ jobs:
 
       - name: First-admin race test (two concurrent sign-ups)
         run: bash scripts/test-db/first-admin-race.sh "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+
+      - name: Default-panels race test (two tabs loading the reference set)
+        run: bash scripts/test-db/default-panels-race.sh "postgresql://postgres:postgres@127.0.0.1:54322/postgres"

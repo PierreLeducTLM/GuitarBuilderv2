@@ -2,7 +2,7 @@
 # Runs the pgTAP database tests (supabase/tests/database) without Docker:
 # starts a throwaway Postgres cluster, loads a Supabase shim, applies the
 # migrations, runs every test file with Perl's `prove`, then the first-admin
-# race test. CI runs the same files with `supabase test db`.
+# and default-panels race tests. CI runs the same files with `supabase test db`.
 #
 # Requirements: Postgres 16+ server binaries (PG_BIN, default
 # /usr/lib/postgresql/16/bin), the pgTAP extension installed into that server
