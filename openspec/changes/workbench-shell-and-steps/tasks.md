@@ -46,7 +46,7 @@ Every task is test-first: write the failing unit, component or Playwright test n
   - the Truss rod exit and the three Neck assembly entries;
   - every displayed arrow of each of the six variants appearing exactly once as an internal edge or as an exit (matched by an entry);
   - the group 12 skip edge being flagged
-- [ ] 3.4 Implement `stepContext(graph, states, key)`, `stepNeighbours(graph, key)` and `nextAfterDone(graph, states, key)`. Verify unit tests for:
+- [x] 3.4 Implement `stepContext(graph, states, key)`, `stepNeighbours(graph, key)` and `nextAfterDone(graph, states, key)`. Verify unit tests for:
   - the Step Context scenarios, including "Starting step of" and "Last step of the build";
   - Previous skipping hidden step 13;
   - the disabled ends;
