@@ -83,7 +83,7 @@
 
 ## 8. Integration check
 
-- [ ] 8.1 Run `pnpm check`, `pnpm build`, the database tests (`supabase test db`, and `pnpm test:db` where pgTAP is installed), `pnpm test:e2e` and `openspec validate --strict`. Verify all pass
+- [x] 8.1 Run `pnpm check`, `pnpm build`, the database tests (`supabase test db`, and `pnpm test:db` where pgTAP is installed), `pnpm test:e2e` and `openspec validate --strict`. Verify all pass
 
 ## 9. Run against the real projects
 
