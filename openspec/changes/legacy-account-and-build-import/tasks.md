@@ -6,7 +6,7 @@
 
 ## 2. Package
 
-- [ ] 2.1 Create `packages/legacy-import` (`@gb/legacy-import`, private):
+- [x] 2.1 Create `packages/legacy-import` (`@gb/legacy-import`, private):
   - `tsconfig.json` with `allowImportingTsExtensions`;
   - Vitest;
   - `typecheck` and `test` scripts;
@@ -14,7 +14,7 @@
   - `reports/` added to `.gitignore`.
 
   Verify `pnpm install` and `pnpm check` pass with an empty test
-- [ ] 2.2 Implement `config.ts`: hosted mode (`SUPABASE_ACCESS_TOKEN`, `LEGACY_SUPABASE_PROJECT_REF`, `SUPABASE_PROJECT_REF`) or local mode (`LEGACY_DATABASE_URL`, `LEGACY_SUPABASE_URL`, `TARGET_DATABASE_URL`, `TARGET_SUPABASE_URL`, `TARGET_SERVICE_KEY`); refusal with a message naming the missing variables; refusal when source and target are the same. Verify unit tests for both modes, the missing-variable message and the same-project refusal
+- [x] 2.2 Implement `config.ts`: hosted mode (`SUPABASE_ACCESS_TOKEN`, `LEGACY_SUPABASE_PROJECT_REF`, `SUPABASE_PROJECT_REF`) or local mode (`LEGACY_DATABASE_URL`, `LEGACY_SUPABASE_URL`, `TARGET_DATABASE_URL`, `TARGET_SUPABASE_URL`, `TARGET_SERVICE_KEY`); refusal with a message naming the missing variables; refusal when source and target are the same. Verify unit tests for both modes, the missing-variable message and the same-project refusal
 
 ## 3. Transport
 

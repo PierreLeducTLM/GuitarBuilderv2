@@ -1,0 +1,22 @@
+{
+  "name": "@gb/legacy-import",
+  "version": "0.0.0",
+  "private": true,
+  "description": "One-time import of accounts, builds and wood panels from the first-version Supabase project (legacy-data-migration).",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "mutation": "stryker run"
+  },
+  "dependencies": {
+    "@gb/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "10.0.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}
