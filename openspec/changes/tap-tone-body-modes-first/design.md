@@ -2,13 +2,13 @@
 
 ## Colours
 
-Three new token pairs in `themes.ts`, one per mode: `modeAir`, `modeTop`, `modeBack` (ink used for text, strokes and dots) and `modeAirSoft`, `modeTopSoft`, `modeBackSoft` (tile background when chosen).
+Three new token slots in `themes.ts`: `mode1`, `mode2`, `mode3` (ink used for text, strokes and dots) and `mode1Soft`, `mode2Soft`, `mode3Soft` (tile background when chosen). They are slots, not body-mode names, because Plate mode reuses them for its takes.
 
-| Role | Dark ink | Dark soft | Light ink | Light soft |
-|---|---|---|---|---|
-| Air | #6CB6FF | #132233 | #1D5FA8 | #E6F0FB |
-| Top | #5FE0A8 | #11271F | #0A7149 | #E2F5EC |
-| Back | #F28CC8 | #2A1726 | #A3286E | #FBE8F2 |
+| Slot | Instrument | Plate | Dark ink | Dark soft | Light ink | Light soft |
+|---|---|---|---|---|---|---|
+| mode1 | Air | Longitudinal | #6CB6FF | #132233 | #1D5FA8 | #E6F0FB |
+| mode2 | Top | Cross-grain | #5FE0A8 | #11271F | #0A7149 | #E2F5EC |
+| mode3 | Back | Diagonal | #F28CC8 | #2A1726 | #A3286E | #FBE8F2 |
 
 They avoid the amber trace hue and the teal "completed" hue, and differ in lightness as well as hue (Top is the lightest in dark). The role name is always written next to its colour, so colour is never the only cue. Each ink is added to `contrastPairs` on every surface and on its own soft tint, so `contrast.test.ts` enforces AA in both themes.
 
@@ -18,7 +18,11 @@ They avoid the amber trace hue and the teal "completed" hue, and differ in light
 
 ## Fixed-size chips on a scaled graph
 
-The graph SVG scales with its container (viewBox 640 wide). To keep chips readable on a 360 px phone, the component measures its rendered width (ResizeObserver; 640 when not measurable, as in jsdom) and sizes the chips in viewBox units as `px / scale`. The chip band is added above the plot by extending the viewBox upwards (negative y), so `GRAPH` and every existing coordinate stay as they are. The band is only added when roles are shown (Instrument mode).
+The graph SVG scales with its container (viewBox 640 wide). To keep chips readable on a 360 px phone, the component measures its rendered width (ResizeObserver; 640 when not measurable, as in jsdom) and sizes the chips in viewBox units as `px / scale`. The chip band is added above the plot by extending the viewBox upwards (negative y), so `GRAPH` and every existing coordinate stay as they are. The band is always there, so the graph does not jump when a mode is cleared.
+
+## One graph for both modes
+
+`TapToneSpectrum` has no mode. It takes `marks` (id, colour slot, name, optional subscript, frequency, level) and an optional `onDragMark`. The dialog passes Air, Top and Back with `onDragMark` in Instrument mode, and the active take's selected peak (`f` with subscript `L`, `C` or `LC`) without it in Plate mode. Markers are quiet in both modes.
 
 ## Spotlight and moving
 
@@ -26,4 +30,8 @@ The dialog keeps `focused: RoleName | null` beside the existing `moving`. Choosi
 
 ## Main frequency
 
-A `MainFrequency` component in `panels.tsx` composes the existing pieces for Instrument mode: heading, frequency, "Same peak as <Role>" when a mode is within 0.5 Hz of it (the dialog's existing same-peak tolerance), a line with level, note, spectral and decay Q, the Q reasons, and the peak buttons. Plate mode keeps `DetectedFrequency` and `DetectedPeaks` as they are.
+A `MainFrequency` component in `panels.tsx` serves both modes: heading (Instrument: "Main frequency"; Plate: the take's name), frequency, "Same peak as <Role>" (Instrument, when a mode is within 0.5 Hz of it, the dialog's existing same-peak tolerance) or "Current value" (Plate, when the caller supplied one), a line with level, note, spectral and decay Q, the Q reasons, and the peak buttons. `DetectedFrequency` and `DetectedPeaks` are removed.
+
+## Plate takes
+
+`PlateTakes` renders the take selector as three tiles in the slot colours (name, `f` symbol, selected frequency or "—", note). It sits above the guidance and is shown in every take state, since it is how the user moves between takes; tiles other than the active one are disabled while recording.

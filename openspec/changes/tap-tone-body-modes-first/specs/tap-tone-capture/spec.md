@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
-### Requirement: Body Mode Labels
-The system SHALL, in Instrument mode, draw each identified body mode in its own colour (Air blue, Top mint, Back pink): a dot with a halo on its peak and a chip "<Role> <frequency>" (one decimal) in a band above the plot, joined to the peak by a leader line. The chips sit on one row at a fixed on-screen size, never overlap each other and never leave the plot.
+### Requirement: Mode Labels
+The system SHALL draw, in a band above the plot, a chip "<name> <frequency>" (one decimal) for each mode being measured, joined to its peak by a leader line, with a haloed dot on the peak: in Instrument mode each identified body mode, in Plate mode the active take's selected peak (f_L, f_C or f_LC). Chips use their slot colour, sit on one row at a fixed on-screen size, never overlap and never leave the plot.
 
 #### Scenario: Modes far apart
 - **GIVEN** Air at 98.4 Hz, Top at 196.9 Hz and Back at 247.5 Hz on a desktop-width graph
@@ -18,9 +18,14 @@ The system SHALL, in Instrument mode, draw each identified body mode in its own 
 - **WHEN** chips are placed
 - **THEN** neighbouring chips that would be closer than g form a cluster laid out edge to edge g apart, centred on the mean of its members' x_i and shifted inside the plot; clusters merge until none touch
 
-#### Scenario: Plate mode
-- **WHEN** the dialog is in Plate mode
-- **THEN** no chip band and no body mode colours are drawn
+#### Scenario: Slot colours
+- **WHEN** chips, tiles or dots are drawn for a mode
+- **THEN** the first slot (Air, Longitudinal) is blue, the second (Top, Cross-grain) mint and the third (Back, Diagonal) pink, and the mode's name is always written next to its colour
+
+#### Scenario: Plate take
+- **GIVEN** the Cross-grain take has 92.7 Hz selected
+- **WHEN** its results are shown
+- **THEN** one mint chip "fC 92.7" marks the 92.7 Hz peak, and it cannot be dragged
 
 ### Requirement: Body Mode Readouts
 The system SHALL, in Instrument mode, show under the graph one tile per body mode in the order Air, Top, Back, with the mode's colour, name and number (T(1,1)1, T(1,1)2, T(1,1)3), frequency (one decimal, "Hz"), note label, spectral Q and decay Q (no decimals, "—" when missing) and "set by you" for a mode the user set. A mode not identified shows "—" and "Not identified".
@@ -41,36 +46,43 @@ The system SHALL, in Instrument mode, show under the graph one tile per body mod
 
 ## MODIFIED Requirements
 
+### Requirement: Plate Mode Takes
+The system SHALL, in Plate mode, offer three takes, Longitudinal (f_L), Cross-grain (f_C) and Diagonal (f_LC), each recorded, analyzed, re-recorded and reopened on its own. In each take the strongest peak is selected automatically and the user may select any other detected peak. The take selector is three tiles in the slot colours, shown in every state, each with the take's name, symbol, selected frequency or "—", and note.
+
+#### Scenario: Measure the three modes
+- **GIVEN** the Longitudinal take selected 181.8 Hz
+- **WHEN** the user switches to the Cross-grain take, records it and the strongest peak is 92.7 Hz
+- **THEN** the tiles read "Longitudinal" with "181.8 Hz", "Cross-grain" with "92.7 Hz" and "Diagonal" with "—", and the Cross-grain tile is the pressed one
+
+#### Scenario: Recording is per take
+- **WHEN** a recording is in progress on one take
+- **THEN** switching to another take is disabled until the recording stops
+
 ### Requirement: Peak Markers
-The system SHALL mark every detected peak between 30 and 600 Hz on the graph, visually distinguishing the strongest peak, the selected peak and the peak under the pointer. In Plate mode each marker has a vertical line, a dot and a "<frequency> Hz" label (one decimal). In Instrument mode a peak that is not selected and not under the pointer is a small dot with no label, the selected peak gets a ring, and a body mode's chip stands in for its peak's label. Peaks above 600 Hz get no marker.
+The system SHALL mark every detected peak between 30 and 600 Hz on the graph with a dot, distinguishing the strongest peak, the selected peak (a ring) and the peak under the pointer. Only the selected peak and the peak under the pointer show a "<frequency> Hz" label (one decimal), and a mode chip stands in for the label of the peak it marks. Peaks above 600 Hz get no marker.
 
 #### Scenario: Results displayed
-- **WHEN** analysis finds peaks at 181.6 Hz (strongest) and 92.8 Hz
-- **THEN** markers labeled "181.6 Hz" and "92.8 Hz" are drawn
-- **AND** the 181.6 Hz marker is emphasized as selected (solid line, larger dot, bold label) while the other uses a dashed line and small dot
+- **GIVEN** peaks at 186.7 Hz (selected), 103.4 Hz and 412.0 Hz and no mode chip
+- **WHEN** results are shown and the pointer is away from the graph
+- **THEN** only the 186.7 Hz marker has a "186.7 Hz" label and a ring; 103.4 Hz and 412.0 Hz are dots without a label
+- **AND** moving the pointer within 20 Hz of 412.0 Hz shows its "412.0 Hz" label
 
 #### Scenario: Peak beyond the axis
 - **WHEN** analysis finds peaks at 720.4 Hz (strongest) and 181.6 Hz
-- **THEN** only the "181.6 Hz" marker is drawn
-- **AND** 720.4 Hz still appears in the Detected Peaks list
-
-#### Scenario: Quiet markers in Instrument mode
-- **GIVEN** Instrument mode with peaks at 186.7 Hz (selected), 103.4 Hz and 412.0 Hz
-- **WHEN** results are shown and the pointer is away from the graph
-- **THEN** only the 186.7 Hz marker has a "<frequency> Hz" label and a ring; 103.4 Hz and 412.0 Hz are dots without a label
-- **AND** moving the pointer within 20 Hz of 412.0 Hz shows its "412.0 Hz" label
+- **THEN** only the 181.6 Hz peak is marked
+- **AND** 720.4 Hz still appears among the peak buttons
 
 ### Requirement: Selected Frequency Display
-The system SHALL show the selected peak's frequency (one decimal, "Hz"), level (dB, one decimal), note label, spectral Q and decay Q (no decimals), with "—" for a missing value and the reason for a missing Q. In Plate mode this is the "Detected Frequency" panel, with a "Current Value" panel (two decimals) when the caller supplied one. In Instrument mode it heads the "Main frequency" section.
+The system SHALL show, under the graph, a section with the selected peak's frequency (one decimal, "Hz"), level (dB, one decimal), note label, spectral Q and decay Q (no decimals), with "—" for a missing value and the reason for a missing Q. It is headed "Main frequency" in Instrument mode and by the take's name in Plate mode, where it also shows the caller's current value, if any, with two decimals and "Hz".
 
 #### Scenario: Compare with the existing value
 - **GIVEN** the wood calculator's longitudinal field holds 180
 - **WHEN** a Longitudinal take selects a peak refined to 181.82 Hz at -19.9 dB with spectral Q 64.3 and decay Q 71.8
-- **THEN** "Current Value" shows "180.00 Hz" and "Detected Frequency" shows "181.8" Hz, peak level "-19.9 dB", "F#3 -30 c", spectral Q "64" and decay Q "72"
+- **THEN** the "Longitudinal (f_L)" section shows "181.8" Hz, "Current value 180.00 Hz" and "-19.9 dB · F#3 -30 c · Q 64 · decay 72"
 
 #### Scenario: Saved spectrum has no decay Q
 - **WHEN** the take shows a saved spectrum record
-- **THEN** "Decay Q" shows "—" with the reason "Needs the recording; record the take again to measure it"
+- **THEN** decay Q shows "—" with the reason "Needs the recording; record the take again to measure it"
 
 #### Scenario: Main peak is a body mode
 - **GIVEN** Instrument mode with Top at 186.7 Hz
@@ -78,7 +90,7 @@ The system SHALL show the selected peak's frequency (one decimal, "Hz"), level (
 - **THEN** "Main frequency" shows "186.7" Hz and "Same peak as Top"
 
 ### Requirement: Detected Peaks List
-The system SHALL list, when more than one peak is detected, the first 5 peaks by level as buttons labeled "<frequency> Hz" with one decimal, the first suffixed "(highest)": under "Detected Peaks" in Plate mode, inside the "Main frequency" section in Instrument mode. Clicking a button selects that peak and the selected button is highlighted.
+The system SHALL list in the selected frequency section, when more than one peak is detected, the first 5 peaks by level as buttons labeled "<frequency> Hz" with one decimal, the first suffixed "(highest)". Clicking a button selects that peak and the selected button is highlighted.
 
 #### Scenario: Choose the second peak
 - **GIVEN** detected peaks 181.6 Hz (strongest) and 92.8 Hz
@@ -90,7 +102,7 @@ The system SHALL list, when more than one peak is detected, the first 5 peaks by
 - **THEN** no list of peak buttons is shown
 
 ### Requirement: Instrument Body Resonance Assignment
-The system SHALL assign the roles Air, T(1,1)1, Top, T(1,1)2, and Back, T(1,1)3, by mode order: Air is the lowest candidate from 70 to 130 Hz; Top the lowest from max(140 Hz, 1.4 x f_air) to 300 Hz; Back the candidate from f_top + 15 Hz to 400 Hz closest to one octave above the air resonance, 2 x f_air, measured as a frequency ratio, the lower one on a tie. Each role is drawn on the spectrum per Body Mode Labels.
+The system SHALL assign the roles Air, T(1,1)1, Top, T(1,1)2, and Back, T(1,1)3, by mode order: Air is the lowest candidate from 70 to 130 Hz; Top the lowest from max(140 Hz, 1.4 x f_air) to 300 Hz; Back the candidate from f_top + 15 Hz to 400 Hz closest to one octave above the air resonance, 2 x f_air, measured as a frequency ratio, the lower one on a tie. Each role is drawn on the spectrum per Mode Labels.
 
 #### Scenario: Typical assembled body
 - **GIVEN** candidates at 98.4 Hz, 196.9 Hz and 247.5 Hz, each with a spectral Q
