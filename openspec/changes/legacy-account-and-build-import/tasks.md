@@ -67,7 +67,7 @@
 
 ## 6. Rehearsal
 
-- [ ] 6.1 Write `scripts/legacy-import/rehearse.sh` (design decision 10): v1 stack from `LEGACY_REPO_DIR` on separate ports with the `sequence_diagram` column, seeded through its GoTrue, Storage and SQL (an admin, a user without a profile, builds with nodes, photos with legacy-style names, measurements, a shared build, a leftover token, dimensions, wood panels with legacy results and spectra including an oversized, an invalid and an unknown-key one, an ownerless panel, default panels), then dry run, apply and second apply against the v2 stack, plus an email-conflict account. Verify the script passes:
+- [x] 6.1 Write `scripts/legacy-import/rehearse.sh` (design decision 10): v1 stack from `LEGACY_REPO_DIR` on separate ports with the `sequence_diagram` column, seeded through its GoTrue, Storage and SQL (an admin, a user without a profile, builds with nodes, photos with legacy-style names, measurements, a shared build, a leftover token, dimensions, wood panels with legacy results and spectra including an oversized, an invalid and an unknown-key one, an ownerless panel, default panels), then dry run, apply and second apply against the v2 stack, plus an email-conflict account. Verify the script passes:
   - sign-in to v2 with each first-version password;
   - roles;
   - build rows, step entries and photo objects;
