@@ -2,6 +2,7 @@ import type { Database } from "@gb/db";
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { publicEnv } from "../env";
+import type { SharedAccount } from "../sharedAccount";
 
 export interface SessionUpdate {
   /** The response to return (or to copy cookies and headers from). */
@@ -12,9 +13,13 @@ export interface SessionUpdate {
 
 /**
  * Refreshes the Supabase session for this request and reports who is signed in.
- * Renewed tokens are written to both the forwarded request and the response.
+ * Without a session, signs in to `signInAs` when given. Renewed or new tokens are
+ * written to both the forwarded request and the response.
  */
-export async function updateSession(request: NextRequest): Promise<SessionUpdate> {
+export async function updateSession(
+  request: NextRequest,
+  signInAs: SharedAccount | null = null,
+): Promise<SessionUpdate> {
   const { supabaseUrl, supabaseAnonKey } = publicEnv();
   let response = NextResponse.next({ request });
 
@@ -37,7 +42,10 @@ export async function updateSession(request: NextRequest): Promise<SessionUpdate
   // Must run before any response is produced: it may refresh the tokens.
   const { data } = await supabase.auth.getClaims();
   const userId = typeof data?.claims?.sub === "string" ? data.claims.sub : null;
-  return { response, userId };
+  if (userId || !signInAs) return { response, userId };
+
+  const { data: signedIn } = await supabase.auth.signInWithPassword(signInAs);
+  return { response, userId: signedIn.user?.id ?? null };
 }
 
 /**
