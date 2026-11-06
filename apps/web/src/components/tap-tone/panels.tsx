@@ -31,10 +31,28 @@ export type BodyModeView = {
 const VISIBLE_PEAKS = 5;
 
 /** Colour slots shared by both modes: Air and Longitudinal, Top and Cross-grain, Back and Diagonal. */
-const SLOT_COLOUR = [
-  { ink: "text-mode1", dot: "bg-mode1", chosen: "border-mode1 bg-mode1-soft" },
-  { ink: "text-mode2", dot: "bg-mode2", chosen: "border-mode2 bg-mode2-soft" },
-  { ink: "text-mode3", dot: "bg-mode3", chosen: "border-mode3 bg-mode3-soft" },
+export const SLOT_COLOUR = [
+  {
+    ink: "text-mode1",
+    dot: "bg-mode1",
+    chosen: "border-mode1 bg-mode1-soft",
+    editing:
+      "focus-within:border-mode1 focus-within:bg-mode1-soft focus-within:shadow-[0_0_0_1px_var(--gb-mode1)]",
+  },
+  {
+    ink: "text-mode2",
+    dot: "bg-mode2",
+    chosen: "border-mode2 bg-mode2-soft",
+    editing:
+      "focus-within:border-mode2 focus-within:bg-mode2-soft focus-within:shadow-[0_0_0_1px_var(--gb-mode2)]",
+  },
+  {
+    ink: "text-mode3",
+    dot: "bg-mode3",
+    chosen: "border-mode3 bg-mode3-soft",
+    editing:
+      "focus-within:border-mode3 focus-within:bg-mode3-soft focus-within:shadow-[0_0_0_1px_var(--gb-mode3)]",
+  },
 ] as const;
 
 export const TAKE_SYMBOL: Record<PlateTake, string> = {

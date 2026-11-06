@@ -19,4 +19,5 @@ next-env.d.ts
 .env.local
 .stryker-tmp*/
 packages/*/reports/
+apps/*/reports/
 .vitest/

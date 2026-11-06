@@ -25,11 +25,23 @@ The system SHALL offer, under "Sample Measurements", four inputs with these unit
 - **THEN** the sample inputs show 280 mm, 70 mm, 3.0 mm and 25 grams
 
 ### Requirement: Frequency Inputs
-The system SHALL offer, under "Frequency Measurements", three inputs in Hz with these defaults: Longitudinal (f_L), default 180; Cross-grain (f_C), default 90; Diagonal (f_LC), default 120. f_L is the first bending mode along the grain, f_C the first bending mode across the grain and f_LC the first twisting mode of the sample.
+The system SHALL offer, under "Frequency Measurements", three inputs in Hz with these defaults: Longitudinal (f_L), default 180; Cross-grain (f_C), default 90; Diagonal (f_LC), default 120. f_L is the first bending mode along the grain, f_C the first bending mode across the grain and f_LC the first twisting mode of the sample. Each input SHALL be a tile in its take's slot colour from the tap-tone reader, with the take's name and symbol, the editable value and the note of a valid value.
 
 #### Scenario: Frequency defaults
 - **WHEN** the user opens the calculator
 - **THEN** the frequency inputs show 180 Hz, 90 Hz and 120 Hz
+
+#### Scenario: Tiles match the reader
+- **WHEN** the user opens the calculator
+- **THEN** the tiles read, in order, "Longitudinal" f_L in blue, "Cross-grain" f_C in mint and "Diagonal" f_LC in pink, the same names and colours as the reader's Plate mode takes
+
+#### Scenario: Note label
+- **WHEN** the longitudinal frequency is 180 Hz
+- **THEN** its tile shows "F#3 -47 c" under the value
+
+#### Scenario: No note for an invalid value
+- **WHEN** the user clears the cross-grain frequency
+- **THEN** its tile shows no note label and the validation message
 
 ### Requirement: Target Plate and Stiffness Inputs
 The system SHALL offer, under "Target Plate Dimensions", Plate Length (a) in mm, default 500, and Plate Width (b) in mm, default 380; and, under "Vibrational Stiffness", Parameter (f), dimensionless, default 75, with the hint "Typical value: 75".
@@ -39,11 +51,15 @@ The system SHALL offer, under "Target Plate Dimensions", Plate Length (a) in mm,
 - **THEN** the plate inputs show 500 mm and 380 mm and the stiffness parameter shows 75 with the hint "Typical value: 75"
 
 ### Requirement: Numeric Entry
-The system SHALL accept decimal values (increment 0.1) in every input, show each input's symbol and unit in its label, and treat an empty or non-numeric entry as missing (zero), displaying the field empty.
+The system SHALL accept decimal values (increment 0.1) in every input, show each input's symbol and unit in its label, and treat an empty or non-numeric entry as missing (zero), displaying the field empty. Each input SHALL be shown as a tile with a short name, its symbol, the editable value and its unit; only the frequency tiles are coloured.
 
 #### Scenario: Clearing a field
 - **WHEN** the user deletes the content of the Sample Mass field
 - **THEN** the field is shown empty and is treated as missing for validation
+
+#### Scenario: Sample tiles
+- **WHEN** the user opens the calculator
+- **THEN** the sample measurements show four tiles, "Length" L 280 mm, "Width" W 70 mm, "Thickness" h 3.0 mm and "Mass" m 25 g
 
 ### Requirement: Input Validation
 The system SHALL require every input to be a number strictly greater than 0 and, for each failing input, show a message under that field reading "<Field> must be greater than 0" and highlight the field as invalid. The field names used in the messages are: Sample length, Sample width, Sample thickness, Sample mass, Longitudinal frequency, Cross-grain frequency, Diagonal frequency, Target plate length, Target plate width, Vibrational stiffness parameter.

@@ -8,7 +8,7 @@ import { formatValue } from "@/lib/wood/calculator";
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="font-mono text-xs font-bold tracking-widest text-fg-dim uppercase">{title}</h3>
+      <h3 className="text-base font-semibold text-fg">{title}</h3>
       <dl className="flex flex-col">{children}</dl>
     </div>
   );

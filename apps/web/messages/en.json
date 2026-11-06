@@ -625,6 +625,15 @@
       "freqDiagonal": "First twisting mode",
       "stiffness": "Typical value: 75"
     },
+    "tiles": {
+      "sampleLength": "Length",
+      "sampleWidth": "Width",
+      "sampleThickness": "Thickness",
+      "sampleMass": "Mass",
+      "plateLength": "Length",
+      "plateWidth": "Width",
+      "stiffness": "Parameter"
+    },
     "reset": "Reset to defaults",
     "results": {
       "fixInputs": "Please fix input errors to see results",
