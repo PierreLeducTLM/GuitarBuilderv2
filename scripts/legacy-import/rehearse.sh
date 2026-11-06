@@ -7,7 +7,8 @@
 #
 # Requirements: Docker, the Supabase CLI, psql, and the first-version checkout:
 #   LEGACY_REPO_DIR=~/path/to/GuitarBuilder bash scripts/legacy-import/rehearse.sh
-# KEEP_STACKS=1 leaves both stacks running afterwards (for the Playwright check).
+# Requires jq too. KEEP_STACKS=1 leaves both stacks running afterwards; REHEARSAL_UI=0 skips
+# the browser check (apps/web/e2e-rehearsal), which builds the app against the v2 stack.
 # V1_PORT_PREFIX and V2_PORT_PREFIX (default 585 and 575) replace the 543 of the default ports.
 set -euo pipefail
 
@@ -67,3 +68,11 @@ export V1_STATUS V2_STATUS
 export REHEARSAL_WORK="$WORK"
 
 node "$ROOT/scripts/legacy-import/rehearse.mts"
+
+# Task 6.2: open what the import wrote in the v2 app built against the rehearsal's v2 stack.
+if [[ "${REHEARSAL_UI:-1}" != 0 ]]; then
+  echo "rehearse: opening the imported build and wood panel in the v2 app"
+  REHEARSAL_SUPABASE_URL="$(jq -r .API_URL <<<"$V2_STATUS")" \
+    REHEARSAL_SUPABASE_KEY="$(jq -r .PUBLISHABLE_KEY <<<"$V2_STATUS")" \
+    pnpm --dir "$ROOT/apps/web" exec playwright test -c playwright.rehearsal.config.ts
+fi

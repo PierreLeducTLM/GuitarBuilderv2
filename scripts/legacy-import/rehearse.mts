@@ -158,7 +158,7 @@ const seedFirstVersion = async () => {
   const photo = (build: string, step: string, name: string) => `${build}/${step}/${name}`;
   await uploadV1Photo(photo(B1, "TrussRod", "1733500000000_k3j9x.jpg"), "image/jpeg");
   await uploadV1Photo(photo(B1, "TrussRod", "1733500000001_ab.my photo"), "image/png");
-  await uploadV1Photo(photo(B1, "Bracing", "IMG_0001.HEIC"), "image/heic");
+  await uploadV1Photo(photo(B1, "TapTestPanels", "IMG_0001.HEIC"), "image/heic");
   await uploadV1Photo(photo(B3, "TrussRod", "1733500000009_cf.jpg"), "image/jpeg");
   await uploadV1Photo(
     photo("e9000000-0000-4000-8000-000000000009", "Old", "1700000000000_zz.jpg"),
@@ -203,10 +203,10 @@ const seedFirstVersion = async () => {
           },
           { id: "FabricateCLBridge", completed: true, notes: "", photos: [], fftAnalyses: [] },
           {
-            id: "Bracing",
+            id: "TapTestPanels",
             completed: false,
             notes: "",
-            photos: [photoRef(photo(B1, "Bracing", "IMG_0001.HEIC"))],
+            photos: [photoRef(photo(B1, "TapTestPanels", "IMG_0001.HEIC"))],
             fftAnalyses: [
               analysis("m1", spectrum(300)),
               analysis("m2", spectrum(1366), "  "),
@@ -454,7 +454,7 @@ check(
   "build 1 has an entry per step with data, unknown keys kept",
   same(
     state.map((entry) => entry.key),
-    ["TrussRod", "FabricateCLBridge", "Bracing", "OldCustomStep"],
+    ["TrussRod", "FabricateCLBridge", "TapTestPanels", "OldCustomStep"],
   ),
   state.map((entry) => entry.key),
 );
@@ -468,22 +468,22 @@ check(
   ) && truss?.photos[0]?.name === "1733500000000_k3j9x.jpg",
   truss?.photos,
 );
-const bracing = state.find((entry) => entry.key === "Bracing");
+const tapTest = state.find((entry) => entry.key === "TapTestPanels");
 check(
   "a HEIC photo without a v2 name is renamed",
-  /^1735689600000_[0-9a-z]{8}\.HEIC$/.test(bracing?.photos[0]?.name ?? ""),
-  bracing?.photos,
+  /^1735689600000_[0-9a-z]{8}\.HEIC$/.test(tapTest?.photos[0]?.name ?? ""),
+  tapTest?.photos,
 );
 check(
   "measurements: valid kept, oversized reduced, invalid skipped, blank description named",
   same(
-    bracing?.measurements.map((m) => [m.id, m.spectrum.frequencies.length, m.description]),
+    tapTest?.measurements.map((m) => [m.id, m.spectrum.frequencies.length, m.description]),
     [
       ["m1", 300, "Top tap"],
       ["m2", 683, "Untitled Analysis"],
     ],
   ),
-  bracing?.measurements.map((m) => [m.id, m.spectrum.frequencies.length, m.description]),
+  tapTest?.measurements.map((m) => [m.id, m.spectrum.frequencies.length, m.description]),
 );
 const photoUrls = state.flatMap((entry) => entry.photos.map((p) => p.url));
 const fetched = await Promise.all(photoUrls.map(async (url) => (await fetch(url)).status));

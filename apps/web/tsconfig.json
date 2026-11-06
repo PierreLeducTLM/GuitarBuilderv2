@@ -13,9 +13,10 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "e2e/**/*.ts",
+    "e2e-rehearsal/**/*.ts",
     "*.config.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next-e2e"]
+  "exclude": ["node_modules", ".next-e2e", ".next-rehearsal"]
 }

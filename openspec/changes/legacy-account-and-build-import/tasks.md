@@ -75,7 +75,7 @@
   - unchanged counts after the second apply;
   - the conflict account and its builds skipped;
   - the v1 database unchanged
-- [ ] 6.2 Open an imported build and an imported wood panel in the v2 app built against the local v2 stack: the step dialog shows the migrated notes, photos and measurement graph, and the panel's cross-grain frequency detector shows its saved spectrum. Verify with a Playwright check in the rehearsal
+- [x] 6.2 Open an imported build and an imported wood panel in the v2 app built against the local v2 stack: the step dialog shows the migrated notes, photos and measurement graph, and the panel's cross-grain frequency detector shows its saved spectrum. Verify with a Playwright check in the rehearsal
 
 ## 7. Documentation
 

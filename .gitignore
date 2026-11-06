@@ -22,3 +22,4 @@ packages/*/reports/
 apps/*/reports/
 .vitest/
 /reports/
+.next-rehearsal/
