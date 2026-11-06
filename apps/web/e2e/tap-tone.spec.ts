@@ -35,8 +35,8 @@ test("records taps on a build step, labels the body, moves Top and saves the ana
   await expect(tile("top")).toContainText(/19[67]\.\d/);
   await expect(tile("back")).toContainText(/24[78]\.\d/);
 
-  const topLabel = dialog.locator("[data-role=top] rect");
-  const backPeak = dialog.locator("[data-role=back] circle").last();
+  const topLabel = dialog.locator("[data-mark=top] rect");
+  const backPeak = dialog.locator("[data-mark=back] circle").last();
   const from = await topLabel.boundingBox();
   const to = await backPeak.boundingBox();
   if (!from || !to) throw new Error("expected the Top label and the Back peak on screen");

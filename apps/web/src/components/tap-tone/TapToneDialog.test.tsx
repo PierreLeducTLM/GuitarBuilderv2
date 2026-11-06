@@ -157,7 +157,7 @@ describe("TapToneDialog in Instrument mode", () => {
     expect(
       screen
         .getByRole("img", { name: /Frequency spectrum/ })
-        .querySelector("[data-role=air]")
+        .querySelector("[data-mark=air]")
         ?.getAttribute("opacity"),
     ).toBe("0.3");
     await user.click(screen.getByRole("button", { name: "Move Back" }));

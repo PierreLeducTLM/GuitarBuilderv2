@@ -40,7 +40,7 @@ import { MAX_RECORDING_SECONDS, useAudioInputs, usePlayback, useRecorder } from 
 import { Oscilloscope } from "./Oscilloscope";
 import { PeakInspector } from "./PeakInspector";
 import { BodyModes, DetectedFrequency, DetectedPeaks, MainFrequency } from "./panels";
-import { TapToneSpectrum } from "./TapToneSpectrum";
+import { type GraphMark, type ModeSlot, TapToneSpectrum } from "./TapToneSpectrum";
 import { TapWaveform } from "./TapWaveform";
 import { useDecayQ } from "./useDecayQ";
 import { useTakeAnalysis } from "./useTakeAnalysis";
@@ -78,6 +78,7 @@ export type TapToneDialogProps =
   | (CommonProps & { mode: "instrument"; onConfirm: (result: InstrumentConfirm) => void });
 
 const SAME_PEAK_HZ = 0.5;
+const MODE_SLOTS: readonly ModeSlot[] = [1, 2, 3];
 
 const targetFor = (result: TakeResult, frequency: number, level: number): DecayTarget =>
   result.peaks.find((peak) => Math.abs(peak.frequency - frequency) <= SAME_PEAK_HZ) ?? {
@@ -282,11 +283,20 @@ export function TapToneDialog(props: TapToneDialogProps) {
   };
   const bodyModes = { air: bodyMode("air"), top: bodyMode("top"), back: bodyMode("back") };
 
-  const roleMarks = Object.fromEntries(
-    Object.entries(roles).flatMap(([name, role]) =>
-      role ? [[name, { frequency: role.frequency, level: role.level }]] : [],
-    ),
-  );
+  const roleMarks: GraphMark[] = ROLE_NAMES.flatMap((name, i) => {
+    const role = roles[name];
+    return role
+      ? [
+          {
+            id: name,
+            slot: MODE_SLOTS[i] ?? 1,
+            name: t(`roles.${name}`),
+            frequency: role.frequency,
+            level: role.level,
+          },
+        ]
+      : [];
+  });
 
   return (
     <DialogFrame
@@ -486,10 +496,12 @@ export function TapToneDialog(props: TapToneDialogProps) {
                   peaks={results.result.peaks}
                   selected={results.selected}
                   onSelect={choosePeak}
-                  mode="instrument"
-                  roles={roleMarks}
+                  marks={roleMarks}
                   focused={focused}
-                  onAssignRole={(role, index) => dispatch({ type: "roleAssigned", role, index })}
+                  onDragMark={(id, index) => {
+                    const role = ROLE_NAMES.find((name) => name === id);
+                    if (role) dispatch({ type: "roleAssigned", role, index });
+                  }}
                 />
               </div>
               <BodyModes
