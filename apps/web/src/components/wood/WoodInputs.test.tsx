@@ -136,3 +136,53 @@ describe("frequency tiles", () => {
     expect(tile.queryByText(/ c$/)).toBeNull();
   });
 });
+
+describe("measurement tiles", () => {
+  it("shows every other field as a tile with a short name, symbol, value and unit", () => {
+    renderInputs({});
+    const tiles = screen
+      .getAllByRole("spinbutton")
+      .map((input) => input.closest("[data-field]")?.textContent ?? "");
+    expect(tiles).toHaveLength(10);
+    expect(
+      fieldFrame(en.wood.fields.sampleThickness).getByText(en.wood.tiles.sampleThickness),
+    ).toBeDefined();
+    expect(fieldFrame(en.wood.fields.sampleThickness).getByText("h")).toBeDefined();
+    expect(fieldFrame(en.wood.fields.sampleMass).getByText("g")).toBeDefined();
+    expect(fieldFrame(en.wood.fields.plateWidth).getByText("b")).toBeDefined();
+  });
+
+  it("names each tile in French", () => {
+    renderInputs({}, "fr");
+    expect(fieldFrame(fr.wood.fields.sampleMass).getByText(fr.wood.tiles.sampleMass)).toBeDefined();
+  });
+
+  it("keeps each input's name with its unit, and none for the stiffness parameter", () => {
+    renderInputs({});
+    expect(
+      screen.getByRole("spinbutton", { name: `${en.wood.fields.sampleLength} mm` }),
+    ).toHaveProperty("value", "280");
+    expect(screen.getByRole("spinbutton", { name: en.wood.fields.stiffness })).toHaveProperty(
+      "value",
+      "75",
+    );
+  });
+
+  it("shows the hint and the error in the tile, without a note", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <WoodInputs
+          inputs={{ ...DEFAULT_INPUTS, stiffness: "-5" }}
+          errors={{ stiffness: "stiffness" }}
+          quality={{}}
+          onChange={vi.fn()}
+          onReset={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+    const tile = fieldFrame(en.wood.fields.stiffness);
+    expect(tile.getByText(en.wood.validation.stiffness)).toBeDefined();
+    expect(tile.getByText(en.wood.hints.stiffness)).toBeDefined();
+    expect(fieldFrame(en.wood.fields.sampleLength).queryByText(/ c$/)).toBeNull();
+  });
+});

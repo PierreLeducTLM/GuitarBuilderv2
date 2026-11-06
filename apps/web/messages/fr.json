@@ -625,6 +625,15 @@
       "freqDiagonal": "Premier mode de torsion",
       "stiffness": "Valeur typique : 75"
     },
+    "tiles": {
+      "sampleLength": "Longueur",
+      "sampleWidth": "Largeur",
+      "sampleThickness": "Épaisseur",
+      "sampleMass": "Masse",
+      "plateLength": "Longueur",
+      "plateWidth": "Largeur",
+      "stiffness": "Paramètre"
+    },
     "reset": "Réinitialiser les valeurs par défaut",
     "results": {
       "fixInputs": "Corrigez les erreurs de saisie pour voir les résultats",
