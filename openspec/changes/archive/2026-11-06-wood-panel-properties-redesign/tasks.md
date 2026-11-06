@@ -12,4 +12,4 @@ Every task is test-first: write the failing test named in the task, then the cod
 ## 2. Page alignment
 
 - [x] 2.1 "Measure plate" in the frequency group header; plain semibold group headings in inputs and results. Verify the wood unit and e2e tests still pass.
-- [ ] 2.2 Run `pnpm check`, mutation testing on the changed components, and `openspec validate --strict`.
+- [x] 2.2 Run `pnpm check`, mutation testing on the changed components, and `openspec validate --strict`. Mutation (Stryker command runner, now set up in `@gb/web`): `WoodInputs` 88.75 %; the 9 survivors are CSS classes and the input's width, visual only and checked in screenshots. `SLOT_COLOUR` holds only class strings.

@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Frequency Inputs
-The system SHALL offer, under "Frequency Measurements", three inputs in Hz with these defaults: Longitudinal (f_L), default 180; Cross-grain (f_C), default 90; Diagonal (f_LC), default 120. f_L is the first bending mode along the grain, f_C the first bending mode across the grain and f_LC the first twisting mode of the sample. Each input SHALL be shown as a tile in its take's slot colour from the tap-tone reader, with the take's name and symbol, the editable value and the note label of a valid value.
+The system SHALL offer, under "Frequency Measurements", three inputs in Hz with these defaults: Longitudinal (f_L), default 180; Cross-grain (f_C), default 90; Diagonal (f_LC), default 120. f_L is the first bending mode along the grain, f_C the first bending mode across the grain and f_LC the first twisting mode of the sample. Each input SHALL be a tile in its take's slot colour from the tap-tone reader, with the take's name and symbol, the editable value and the note of a valid value.
 
 #### Scenario: Frequency defaults
 - **WHEN** the user opens the calculator
