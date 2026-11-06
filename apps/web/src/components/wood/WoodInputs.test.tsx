@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -58,5 +59,80 @@ describe("measured Q line", () => {
   it("shows no Q line without measured takes", () => {
     renderInputs({});
     expect(screen.queryByText(/Spectral Q/)).toBeNull();
+  });
+});
+
+describe("frequency tiles", () => {
+  const frequencyGroup = () =>
+    within(screen.getByRole("group", { name: en.wood.groups.frequency }));
+
+  it("shows the three takes in the reader's order, names and symbols", () => {
+    renderInputs({});
+    const tiles = frequencyGroup()
+      .getAllByRole("spinbutton")
+      .map((input) => input.closest("[data-field]")?.textContent ?? "");
+    expect(tiles).toHaveLength(3);
+    expect(tiles[0]).toMatch(/^Longitudinal.*fL/);
+    expect(tiles[1]).toMatch(/^Cross-grain.*fC/);
+    expect(tiles[2]).toMatch(/^Diagonal.*fLC/);
+  });
+
+  it("uses the reader's take names in French", () => {
+    renderInputs({}, "fr");
+    expect(
+      fieldFrame(fr.wood.fields.freqCrossGrain).getByText(fr.tapTone.takes.name.crossGrain),
+    ).toBeDefined();
+  });
+
+  it("keeps each input's name, value and unit", () => {
+    renderInputs({});
+    const longitudinal = screen.getByRole("spinbutton", {
+      name: `${en.wood.fields.freqLongitudinal} Hz`,
+    });
+    expect(longitudinal).toHaveProperty("value", "180");
+  });
+
+  it("reports what the user types", async () => {
+    const onChange = vi.fn();
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <WoodInputs
+          inputs={DEFAULT_INPUTS}
+          errors={{}}
+          quality={{}}
+          onChange={onChange}
+          onReset={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+    const diagonal = screen.getByRole("spinbutton", { name: /^Diagonal/ });
+    await userEvent.type(diagonal, "5");
+    expect(onChange).toHaveBeenLastCalledWith("freqDiagonal", "1205");
+  });
+
+  it("shows the note of a valid frequency", () => {
+    renderInputs({});
+    expect(fieldFrame(en.wood.fields.freqLongitudinal).getByText("F#3 -47 c")).toBeDefined();
+    expect(fieldFrame(en.wood.fields.freqDiagonal).getByText("B2 -49 c")).toBeDefined();
+  });
+
+  it("shows the hint and, for an invalid value, the error instead of a note", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <WoodInputs
+          inputs={{ ...DEFAULT_INPUTS, freqCrossGrain: "" }}
+          errors={{ freqCrossGrain: "freqCrossGrain" }}
+          quality={{}}
+          onChange={vi.fn()}
+          onReset={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+    const crossGrain = screen.getByRole("spinbutton", { name: /^Cross-grain/ });
+    const tile = fieldFrame(en.wood.fields.freqCrossGrain);
+    expect(crossGrain.getAttribute("aria-invalid")).toBe("true");
+    expect(tile.getByText(en.wood.validation.freqCrossGrain)).toBeDefined();
+    expect(tile.getByText(en.wood.hints.freqCrossGrain)).toBeDefined();
+    expect(tile.queryByText(/ c$/)).toBeNull();
   });
 });

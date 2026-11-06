@@ -31,7 +31,7 @@ function Area({
 }) {
   return (
     <section aria-labelledby={id} className={className}>
-      <Panel padding="lg" className="flex flex-col gap-5">
+      <Panel padding="none" className="flex flex-col gap-5 p-4 sm:p-5">
         <h2 id={id} className="text-xl font-semibold text-fg">
           {title}
         </h2>
@@ -79,17 +79,15 @@ export function WoodCalculator({ panels }: { panels: WoodPanelSummary[] | null }
             inputs={state.inputs}
             errors={errors}
             quality={state.quality}
-            groupExtras={{
+            groupActions={{
               frequency: (
-                <div>
-                  <Button
-                    variant="secondary"
-                    icon={<AudioLines className="size-4" />}
-                    onClick={() => setMeasuring(true)}
-                  >
-                    {t("plate.measure")}
-                  </Button>
-                </div>
+                <Button
+                  variant="secondary"
+                  icon={<AudioLines className="size-4" />}
+                  onClick={() => setMeasuring(true)}
+                >
+                  {t("plate.measure")}
+                </Button>
               ),
             }}
             onChange={(key, value) => dispatch({ type: "edited", key, value })}
