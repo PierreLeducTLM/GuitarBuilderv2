@@ -41,7 +41,7 @@
   - each refusal reason (mismatched lists, non-ascending or out-of-range frequencies, negative magnitude, bad FFT size or bin width)
 - [x] 4.3 Steps: convert legacy nodes to v2 entries (data-only entries, unknown keys kept, notes exact) and measurements to the v2 record ("Untitled Analysis" for blank descriptions, spectrum through `prepareSpectrum`, skipped when missing or refused). Verify unit tests for each rule, including a measurement graph's data being unchanged and an oversized spectrum reported as reduced
 - [x] 4.4 Photos and guitar type: source path from `fileName` or URL; deterministic v2 names (legacy name kept when valid, otherwise timestamp, SHA-256 suffix and extension); guitar-type inference from the template's flags. Verify unit tests for the Build Variant Inference scenarios and for names being stable across runs
-- [ ] 4.5 Builds: assemble the v2 row (trimmed name or "Untitled build", BOBO neck, share token only when shared, times kept), the photo copy list and the report notes (dropped dimensions, untyped, renamed, skipped with reason). Verify unit tests for the Build Migration and Stable Identifiers scenarios
+- [x] 4.5 Builds: assemble the v2 row (trimmed name or "Untitled build", BOBO neck, share token only when shared, times kept), the photo copy list and the report notes (dropped dimensions, untyped, renamed, skipped with reason). Verify unit tests for the Build Migration and Stable Identifiers scenarios
 - [ ] 4.6 Wood panels (design decision 7): `convertPanel` and `convertDefaultPanel`:
   - id and owner kept;
   - trimmed name or "Untitled panel";
