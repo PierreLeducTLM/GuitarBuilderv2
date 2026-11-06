@@ -19,7 +19,7 @@ The system SHALL NOT import a legacy account whose email address already belongs
 ## MODIFIED Requirements
 
 ### Requirement: Step Measurement Migration
-The system SHALL import step measurements (frequency, description, capture time and stored tap-tone spectrum) unchanged, because the tap-tone spectrum scale is the same in both apps (`tap-tone-capture`). A stored spectrum with more points than a Tap-Tone Spectrum Record allows (1024) SHALL be reduced to at most 1024 points by keeping, from each run of consecutive points, the point with the greatest magnitude, so that every peak keeps its frequency and level; the measurement's frequency is unchanged and the report lists each reduced spectrum. A stored spectrum that is not a valid record for any other reason SHALL NOT be imported, and the report lists it.
+The system SHALL import step measurements (frequency, description, capture time and stored tap-tone spectrum) unchanged, because the tap-tone spectrum scale is the same in both apps (`tap-tone-capture`). A spectrum with more than 1024 points SHALL be reduced by keeping the loudest point of each run of consecutive points, and a spectrum invalid for any other reason SHALL NOT be imported; the report lists both.
 
 #### Scenario: Measurement graph unchanged
 - **GIVEN** a step measurement at 182.5 Hz with its spectrum
@@ -32,8 +32,14 @@ The system SHALL import step measurements (frequency, description, capture time 
 - **THEN** its spectrum has at most 1024 points, still contains the point at 182.5 Hz with the same level, and the measurement's frequency is unchanged
 - **AND** the report lists the measurement as reduced
 
+#### Scenario: Invalid measurement spectrum skipped
+- **GIVEN** a step measurement whose stored spectrum has fewer magnitudes than frequencies
+- **WHEN** it is migrated
+- **THEN** the measurement is not imported, the step's other data is
+- **AND** the report lists the measurement and the reason
+
 ### Requirement: Wood Panel Spectrum Migration
-The system SHALL import each panel's stored tap-tone spectra unchanged and attach them to the matching measurement: the legacy key "freqLongitudinal" to the longitudinal frequency, "freqCrossGrain" to the cross-grain frequency and "freqDiagonal" to the diagonal frequency. Any other key SHALL be ignored and reported. A spectrum with more than 1024 points SHALL be reduced as for step measurements and reported; a spectrum that is not a valid record for any other reason SHALL NOT be imported, and the report lists it.
+The system SHALL import each panel's stored tap-tone spectra unchanged and attach them to the matching measurement: the legacy key "freqLongitudinal" to the longitudinal frequency, "freqCrossGrain" to the cross-grain frequency and "freqDiagonal" to the diagonal frequency. Other keys SHALL be ignored and reported. Oversized or invalid spectra SHALL be handled as for step measurements.
 
 #### Scenario: Spectrum reopens after migration
 - **GIVEN** a panel whose legacy spectra are keyed "freqLongitudinal" and "freqCrossGrain"
