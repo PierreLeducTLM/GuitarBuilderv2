@@ -15,7 +15,8 @@
     "test": "pnpm -r test",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "test:db": "bash scripts/test-db/run.sh",
-    "test:e2e": "pnpm --filter @gb/web test:e2e"
+    "test:e2e": "pnpm --filter @gb/web test:e2e",
+    "legacy:import": "node packages/legacy-import/src/cli.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.4",

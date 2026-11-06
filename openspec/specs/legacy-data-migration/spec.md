@@ -39,6 +39,20 @@ The system SHALL import every legacy account with its identifier, email address,
 - **WHEN** the migration runs
 - **THEN** the account is imported with role user and is listed in the migration report
 
+### Requirement: Accounts Already in the New System
+The system SHALL NOT import a legacy account whose email address already belongs to a different account in the new system, and SHALL NOT import the builds and other records that account owns. The migration report SHALL list each such account and the records skipped with it, so the owner can remove the new-system account and run the migration again. Accounts already imported earlier, with the same identifier, are updated instead.
+
+#### Scenario: Owner signed up in the new system first
+- **GIVEN** the owner created an account with email E in the new system, and a legacy account with email E and a different identifier owns 3 builds
+- **WHEN** the migration runs
+- **THEN** the legacy account and its 3 builds are not imported, the new-system account is unchanged
+- **AND** the report lists the account and the 3 builds with the reason "email already used by another account"
+
+#### Scenario: Same account imported again
+- **GIVEN** a legacy account imported by an earlier run
+- **WHEN** the migration runs again
+- **THEN** the account is updated in place, not skipped and not duplicated
+
 ### Requirement: Build Migration
 The system SHALL import each build's identifier, owner, name, creation and last-update times, sharing state and step state (completion, notes, photos and measurements). Legacy model name, width and length SHALL NOT be imported, because builds no longer have them; the report lists every build that had a non-empty value, with those values.
 
@@ -75,12 +89,24 @@ The system SHALL copy every photo file referenced by a migrated build's step sta
 - **THEN** those files are not copied, and the report counts them
 
 ### Requirement: Step Measurement Migration
-The system SHALL import step measurements (frequency, description, capture time and stored tap-tone spectrum) unchanged, because the tap-tone spectrum scale is the same in both apps (`tap-tone-capture`).
+The system SHALL import step measurements (frequency, description, capture time and stored tap-tone spectrum) unchanged, because the tap-tone spectrum scale is the same in both apps (`tap-tone-capture`). A spectrum with more than 1024 points SHALL be reduced by keeping the loudest point of each run of consecutive points, and a spectrum invalid for any other reason SHALL NOT be imported; the report lists both.
 
 #### Scenario: Measurement graph unchanged
 - **GIVEN** a step measurement at 182.5 Hz with its spectrum
 - **WHEN** the owner opens its graph after migration
 - **THEN** the graph and the peak frequency are the same as before
+
+#### Scenario: Oversized spectrum reduced
+- **GIVEN** a step measurement whose stored spectrum has 1366 points with its highest peak at 182.5 Hz
+- **WHEN** it is migrated
+- **THEN** its spectrum has at most 1024 points, still contains the point at 182.5 Hz with the same level, and the measurement's frequency is unchanged
+- **AND** the report lists the measurement as reduced
+
+#### Scenario: Invalid measurement spectrum skipped
+- **GIVEN** a step measurement whose stored spectrum has fewer magnitudes than frequencies
+- **WHEN** it is migrated
+- **THEN** the measurement is not imported, the step's other data is
+- **AND** the report lists the measurement and the reason
 
 ### Requirement: Saved FFT Result Conversion
 The system SHALL convert every legacy saved FFT result to the dBFS scale of `acoustic-signal-analysis` and keep its frequencies, name, order and creation time. Each legacy level A_old (dB) SHALL become A_new = -100 + 70 * 10^(A_old/20) + 13.56 dB. The legacy air and body resonance fields were always empty, so migrated results have no identified resonances.
@@ -113,12 +139,18 @@ The system SHALL import each wood panel's name, owner, the ten inputs and the ti
 - **THEN** it is not imported and the report lists it
 
 ### Requirement: Wood Panel Spectrum Migration
-The system SHALL import each panel's stored tap-tone spectra unchanged and attach them to the matching measurement: the legacy key "freqLongitudinal" to the longitudinal frequency, "freqCrossGrain" to the cross-grain frequency and "freqDiagonal" to the diagonal frequency. Any other key SHALL be ignored and reported.
+The system SHALL import each panel's stored tap-tone spectra unchanged and attach them to the matching measurement: the legacy key "freqLongitudinal" to the longitudinal frequency, "freqCrossGrain" to the cross-grain frequency and "freqDiagonal" to the diagonal frequency. Other keys SHALL be ignored and reported. Oversized or invalid spectra SHALL be handled as for step measurements.
 
 #### Scenario: Spectrum reopens after migration
 - **GIVEN** a panel whose legacy spectra are keyed "freqLongitudinal" and "freqCrossGrain"
 - **WHEN** the owner opens the frequency detector for the cross-grain field after migration
 - **THEN** the saved cross-grain spectrum is shown with its peaks
+
+#### Scenario: Invalid spectrum left out
+- **GIVEN** a panel whose legacy cross-grain spectrum has fewer magnitudes than frequencies
+- **WHEN** it is migrated
+- **THEN** the panel is imported without a cross-grain spectrum, its other spectra are attached
+- **AND** the report lists the panel and the spectrum that was left out
 
 ### Requirement: Settings Migration
 The system SHALL import the analysis prompt template as configured in the legacy app. If none was configured, the default template applies (`wood-panel-properties`).
