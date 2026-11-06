@@ -441,19 +441,10 @@
       "noneUsable": "Aucune frappe n'est exploitable"
     },
     "detected": {
-      "heading": "Fréquence détectée",
-      "level": "Niveau du pic",
-      "note": "Note",
-      "spectralQ": "Q spectral",
-      "decayQ": "Q de décroissance",
-      "current": "Valeur actuelle",
       "none": "—",
-      "hz": "{frequency} Hz",
-      "db": "{level} dB",
       "pending": "Mesure en cours…"
     },
     "peaks": {
-      "heading": "Pics détectés",
       "item": "{frequency} Hz",
       "highest": "{frequency} Hz (le plus fort)"
     },
@@ -491,8 +482,11 @@
       "longitudinal": "Longitudinal (f_L)",
       "crossGrain": "Travers (f_C)",
       "diagonal": "Diagonale (f_LC)",
-      "value": "{take} {frequency} Hz",
-      "empty": "{take} —"
+      "name": {
+        "longitudinal": "Longitudinal",
+        "crossGrain": "Travers",
+        "diagonal": "Diagonale"
+      }
     },
     "guidance": {
       "longitudinal": "Tenez la plaque délicatement à 22,4 % de sa longueur depuis une extrémité, près d'un grand côté. Frappez le milieu de la plaque.",
@@ -565,7 +559,8 @@
     "main": {
       "heading": "Fréquence principale",
       "sameAs": "Même pic que {role}",
-      "detail": "{level} dB · {note} · {q}"
+      "detail": "{level} dB · {note} · {q}",
+      "current": "Valeur actuelle {frequency} Hz"
     }
   },
   "wood": {

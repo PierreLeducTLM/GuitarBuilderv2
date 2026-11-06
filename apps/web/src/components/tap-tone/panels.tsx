@@ -3,7 +3,8 @@
 import { noteLabel, type TakePeak } from "@gb/dsp";
 import { Button, cx } from "@gb/ui";
 import { useFormatter, useTranslations } from "next-intl";
-import { ROLE_NAMES, type RoleName } from "@/lib/tap-tone/machine";
+import type { ReactNode } from "react";
+import { PLATE_TAKES, type PlateTake, ROLE_NAMES, type RoleName } from "@/lib/tap-tone/machine";
 
 export type DecayReason =
   | "noRecording"
@@ -20,70 +21,230 @@ export type DecayQView =
   | { value: number; reason?: undefined }
   | { value: null; reason: DecayReason };
 
+export type BodyModeView = {
+  readonly frequency: number;
+  readonly spectralQ: number | null;
+  readonly decayQ: DecayQView | "pending";
+  readonly origin: "auto" | "user";
+};
+
 const VISIBLE_PEAKS = 5;
 
-/** tap-tone-capture: Selected Frequency Display. */
-export function DetectedFrequency({
-  peak,
-  decayQ,
-  current,
-}: {
-  peak: TakePeak | undefined;
-  decayQ: DecayQView | "pending";
-  current?: number;
-}) {
+/** Colour slots shared by both modes: Air and Longitudinal, Top and Cross-grain, Back and Diagonal. */
+const SLOT_COLOUR = [
+  { ink: "text-mode1", dot: "bg-mode1", chosen: "border-mode1 bg-mode1-soft" },
+  { ink: "text-mode2", dot: "bg-mode2", chosen: "border-mode2 bg-mode2-soft" },
+  { ink: "text-mode3", dot: "bg-mode3", chosen: "border-mode3 bg-mode3-soft" },
+] as const;
+
+export const TAKE_SYMBOL: Record<PlateTake, string> = {
+  longitudinal: "L",
+  crossGrain: "C",
+  diagonal: "LC",
+};
+
+function useQParts() {
   const t = useTranslations("tapTone");
   const format = useFormatter();
   const none = t("detected.none");
-  const spectral = peak?.spectralQ ? format.number(Math.round(peak.spectralQ.q)) : none;
-  const decay =
-    decayQ === "pending"
-      ? t("detected.pending")
-      : decayQ.value === null
-        ? none
-        : format.number(Math.round(decayQ.value));
+  return (spectralQ: number | null, decayQ: DecayQView | "pending") =>
+    [
+      t("bodyModes.spectralQ", {
+        value: spectralQ === null ? none : format.number(Math.round(spectralQ)),
+      }),
+      t("bodyModes.decayQ", {
+        value:
+          decayQ === "pending"
+            ? t("bodyModes.pending")
+            : decayQ.value === null
+              ? none
+              : format.number(Math.round(decayQ.value)),
+      }),
+    ] as const;
+}
+
+/** One measured mode: a body mode in Instrument mode, a take in Plate mode. */
+function ModeTile({
+  slot,
+  name,
+  symbol,
+  frequency,
+  pressed,
+  disabled = false,
+  missing,
+  onClick,
+  children,
+}: {
+  slot: 0 | 1 | 2;
+  name: string;
+  symbol: ReactNode;
+  frequency: number | null;
+  pressed: boolean;
+  disabled?: boolean;
+  missing?: string;
+  onClick: () => void;
+  children?: ReactNode;
+}) {
+  const t = useTranslations("tapTone");
+  const format = useFormatter();
+  const colour = SLOT_COLOUR[slot];
   return (
-    <div className="flex flex-col gap-3">
-      <section
-        aria-label={t("detected.heading")}
-        className="flex flex-col gap-1 rounded-xl border border-line bg-panel p-3"
+    <button
+      type="button"
+      aria-pressed={pressed}
+      disabled={disabled}
+      onClick={onClick}
+      className={cx(
+        "flex min-h-24 min-w-0 flex-col items-start gap-0.5 rounded-xl border p-2.5 text-left transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50",
+        pressed
+          ? colour.chosen
+          : frequency !== null
+            ? "border-line bg-panel enabled:hover:bg-raised"
+            : "border-dashed border-line-strong enabled:hover:bg-raised",
+      )}
+    >
+      <span
+        className={cx(
+          "max-w-full text-sm font-semibold leading-tight hyphens-auto break-words",
+          colour.ink,
+        )}
       >
-        <h3 className="text-sm font-semibold text-fg-dim">{t("detected.heading")}</h3>
-        <p className="font-mono text-2xl font-bold text-amber-ink">
-          {peak ? format.number(peak.frequency, "decimal1") : none}{" "}
-          <span className="text-base">Hz</span>
-        </p>
-        {peak ? (
-          <p className="font-mono text-sm text-fg-dim">
-            {t("detected.level")}{" "}
-            {t("detected.db", { level: format.number(peak.level, "decimal1") })} · {peak.note}
+        {name}
+      </span>
+      <span className="flex items-center gap-1.5 font-mono text-2xs text-fg-faint">
+        <span aria-hidden="true" className={cx("size-2 shrink-0 rounded-full", colour.dot)} />
+        {symbol}
+      </span>
+      {frequency !== null ? (
+        <>
+          <span className="mt-0.5 flex items-baseline gap-1">
+            <span className="font-mono text-xl font-bold leading-tight tracking-tight text-fg">
+              {format.number(frequency, "decimal1")}
+            </span>
+            <span className="text-xs text-fg-dim">Hz</span>
+          </span>
+          <span className="font-mono text-xs text-fg-dim">{noteLabel(frequency)}</span>
+          {children}
+        </>
+      ) : (
+        <>
+          <span className="mt-0.5 font-mono text-xl font-bold leading-tight text-fg-faint">
+            {t("detected.none")}
+          </span>
+          {missing ? <span className="text-xs text-fg-dim">{missing}</span> : null}
+        </>
+      )}
+    </button>
+  );
+}
+
+/** tap-tone-capture: Plate Mode Takes, the take selector. */
+export function PlateTakes({
+  selected,
+  active,
+  recording,
+  onSwitch,
+}: {
+  selected: Partial<Record<PlateTake, TakePeak>>;
+  active: PlateTake;
+  recording: boolean;
+  onSwitch: (take: PlateTake) => void;
+}) {
+  const t = useTranslations("tapTone.takes");
+  return (
+    <fieldset className="grid grid-cols-3 gap-2">
+      <legend className="sr-only">{t("label")}</legend>
+      {PLATE_TAKES.map((take, i) => (
+        <ModeTile
+          key={take}
+          slot={i === 0 ? 0 : i === 1 ? 1 : 2}
+          name={t(`name.${take}`)}
+          symbol={
+            <>
+              f<sub>{TAKE_SYMBOL[take]}</sub>
+            </>
+          }
+          frequency={selected[take]?.frequency ?? null}
+          pressed={active === take}
+          disabled={recording && active !== take}
+          onClick={() => onSwitch(take)}
+        />
+      ))}
+    </fieldset>
+  );
+}
+
+/** tap-tone-capture: Body Mode Readouts, and the touch and keyboard path of Manual Role Assignment. */
+export function BodyModes({
+  modes,
+  focused,
+  moving,
+  onFocus,
+  onMove,
+  onClear,
+}: {
+  modes: Record<RoleName, BodyModeView | null>;
+  focused: RoleName | null;
+  moving: boolean;
+  onFocus: (role: RoleName) => void;
+  onMove: () => void;
+  onClear: (role: RoleName) => void;
+}) {
+  const t = useTranslations("tapTone");
+  const qParts = useQParts();
+  const chosen = focused ? modes[focused] : null;
+  const chosenName = focused ? t(`roles.${focused}`) : "";
+  return (
+    <section aria-label={t("bodyModes.heading")} className="flex flex-col gap-2">
+      <div className="grid grid-cols-3 gap-2">
+        {ROLE_NAMES.map((name, i) => {
+          const mode = modes[name];
+          return (
+            <ModeTile
+              key={name}
+              slot={i === 0 ? 0 : i === 1 ? 1 : 2}
+              name={t(`roles.${name}`)}
+              symbol={t(`bodyModes.number.${name}`)}
+              frequency={mode?.frequency ?? null}
+              pressed={focused === name}
+              missing={t("bodyModes.notIdentified")}
+              onClick={() => onFocus(name)}
+            >
+              {mode ? (
+                <>
+                  <span className="font-mono text-2xs text-fg-dim">
+                    {qParts(mode.spectralQ, mode.decayQ).map((part, j) => (
+                      <span key={part}>
+                        {j > 0 ? " · " : null}
+                        <span className="whitespace-nowrap">{part}</span>
+                      </span>
+                    ))}
+                  </span>
+                  {mode.origin === "user" ? (
+                    <span className="text-2xs text-fg-dim">{t("bodyModes.setByYou")}</span>
+                  ) : null}
+                </>
+              ) : null}
+            </ModeTile>
+          );
+        })}
+      </div>
+      {focused ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-panel py-1.5 pr-1.5 pl-3">
+          <p role="status" className="grow text-sm text-amber-ink">
+            {moving ? t("bodyModes.moving", { role: chosenName }) : ""}
           </p>
-        ) : null}
-        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-sm">
-          <dt className="text-fg-dim">{t("detected.spectralQ")}</dt>
-          <dd className="font-mono font-bold text-fg">{peak ? spectral : none}</dd>
-          <dt className="text-fg-dim">{t("detected.decayQ")}</dt>
-          <dd className="font-mono font-bold text-fg">{peak ? decay : none}</dd>
-        </dl>
-        {peak && !peak.spectralQ ? (
-          <p className="text-xs text-fg-dim">{t("qReasons.spectral")}</p>
-        ) : null}
-        {peak && decayQ !== "pending" && decayQ.value === null ? (
-          <p className="text-xs text-fg-dim">{t(`qReasons.${decayQ.reason}`)}</p>
-        ) : null}
-      </section>
-      {typeof current === "number" ? (
-        <section
-          aria-label={t("detected.current")}
-          className="flex flex-col gap-1 rounded-xl border border-line bg-panel p-3"
-        >
-          <h3 className="text-sm font-semibold text-fg-dim">{t("detected.current")}</h3>
-          <p className="font-mono text-lg font-bold text-fg">
-            {t("detected.hz", { frequency: format.number(current, "decimal2") })}
-          </p>
-        </section>
+          <Button variant="secondary" aria-pressed={moving} onClick={onMove}>
+            {t(chosen ? "bodyModes.move" : "bodyModes.assign", { role: chosenName })}
+          </Button>
+          {chosen ? (
+            <Button variant="ghost" onClick={() => onClear(focused)}>
+              {t("bodyModes.clear", { role: chosenName })}
+            </Button>
+          ) : null}
+        </div>
       ) : null}
-    </div>
+    </section>
   );
 }
 
@@ -119,178 +280,22 @@ function PeakButtons({
   );
 }
 
-/** tap-tone-capture: Detected Peaks List. */
-export function DetectedPeaks({
-  peaks,
-  selected,
-  onSelect,
-}: {
-  peaks: readonly TakePeak[];
-  selected: number | null;
-  onSelect: (index: number) => void;
-}) {
-  const t = useTranslations("tapTone.peaks");
-  if (peaks.length <= 1) return null;
-  return (
-    <section className="flex flex-col gap-2">
-      <h3 className="text-sm font-semibold text-fg-dim">{t("heading")}</h3>
-      <PeakButtons peaks={peaks} selected={selected} onSelect={onSelect} />
-    </section>
-  );
-}
+export type FrequencyContext =
+  | { mode: "instrument"; sameAs: RoleName | null }
+  | { mode: "plate"; take: PlateTake; current?: number };
 
-export type BodyModeView = {
-  readonly frequency: number;
-  readonly spectralQ: number | null;
-  readonly decayQ: DecayQView | "pending";
-  readonly origin: "auto" | "user";
-};
-
-const MODE_COLOUR: Record<RoleName, { ink: string; dot: string; chosen: string }> = {
-  air: { ink: "text-mode1", dot: "bg-mode1", chosen: "border-mode1 bg-mode1-soft" },
-  top: { ink: "text-mode2", dot: "bg-mode2", chosen: "border-mode2 bg-mode2-soft" },
-  back: {
-    ink: "text-mode3",
-    dot: "bg-mode3",
-    chosen: "border-mode3 bg-mode3-soft",
-  },
-};
-
-function useQParts() {
-  const t = useTranslations("tapTone");
-  const format = useFormatter();
-  const none = t("detected.none");
-  return (spectralQ: number | null, decayQ: DecayQView | "pending") =>
-    [
-      t("bodyModes.spectralQ", {
-        value: spectralQ === null ? none : format.number(Math.round(spectralQ)),
-      }),
-      t("bodyModes.decayQ", {
-        value:
-          decayQ === "pending"
-            ? t("bodyModes.pending")
-            : decayQ.value === null
-              ? none
-              : format.number(Math.round(decayQ.value)),
-      }),
-    ] as const;
-}
-
-/** tap-tone-capture: Body Mode Readouts, and the touch and keyboard path of Manual Role Assignment. */
-export function BodyModes({
-  modes,
-  focused,
-  moving,
-  onFocus,
-  onMove,
-  onClear,
-}: {
-  modes: Record<RoleName, BodyModeView | null>;
-  focused: RoleName | null;
-  moving: boolean;
-  onFocus: (role: RoleName) => void;
-  onMove: () => void;
-  onClear: (role: RoleName) => void;
-}) {
-  const t = useTranslations("tapTone");
-  const format = useFormatter();
-  const qParts = useQParts();
-  const chosen = focused ? modes[focused] : null;
-  const chosenName = focused ? t(`roles.${focused}`) : "";
-  return (
-    <section aria-label={t("bodyModes.heading")} className="flex flex-col gap-2">
-      <div className="grid grid-cols-3 gap-2">
-        {ROLE_NAMES.map((name) => {
-          const mode = modes[name];
-          const colour = MODE_COLOUR[name];
-          return (
-            <button
-              key={name}
-              type="button"
-              aria-pressed={focused === name}
-              onClick={() => onFocus(name)}
-              className={cx(
-                "flex min-h-28 min-w-0 flex-col items-start gap-0.5 rounded-xl border p-2.5 text-left transition-colors duration-150",
-                focused === name
-                  ? colour.chosen
-                  : mode
-                    ? "border-line bg-panel hover:bg-raised"
-                    : "border-line-strong border-dashed hover:bg-raised",
-              )}
-            >
-              <span className="flex items-center gap-1.5">
-                <span aria-hidden="true" className={cx("size-2 rounded-full", colour.dot)} />
-                <span className={cx("text-sm font-semibold", colour.ink)}>
-                  {t(`roles.${name}`)}
-                </span>
-              </span>
-              <span className="font-mono text-2xs text-fg-faint">
-                {t(`bodyModes.number.${name}`)}
-              </span>
-              {mode ? (
-                <>
-                  <span className="mt-0.5 flex items-baseline gap-1">
-                    <span className="font-mono text-xl font-bold leading-tight tracking-tight text-fg">
-                      {format.number(mode.frequency, "decimal1")}
-                    </span>
-                    <span className="text-xs text-fg-dim">Hz</span>
-                  </span>
-                  <span className="font-mono text-xs text-fg-dim">{noteLabel(mode.frequency)}</span>
-                  <span className="font-mono text-2xs text-fg-dim">
-                    {qParts(mode.spectralQ, mode.decayQ).map((part, i) => (
-                      <span key={part}>
-                        {i > 0 ? " · " : null}
-                        <span className="whitespace-nowrap">{part}</span>
-                      </span>
-                    ))}
-                  </span>
-                  {mode.origin === "user" ? (
-                    <span className="text-2xs text-fg-dim">{t("bodyModes.setByYou")}</span>
-                  ) : null}
-                </>
-              ) : (
-                <>
-                  <span className="mt-0.5 font-mono text-xl font-bold leading-tight text-fg-faint">
-                    {t("detected.none")}
-                  </span>
-                  <span className="text-xs text-fg-dim">{t("bodyModes.notIdentified")}</span>
-                </>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      {focused ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-panel py-1.5 pr-1.5 pl-3">
-          <p role="status" className="grow text-sm text-amber-ink">
-            {moving ? t("bodyModes.moving", { role: chosenName }) : ""}
-          </p>
-          <Button variant="secondary" aria-pressed={moving} onClick={onMove}>
-            {t(chosen ? "bodyModes.move" : "bodyModes.assign", { role: chosenName })}
-          </Button>
-          {chosen ? (
-            <Button variant="ghost" onClick={() => onClear(focused)}>
-              {t("bodyModes.clear", { role: chosenName })}
-            </Button>
-          ) : null}
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
-/** tap-tone-capture: Selected Frequency Display and Detected Peaks List, in Instrument mode. */
+/** tap-tone-capture: Selected Frequency Display and Detected Peaks List. */
 export function MainFrequency({
   peak,
   decayQ,
-  sameAs,
+  context,
   peaks,
   selected,
   onSelect,
 }: {
   peak: TakePeak | undefined;
   decayQ: DecayQView | "pending";
-  sameAs: RoleName | null;
+  context: FrequencyContext;
   peaks: readonly TakePeak[];
   selected: number | null;
   onSelect: (index: number) => void;
@@ -298,17 +303,25 @@ export function MainFrequency({
   const t = useTranslations("tapTone");
   const format = useFormatter();
   const qParts = useQParts();
+  const heading = context.mode === "plate" ? t(`takes.${context.take}`) : t("main.heading");
   return (
-    <section aria-label={t("main.heading")} className="flex flex-col gap-2">
+    <section aria-label={heading} className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="text-sm font-semibold text-fg">{t("main.heading")}</h3>
+        <h3 className="text-sm font-semibold text-fg">{heading}</h3>
         <p className="font-mono text-lg font-bold text-fg">
           {peak ? format.number(peak.frequency, "decimal1") : t("detected.none")}{" "}
           <span className="text-xs font-normal text-fg-dim">Hz</span>
         </p>
       </div>
-      {sameAs ? (
-        <p className="text-sm text-fg-dim">{t("main.sameAs", { role: t(`roles.${sameAs}`) })}</p>
+      {context.mode === "instrument" && context.sameAs ? (
+        <p className="text-sm text-fg-dim">
+          {t("main.sameAs", { role: t(`roles.${context.sameAs}`) })}
+        </p>
+      ) : null}
+      {context.mode === "plate" && context.current !== undefined ? (
+        <p className="text-sm text-fg-dim">
+          {t("main.current", { frequency: format.number(context.current, "decimal2") })}
+        </p>
       ) : null}
       {peak ? (
         <p className="font-mono text-xs text-fg-dim">

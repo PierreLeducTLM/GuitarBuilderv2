@@ -39,7 +39,7 @@ import {
 import { MAX_RECORDING_SECONDS, useAudioInputs, usePlayback, useRecorder } from "./hooks";
 import { Oscilloscope } from "./Oscilloscope";
 import { PeakInspector } from "./PeakInspector";
-import { BodyModes, DetectedFrequency, DetectedPeaks, MainFrequency } from "./panels";
+import { BodyModes, MainFrequency, PlateTakes, TAKE_SYMBOL } from "./panels";
 import { type GraphMark, type ModeSlot, TapToneSpectrum } from "./TapToneSpectrum";
 import { TapWaveform } from "./TapWaveform";
 import { useDecayQ } from "./useDecayQ";
@@ -283,20 +283,41 @@ export function TapToneDialog(props: TapToneDialogProps) {
   };
   const bodyModes = { air: bodyMode("air"), top: bodyMode("top"), back: bodyMode("back") };
 
-  const roleMarks: GraphMark[] = ROLE_NAMES.flatMap((name, i) => {
-    const role = roles[name];
-    return role
+  const activePlate = state.active === "instrument" ? null : state.active;
+  const marks: GraphMark[] = activePlate
+    ? peak
       ? [
           {
-            id: name,
-            slot: MODE_SLOTS[i] ?? 1,
-            name: t(`roles.${name}`),
-            frequency: role.frequency,
-            level: role.level,
+            id: activePlate,
+            slot: MODE_SLOTS[PLATE_TAKES.indexOf(activePlate)] ?? 1,
+            name: "f",
+            sub: TAKE_SYMBOL[activePlate],
+            frequency: peak.frequency,
+            level: peak.level,
           },
         ]
-      : [];
-  });
+      : []
+    : ROLE_NAMES.flatMap((name, i) => {
+        const role = roles[name];
+        return role
+          ? [
+              {
+                id: name,
+                slot: MODE_SLOTS[i] ?? 1,
+                name: t(`roles.${name}`),
+                frequency: role.frequency,
+                level: role.level,
+              },
+            ]
+          : [];
+      });
+
+  const plateSelected = Object.fromEntries(
+    PLATE_TAKES.flatMap((key) => {
+      const chosen = selectedPeak(state.takes[key]);
+      return chosen ? [[key, chosen]] : [];
+    }),
+  );
 
   return (
     <DialogFrame
@@ -321,35 +342,16 @@ export function TapToneDialog(props: TapToneDialogProps) {
         </>
       }
     >
+      {activePlate ? (
+        <PlateTakes
+          selected={plateSelected}
+          active={activePlate}
+          recording={recording}
+          onSwitch={(take) => dispatch({ type: "takeSwitched", take })}
+        />
+      ) : null}
       <div className="flex items-start justify-between gap-3">
-        {props.mode === "plate" ? (
-          <fieldset className="flex flex-wrap gap-2">
-            <legend className="sr-only">{t("takes.label")}</legend>
-            {PLATE_TAKES.map((key) => {
-              const chosen = selectedPeak(state.takes[key]);
-              const name = t(`takes.${key}`);
-              return (
-                <Button
-                  key={key}
-                  variant={state.active === key ? "primary" : "secondary"}
-                  aria-pressed={state.active === key}
-                  disabled={recording && state.active !== key}
-                  onClick={() => dispatch({ type: "takeSwitched", take: key })}
-                  className="font-mono"
-                >
-                  {chosen
-                    ? t("takes.value", {
-                        take: name,
-                        frequency: format.number(chosen.frequency, "decimal1"),
-                      })
-                    : t("takes.empty", { take: name })}
-                </Button>
-              );
-            })}
-          </fieldset>
-        ) : (
-          <span />
-        )}
+        <p className="text-sm text-fg-dim">{activePlate ? t(`guidance.${activePlate}`) : null}</p>
         <Tooltip
           content={
             <div className="flex flex-col gap-1">
@@ -367,9 +369,6 @@ export function TapToneDialog(props: TapToneDialogProps) {
           </IconButton>
         </Tooltip>
       </div>
-      {state.active !== "instrument" ? (
-        <p className="text-sm text-fg-dim">{t(`guidance.${state.active}`)}</p>
-      ) : null}
       {state.error ? (
         <p
           role="alert"
@@ -484,71 +483,60 @@ export function TapToneDialog(props: TapToneDialogProps) {
             <p className="rounded-xl border border-line bg-inset p-4 text-sm text-fg-dim">
               {t("taps.noneUsable")}
             </p>
-          ) : props.mode === "instrument" ? (
+          ) : (
             <>
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-semibold text-fg">
                   {t("spectrum.caption")}{" "}
-                  <span className="font-normal text-fg-dim">{t("spectrum.instrumentHint")}</span>
+                  <span className="font-normal text-fg-dim">
+                    {activePlate ? t("spectrum.hint") : t("spectrum.instrumentHint")}
+                  </span>
                 </p>
                 <TapToneSpectrum
                   points={results.result.points}
                   peaks={results.result.peaks}
                   selected={results.selected}
                   onSelect={choosePeak}
-                  marks={roleMarks}
+                  marks={marks}
                   focused={focused}
-                  onDragMark={(id, index) => {
-                    const role = ROLE_NAMES.find((name) => name === id);
-                    if (role) dispatch({ type: "roleAssigned", role, index });
-                  }}
+                  {...(activePlate
+                    ? {}
+                    : {
+                        onDragMark: (id: string, index: number) => {
+                          const role = ROLE_NAMES.find((name) => name === id);
+                          if (role) dispatch({ type: "roleAssigned", role, index });
+                        },
+                      })}
                 />
               </div>
-              <BodyModes
-                modes={bodyModes}
-                focused={focused}
-                moving={moving !== null}
-                onFocus={(role) => {
-                  setMoving(null);
-                  setFocused((current) => (current === role ? null : role));
-                }}
-                onMove={() => setMoving((current) => (current ? null : focused))}
-                onClear={(role) => {
-                  setMoving(null);
-                  dispatch({ type: "roleCleared", role });
-                }}
-              />
+              {activePlate ? null : (
+                <BodyModes
+                  modes={bodyModes}
+                  focused={focused}
+                  moving={moving !== null}
+                  onFocus={(role) => {
+                    setMoving(null);
+                    setFocused((current) => (current === role ? null : role));
+                  }}
+                  onMove={() => setMoving((current) => (current ? null : focused))}
+                  onClear={(role) => {
+                    setMoving(null);
+                    dispatch({ type: "roleCleared", role });
+                  }}
+                />
+              )}
               <MainFrequency
                 peak={peak}
                 decayQ={peak ? decayOf(peak).view : "pending"}
-                sameAs={sameAs}
-                peaks={results.result.peaks}
-                selected={results.selected}
-                onSelect={choosePeak}
-              />
-            </>
-          ) : (
-            <>
-              <div className="grid gap-4 md:grid-cols-[1fr_16rem]">
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-fg">
-                    {t("spectrum.caption")}{" "}
-                    <span className="font-normal text-fg-dim">{t("spectrum.hint")}</span>
-                  </p>
-                  <TapToneSpectrum
-                    points={results.result.points}
-                    peaks={results.result.peaks}
-                    selected={results.selected}
-                    onSelect={choosePeak}
-                  />
-                </div>
-                <DetectedFrequency
-                  peak={peak}
-                  decayQ={peak ? decayOf(peak).view : "pending"}
-                  {...(currentValue === undefined ? {} : { current: currentValue })}
-                />
-              </div>
-              <DetectedPeaks
+                context={
+                  activePlate
+                    ? {
+                        mode: "plate",
+                        take: activePlate,
+                        ...(currentValue === undefined ? {} : { current: currentValue }),
+                      }
+                    : { mode: "instrument", sameAs }
+                }
                 peaks={results.result.peaks}
                 selected={results.selected}
                 onSelect={choosePeak}

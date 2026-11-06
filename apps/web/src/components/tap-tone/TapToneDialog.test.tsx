@@ -291,8 +291,22 @@ describe("TapToneDialog in Plate mode", () => {
     await user.click(screen.getByRole("button", { name: /^Cross-grain/ }));
     expect(screen.getByText(/22\.4% of its width/)).toBeTruthy();
     await upload(plate(92.7));
-    expect(screen.getByRole("button", { name: /^Longitudinal \(f_L\) 181\.8 Hz/ })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /^Diagonal \(f_LC\) —/ })).toBeTruthy();
+    const takes = screen.getByRole("group", { name: "Plate mode" });
+    expect(within(takes).getByRole("button", { name: /^Longitudinal/ }).textContent).toContain(
+      "181.8",
+    );
+    expect(within(takes).getByRole("button", { name: /^Diagonal/ }).textContent).toContain("—");
+    expect(
+      within(takes)
+        .getByRole("button", { name: /^Cross-grain/ })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    const spectrum = screen.getByRole("img", { name: /Frequency spectrum/ });
+    expect(spectrum.querySelector("[data-mark=crossGrain]")?.textContent).toMatch(/^fC 9[23]\.\d$/);
+    expect(spectrum.querySelectorAll("[data-mark]")).toHaveLength(1);
+    expect(screen.getByRole("region", { name: "Cross-grain (f_C)" }).textContent).toMatch(
+      /9[23]\.\d/,
+    );
     await user.click(screen.getByRole("button", { name: "Confirm" }));
     const [result] = onConfirm.mock.calls[0] ?? [];
     expect(Object.keys(result).sort()).toEqual(["crossGrain", "longitudinal"]);
@@ -322,8 +336,8 @@ describe("TapToneDialog in Plate mode", () => {
         onCancel={vi.fn()}
       />,
     );
-    expect(screen.getByRole("region", { name: "Current Value" }).textContent).toContain(
-      "180.00 Hz",
+    expect(screen.getByRole("region", { name: "Longitudinal (f_L)" }).textContent).toContain(
+      "Current value 180.00 Hz",
     );
     expect(
       screen.getByText("Needs the recording; record the take again to measure it"),
