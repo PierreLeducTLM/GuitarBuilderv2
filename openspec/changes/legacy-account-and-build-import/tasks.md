@@ -25,7 +25,7 @@
   - dollar-quoted JSON literals with a random tag checked against the payload.
 
   Verify unit tests with a mocked `fetch` for the request shape and error handling, the read-only refusal, and quoting of payloads that contain `$` and quotes
-- [ ] 3.2 Implement the Storage clients:
+- [x] 3.2 Implement the Storage clients:
   - source download and `HEAD` by public URL;
   - target upload with `x-upsert: true` and the content type;
   - target secret-key lookup through `GET /v1/projects/<ref>/api-keys?reveal=true` in hosted mode.
