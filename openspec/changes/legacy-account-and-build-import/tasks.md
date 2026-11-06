@@ -35,7 +35,7 @@
 ## 4. Conversion (pure)
 
 - [x] 4.1 Accounts: prepare `auth.users` and `auth.identities` rows from the legacy JSON (generated columns dropped, token columns coalesced to `''`, keys unknown to v2 dropped and listed), map roles (`admin` kept, missing profile becomes `user` and is flagged), and detect email conflicts against v2 accounts. Verify unit tests for the Account Migration and "Accounts Already in the New System" scenarios
-- [ ] 4.2 Spectra: `prepareSpectrum` (design decision 6): the record checks mirrored from `spectrum_record_is_valid` except length, and loudest-point-per-run reduction above 1024 points. Verify unit tests:
+- [x] 4.2 Spectra: `prepareSpectrum` (design decision 6): the record checks mirrored from `spectrum_record_is_valid` except length, and loudest-point-per-run reduction above 1024 points. Verify unit tests:
   - a valid record is returned unchanged;
   - a 1366-point record becomes at most 1024 points, keeps every run's loudest point with its frequency, magnitude and dB value, and stays valid;
   - each refusal reason (mismatched lists, non-ascending or out-of-range frequencies, negative magnitude, bad FFT size or bin width)
