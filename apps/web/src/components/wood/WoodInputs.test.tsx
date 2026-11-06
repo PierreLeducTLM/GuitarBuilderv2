@@ -166,6 +166,11 @@ describe("measurement tiles", () => {
       "value",
       "75",
     );
+    expect(
+      fieldFrame(en.wood.fields.stiffness).getAllByText(
+        (_, element) => element?.tagName === "SPAN" && element.textContent === "f",
+      ),
+    ).not.toHaveLength(0);
   });
 
   it("shows the hint and the error in the tile, without a note", () => {
@@ -184,5 +189,91 @@ describe("measurement tiles", () => {
     expect(tile.getByText(en.wood.validation.stiffness)).toBeDefined();
     expect(tile.getByText(en.wood.hints.stiffness)).toBeDefined();
     expect(fieldFrame(en.wood.fields.sampleLength).queryByText(/ c$/)).toBeNull();
+  });
+});
+
+describe("every tile's symbol, unit and description", () => {
+  const TILES = [
+    ["sampleLength", "L", "mm"],
+    ["sampleWidth", "W", "mm"],
+    ["sampleThickness", "h", "mm"],
+    ["sampleMass", "m", "g"],
+    ["freqLongitudinal", "fL", "Hz"],
+    ["freqCrossGrain", "fC", "Hz"],
+    ["freqDiagonal", "fLC", "Hz"],
+    ["plateLength", "a", "mm"],
+    ["plateWidth", "b", "mm"],
+  ] as const;
+
+  const descriptions = (input: HTMLElement) =>
+    input
+      .getAttribute("aria-describedby")
+      ?.split(" ")
+      .map((id) => document.getElementById(id)?.textContent ?? null);
+
+  it.each(TILES)(
+    "%s shows its symbol and unit, and is named with its unit",
+    (key, symbol, unit) => {
+      renderInputs({});
+      const input = screen.getByRole("spinbutton", { name: `${en.wood.fields[key]} ${unit}` });
+      const tile = input.closest("[data-field]");
+      if (!(tile instanceof HTMLElement)) throw new Error(`no tile for ${key}`);
+      expect(within(tile).getByText(unit)).toBeDefined();
+      expect(
+        within(tile).getAllByText(
+          (_, element) => element?.tagName === "SPAN" && element.textContent === symbol,
+        ),
+      ).not.toHaveLength(0);
+    },
+  );
+
+  it("describes a hinted field by its hint only, and a field without a hint not at all", () => {
+    renderInputs({});
+    expect(descriptions(screen.getByRole("spinbutton", { name: /^Sample Length/ }))).toEqual([
+      en.wood.hints.sampleLength,
+    ]);
+    const thickness = screen.getByRole("spinbutton", { name: /^Sample Thickness/ });
+    expect(thickness.getAttribute("aria-describedby")).toBeNull();
+    expect(
+      within(thickness.closest("[data-field]") as HTMLElement).queryByText(/grain|Typical/),
+    ).toBeNull();
+  });
+
+  it("describes an invalid field by its error, then its hint", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <WoodInputs
+          inputs={{ ...DEFAULT_INPUTS, sampleWidth: "0", sampleMass: "0" }}
+          errors={{ sampleWidth: "sampleWidth", sampleMass: "sampleMass" }}
+          quality={{}}
+          onChange={vi.fn()}
+          onReset={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(descriptions(screen.getByRole("spinbutton", { name: /^Sample Width/ }))).toEqual([
+      en.wood.validation.sampleWidth,
+      en.wood.hints.sampleWidth,
+    ]);
+    expect(descriptions(screen.getByRole("spinbutton", { name: /^Sample Mass/ }))).toEqual([
+      en.wood.validation.sampleMass,
+    ]);
+  });
+
+  it("resets to the defaults", async () => {
+    const onReset = vi.fn();
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <WoodInputs
+          inputs={DEFAULT_INPUTS}
+          errors={{}}
+          quality={{}}
+          onChange={vi.fn()}
+          onReset={onReset}
+        />
+      </NextIntlClientProvider>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: en.wood.reset }));
+    expect(onReset).toHaveBeenCalledOnce();
   });
 });

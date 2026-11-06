@@ -10,6 +10,8 @@
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
+    "mutation": "stryker run",
+    "mutation:incremental": "stryker run --incremental",
     "test:e2e": "playwright test",
     "fixtures:tap-tone": "node scripts/tap-tone-fixtures.ts"
   },
@@ -29,6 +31,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
+    "@stryker-mutator/core": "10.0.0",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",

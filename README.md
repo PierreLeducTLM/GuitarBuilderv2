@@ -77,7 +77,7 @@ pnpm --filter @gb/web fixtures:tap-tone
 
 ## Mutation tests
 
-`@gb/dsp` runs Stryker through its command runner (the Vitest plugin does not support Vitest 5 yet): `pnpm --filter @gb/dsp mutation`, or `pnpm --filter @gb/dsp exec stryker run --mutate "src/tapTone/peaks.ts"` for one file. The decay Q Monte Carlo check (T18) runs only with `DSP_NIGHTLY=1 pnpm --filter @gb/dsp test`.
+`@gb/dsp` runs Stryker through its command runner (the Vitest plugin does not support Vitest 5 yet): `pnpm --filter @gb/dsp mutation`, or `pnpm --filter @gb/dsp exec stryker run --mutate "src/tapTone/peaks.ts"` for one file. `@gb/web` uses the same setup; its suite is large, so narrow the tests to the ones covering the file with `STRYKER_TESTS`: `STRYKER_TESTS="src/components/wood" pnpm --filter @gb/web exec stryker run --mutate "src/components/wood/WoodInputs.tsx"`. The decay Q Monte Carlo check (T18) runs only with `DSP_NIGHTLY=1 pnpm --filter @gb/dsp test`.
 
 ## Step photos
 
