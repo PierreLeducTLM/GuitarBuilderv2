@@ -2,7 +2,7 @@
 
 ## 1. Database
 
-- [ ] 1.1 Add a migration redefining `public.set_updated_at()` so that it leaves `updated_at` unchanged when the session setting `gb.keep_updated_at` is `on`. Write `supabase/tests/database/09_keep_updated_at.test.sql`: without the setting an update moves `updated_at`; with it, an explicitly written `updated_at` is kept, on `builds` and on `wood_panels`; `update_build_step` still moves it. Verify with `supabase test db` and against the shim
+- [x] 1.1 Add a migration redefining `public.set_updated_at()` so that it leaves `updated_at` unchanged when the session setting `gb.keep_updated_at` is `on`. Write `supabase/tests/database/09_keep_updated_at.test.sql`: without the setting an update moves `updated_at`; with it, an explicitly written `updated_at` is kept, on `builds` and on `wood_panels`; `update_build_step` still moves it. Verify with `supabase test db` and against the shim
 
 ## 2. Package
 
