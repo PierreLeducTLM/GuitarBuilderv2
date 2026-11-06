@@ -90,6 +90,9 @@ export const spawnCommand =
       child.stdout.on("data", (chunk: Buffer) => stdout.push(chunk));
       child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk));
       child.on("error", reject);
+      child.stdin.on("error", (error: NodeJS.ErrnoException) => {
+        if (error.code !== "EPIPE") reject(error);
+      });
       child.on("close", (code) => {
         if (code === 0) {
           resolve({ stdout: Buffer.concat(stdout).toString("utf8") });

@@ -189,6 +189,12 @@ describe("spawnCommand", () => {
     ).rejects.toThrow(/^sh failed \(3\): boom$/);
   });
 
+  it("reports the exit code when the command exits without reading its input", async () => {
+    await expect(
+      spawnCommand("sh")({ args: ["-c", "exit 4"], input: "x".repeat(4_000_000), readOnly: false }),
+    ).rejects.toThrow(/^sh failed \(4\): $/);
+  });
+
   it("fails when the command cannot start", async () => {
     await expect(
       spawnCommand("gb-no-such-command")({ args: [], input: "", readOnly: false }),

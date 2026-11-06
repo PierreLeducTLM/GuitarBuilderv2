@@ -63,7 +63,7 @@
   - the post-apply verification counts.
 
   Verify unit tests with fake ends: order of operations, nothing written in a dry run, skipped owners' builds and panels never written
-- [ ] 5.3 Implement the report (Markdown and JSON under `reports/legacy-import/`, terminal summary with counts only) and the CLI (`--apply`, printed project refs, exit codes). Verify a snapshot test of the Markdown for a fixture run and a test that the terminal output contains no email address
+- [x] 5.3 Implement the report (Markdown and JSON under `reports/legacy-import/`, terminal summary with counts only) and the CLI (`--apply`, printed project refs, exit codes). Verify a snapshot test of the Markdown for a fixture run and a test that the terminal output contains no email address
 
 ## 6. Rehearsal
 

@@ -1,0 +1,341 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`a report with every kind of note > counts every note in the terminal 1`] = `
+"Mode: apply
+Accounts: 2 to import (1 updates, 0 admins, 1 given a profile), 0 skipped
+Builds: 1 to import (1 updates, 0 without a guitar type), 1 skipped
+Wood panels: 1 to import (0 corrected), 1 skipped
+Default panels: 1 to import (1 corrected), 0 skipped
+Photos: 0 to copy, 4 copied, 1 missing, 1 orphaned
+Spectra: 2 reduced, 3 left out
+Failures: 2
+Report: r.md
+JSON: r.json"
+`;
+
+exports[`a report with every kind of note > describes every note for the owner 1`] = `
+"# Legacy import report: apply
+
+- Started: 2026-11-06T18:45:07.123Z
+- First-version project: legacyref
+- Target project: targetref
+- Mode: apply (records were written)
+
+## Counts
+
+| Kind | Imported | Of which updates | Skipped |
+| --- | ---: | ---: | ---: |
+| Accounts | 2 | 1 | 0 |
+| Builds | 1 | 1 | 1 |
+| Wood panels | 1 | 1 | 1 |
+| Default panels | 1 | 1 | 0 |
+
+Step photos: 0 to copy, 4 copied, 1 missing. Photo files no build references (not copied): 1.
+
+## Accounts
+
+### Administrators
+
+None.
+
+### Given a profile (no first-version profile, imported as user)
+
+- (no email) (a0000000-0000-4000-8000-00000000000a)
+
+### Skipped
+
+None.
+
+### Auth columns the target does not have (dropped)
+
+- \`auth.users.legacy_only\`
+
+MFA factors not migrated (users sign in again): 2.
+
+## Builds
+
+### Skipped
+
+- "No owner" (orphan-build): no owner
+
+### Guitar type not set (choose it in v2)
+
+None.
+
+### Model name, width and length dropped
+
+- "Untitled build": model "OM", width 380, length 495
+
+### Missing photo files
+
+- build e0000000-0000-4000-8000-00000000000e, step FabricateCLBridge: \`e0000000-0000-4000-8000-00000000000e/x/gone.jpg\`
+
+### Other notes
+
+- "Untitled build" (e0000000-0000-4000-8000-00000000000e): blank name, imported as "Untitled build"
+- "Untitled build" (e0000000-0000-4000-8000-00000000000e): a step without a key was left out
+- "Untitled build" (e0000000-0000-4000-8000-00000000000e): measurement m1 of step FabricateCLBridge skipped: no peak frequency
+- "Untitled build" (e0000000-0000-4000-8000-00000000000e): spectrum of measurement m2 (step FabricateCLBridge) reduced from 1366 to 683 points
+- "Untitled build" (e0000000-0000-4000-8000-00000000000e): measurement (no id) of step FabricateCLBridge skipped: no identifier
+- "Untitled build" (e0000000-0000-4000-8000-00000000000e): step FabricateCLBridge appears twice; the first is kept
+- "Untitled build" (e0000000-0000-4000-8000-00000000000e): a photo of step FabricateCLBridge has no file path
+
+## Wood panels
+
+### Values corrected by v2 (more than 0.1%)
+
+None.
+
+### Default panels corrected by v2
+
+| Panel | E_C (GPa) | Target thickness (mm) | Estimated mass (g) |
+| --- | --- | --- | --- |
+| Ref \\| A B | 0.280 → 0.567 | 2.90 → 0.96 | — → 31.4 |
+
+### Skipped
+
+- "Sitka" (p2): input sample_mass is not a positive number
+
+### Other notes
+
+- "Untitled panel" (p1): blank name, imported as "Untitled panel"
+- "Untitled panel" (p1): unused build link dropped
+- "Untitled panel" (p1): longitudinal spectrum reduced from 2048 to 1024 points
+- "Untitled panel" (p1): crossGrain spectrum left out: lists of different lengths
+- "Untitled panel" (p1): spectrum under unknown key "freqTwist" ignored
+
+## First-version records not imported by this change
+
+| Table | Rows |
+| --- | ---: |
+| public.fft_results | 35 |
+| public.posted_steps | table missing |
+
+## Failures
+
+- build e0000000-0000-4000-8000-00000000000e ("Untitled build"): Upload failed (500)
+- panels p1: boom
+
+## Post-apply check
+
+| Record | In v2 |
+| --- | ---: |
+| accounts | 2 |
+| builds | 0 |
+"
+`;
+
+exports[`reportMarkdown > adds the post-apply check after applying 1`] = `
+"# Legacy import report: apply
+
+- Started: 2026-11-06T18:45:07.123Z
+- First-version project: legacyref
+- Target project: targetref
+- Mode: apply (records were written)
+
+## Counts
+
+| Kind | Imported | Of which updates | Skipped |
+| --- | ---: | ---: | ---: |
+| Accounts | 1 | 0 | 1 |
+| Builds | 2 | 0 | 1 |
+| Wood panels | 1 | 0 | 1 |
+| Default panels | 1 | 0 | 0 |
+
+Step photos: 3 to copy, 2 copied, 1 missing. Photo files no build references (not copied): 0.
+
+## Accounts
+
+### Administrators
+
+- owner@example.com (b0000000-0000-4000-8000-00000000000b)
+
+### Given a profile (no first-version profile, imported as user)
+
+None.
+
+### Skipped
+
+- taken@example.com (c0000000-0000-4000-8000-00000000000c): email already used by another account; skipped with it: build "Build ee" (e0000000-0000-4000-8000-0000000000ee)
+
+### Auth columns the target does not have (dropped)
+
+None.
+
+MFA factors not migrated (users sign in again): 0.
+
+## Builds
+
+### Skipped
+
+- "Build ee" (e0000000-0000-4000-8000-0000000000ee): email already used by another account
+
+### Guitar type not set (choose it in v2)
+
+- "Build 0e" (e0000000-0000-4000-8000-00000000000e)
+- "Build e2" (e0000000-0000-4000-8000-0000000000e2)
+
+### Model name, width and length dropped
+
+None.
+
+### Missing photo files
+
+- build e0000000-0000-4000-8000-00000000000e, step TrussRod: \`e0000000-0000-4000-8000-00000000000e/TrussRod/2_gone.jpg\`
+
+### Other notes
+
+None.
+
+## Wood panels
+
+### Values corrected by v2 (more than 0.1%)
+
+| Panel | E_C (GPa) | Target thickness (mm) | Estimated mass (g) |
+| --- | --- | --- | --- |
+| Sitka | 0.280 → 0.570 | 2.90 → 0.96 | 150.0 → 31.4 |
+
+### Default panels corrected by v2
+
+| Panel | E_C (GPa) | Target thickness (mm) | Estimated mass (g) |
+| --- | --- | --- | --- |
+| Sitka | 0.280 → 0.570 | 2.90 → 0.96 | 150.0 → 31.4 |
+
+### Skipped
+
+- "Sitka" (p2): no owner
+
+### Other notes
+
+None.
+
+## First-version records not imported by this change
+
+| Table | Rows |
+| --- | ---: |
+
+## Failures
+
+None.
+
+## Post-apply check
+
+| Record | In v2 |
+| --- | ---: |
+| accounts | 1 |
+| admins | 1 |
+| users | 0 |
+| builds | 1 |
+| panels | 1 |
+| default_panels | 1 |
+| photos | 1 |
+"
+`;
+
+exports[`reportMarkdown > lists everything the owner reviews in a dry run 1`] = `
+"# Legacy import report: dry run
+
+- Started: 2026-11-06T18:45:07.123Z
+- First-version project: legacyref
+- Target project: targetref
+- Mode: dry run (nothing was written)
+
+## Counts
+
+| Kind | Imported | Of which updates | Skipped |
+| --- | ---: | ---: | ---: |
+| Accounts | 1 | 0 | 1 |
+| Builds | 2 | 0 | 1 |
+| Wood panels | 1 | 0 | 1 |
+| Default panels | 1 | 0 | 0 |
+
+Step photos: 3 to copy, 0 copied, 1 missing. Photo files no build references (not copied): 0.
+
+## Accounts
+
+### Administrators
+
+- owner@example.com (b0000000-0000-4000-8000-00000000000b)
+
+### Given a profile (no first-version profile, imported as user)
+
+None.
+
+### Skipped
+
+- taken@example.com (c0000000-0000-4000-8000-00000000000c): email already used by another account; skipped with it: build "Build ee" (e0000000-0000-4000-8000-0000000000ee)
+
+### Auth columns the target does not have (dropped)
+
+None.
+
+MFA factors not migrated (users sign in again): 0.
+
+## Builds
+
+### Skipped
+
+- "Build ee" (e0000000-0000-4000-8000-0000000000ee): email already used by another account
+
+### Guitar type not set (choose it in v2)
+
+- "Build 0e" (e0000000-0000-4000-8000-00000000000e)
+- "Build e2" (e0000000-0000-4000-8000-0000000000e2)
+
+### Model name, width and length dropped
+
+None.
+
+### Missing photo files
+
+- build e0000000-0000-4000-8000-00000000000e, step TrussRod: \`e0000000-0000-4000-8000-00000000000e/TrussRod/2_gone.jpg\`
+
+### Other notes
+
+None.
+
+## Wood panels
+
+### Values corrected by v2 (more than 0.1%)
+
+| Panel | E_C (GPa) | Target thickness (mm) | Estimated mass (g) |
+| --- | --- | --- | --- |
+| Sitka | 0.280 → 0.570 | 2.90 → 0.96 | 150.0 → 31.4 |
+
+### Default panels corrected by v2
+
+| Panel | E_C (GPa) | Target thickness (mm) | Estimated mass (g) |
+| --- | --- | --- | --- |
+| Sitka | 0.280 → 0.570 | 2.90 → 0.96 | 150.0 → 31.4 |
+
+### Skipped
+
+- "Sitka" (p2): no owner
+
+### Other notes
+
+None.
+
+## First-version records not imported by this change
+
+| Table | Rows |
+| --- | ---: |
+
+## Failures
+
+None.
+"
+`;
+
+exports[`terminalSummary > shows counts and the report's location, and no email address 1`] = `
+"Mode: dry run (nothing written)
+Accounts: 1 to import (0 updates, 1 admins, 0 given a profile), 1 skipped
+Builds: 2 to import (0 updates, 2 without a guitar type), 1 skipped
+Wood panels: 1 to import (1 corrected), 1 skipped
+Default panels: 1 to import (1 corrected), 0 skipped
+Photos: 3 to copy, 0 copied, 1 missing, 0 orphaned
+Spectra: 0 reduced, 0 left out
+Failures: 0
+Report: reports/legacy-import/x.md
+JSON: reports/legacy-import/x.json"
+`;
