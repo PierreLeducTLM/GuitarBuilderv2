@@ -38,6 +38,12 @@
   --color-variant-soft: var(--gb-variant-soft);
   --color-blank-ink: var(--gb-blank-ink);
   --color-blank-soft: var(--gb-blank-soft);
+  --color-mode1: var(--gb-mode1);
+  --color-mode1-soft: var(--gb-mode1-soft);
+  --color-mode2: var(--gb-mode2);
+  --color-mode2-soft: var(--gb-mode2-soft);
+  --color-mode3: var(--gb-mode3);
+  --color-mode3-soft: var(--gb-mode3-soft);
   --color-focus: var(--gb-focus);
   --color-overlay: var(--gb-overlay);
 

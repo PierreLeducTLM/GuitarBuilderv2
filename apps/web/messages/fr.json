@@ -417,6 +417,7 @@
     "spectrum": {
       "caption": "Spectre de fréquences",
       "hint": "Cliquez sur un pic pour le sélectionner",
+      "instrumentHint": "Cliquez sur un pic pour le sélectionner ; faites glisser l'étiquette d'un mode sur un autre pic pour la déplacer",
       "label": "Spectre de fréquences. Pics : {peaks}",
       "noPeaks": "Spectre de fréquences, aucun pic détecté",
       "frequency": "{frequency} Hz",
@@ -440,30 +441,12 @@
       "noneUsable": "Aucune frappe n'est exploitable"
     },
     "detected": {
-      "heading": "Fréquence détectée",
-      "level": "Niveau du pic",
-      "note": "Note",
-      "spectralQ": "Q spectral",
-      "decayQ": "Q de décroissance",
-      "current": "Valeur actuelle",
       "none": "—",
-      "hz": "{frequency} Hz",
-      "db": "{level} dB",
       "pending": "Mesure en cours…"
     },
     "peaks": {
-      "heading": "Pics détectés",
       "item": "{frequency} Hz",
       "highest": "{frequency} Hz (le plus fort)"
-    },
-    "rolesPanel": {
-      "heading": "Résonances de la caisse",
-      "notIdentified": "Non identifiée",
-      "setByYou": "défini par vous",
-      "move": "Déplacer {role}",
-      "clear": "Effacer {role}",
-      "moving": "Choisissez un pic pour {role}",
-      "value": "{frequency} Hz"
     },
     "qReasons": {
       "spectral": "Le pic est trop large ou se confond avec un voisin",
@@ -499,8 +482,11 @@
       "longitudinal": "Longitudinal (f_L)",
       "crossGrain": "Travers (f_C)",
       "diagonal": "Diagonale (f_LC)",
-      "value": "{take} {frequency} Hz",
-      "empty": "{take} —"
+      "name": {
+        "longitudinal": "Longitudinal",
+        "crossGrain": "Travers",
+        "diagonal": "Diagonale"
+      }
     },
     "guidance": {
       "longitudinal": "Tenez la plaque délicatement à 22,4 % de sa longueur depuis une extrémité, près d'un grand côté. Frappez le milieu de la plaque.",
@@ -552,6 +538,29 @@
       "excluded": "exclu (contact de la frappe et bords du filtre)",
       "fitEnds": "fin de l'ajustement",
       "noise": "bruit de fond"
+    },
+    "bodyModes": {
+      "heading": "Modes de la caisse",
+      "number": {
+        "air": "T(1,1)₁",
+        "top": "T(1,1)₂",
+        "back": "T(1,1)₃"
+      },
+      "spectralQ": "Q {value}",
+      "decayQ": "amort. {value}",
+      "pending": "…",
+      "notIdentified": "Non identifié",
+      "setByYou": "défini par vous",
+      "move": "Déplacer {role}",
+      "assign": "Attribuer {role}",
+      "clear": "Effacer {role}",
+      "moving": "Choisissez un pic pour {role}"
+    },
+    "main": {
+      "heading": "Fréquence principale",
+      "sameAs": "Même pic que {role}",
+      "detail": "{level} dB · {note} · {q}",
+      "current": "Valeur actuelle {frequency} Hz"
     }
   },
   "wood": {

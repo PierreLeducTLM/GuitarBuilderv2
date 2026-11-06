@@ -28,18 +28,15 @@ test("records taps on a build step, labels the body, moves Top and saves the ana
   await dialog.getByRole("button", { name: en.tapTone.capture.stop }).click();
   await waitForSpectrum(page);
 
-  const roles = dialog.locator("section", {
-    has: page.getByRole("heading", { name: en.tapTone.rolesPanel.heading }),
-  });
-  await expect(roles.getByRole("listitem").nth(0)).toContainText(/9[78]\.\d Hz/);
-  await expect(roles.getByRole("listitem").nth(1)).toContainText(/19[67]\.\d Hz/);
-  await expect(roles.getByRole("listitem").nth(2)).toContainText(/24[78]\.\d Hz/);
+  const modes = dialog.getByRole("region", { name: en.tapTone.bodyModes.heading });
+  const tile = (role: "air" | "top" | "back") =>
+    modes.getByRole("button", { name: new RegExp(`^${en.tapTone.roles[role]}`) });
+  await expect(tile("air")).toContainText(/9[78]\.\d/);
+  await expect(tile("top")).toContainText(/19[67]\.\d/);
+  await expect(tile("back")).toContainText(/24[78]\.\d/);
 
-  const topLabel = dialog.locator("[data-role=top]");
-  const backPeak = dialog
-    .locator("[data-peak]", { hasText: /^24[78]\.\d Hz$/ })
-    .locator("circle")
-    .last();
+  const topLabel = dialog.locator("[data-mark=top] rect");
+  const backPeak = dialog.locator("[data-mark=back] circle").last();
   const from = await topLabel.boundingBox();
   const to = await backPeak.boundingBox();
   if (!from || !to) throw new Error("expected the Top label and the Back peak on screen");
@@ -47,7 +44,7 @@ test("records taps on a build step, labels the body, moves Top and saves the ana
   await page.mouse.down();
   await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 8 });
   await page.mouse.up();
-  await expect(roles.getByRole("listitem").nth(1)).toContainText(en.tapTone.rolesPanel.setByYou);
+  await expect(tile("top")).toContainText(en.tapTone.bodyModes.setByYou);
 
   await dialog.getByRole("button", { name: en.tapTone.actions.confirm }).click();
   const prompt = page.getByRole("dialog", { name: en.sequence.measurement.descriptionLabel });

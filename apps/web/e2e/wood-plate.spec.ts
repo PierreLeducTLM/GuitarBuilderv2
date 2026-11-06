@@ -13,19 +13,22 @@ const field = (page: Page, key: keyof typeof en.wood.fields) =>
 const frame = (page: Page, key: keyof typeof en.wood.fields) =>
   inputs(page).locator(`[data-field=${key}]`);
 const qualityLine = /^Spectral Q \d+ · Decay Q (\d+|—)$/;
-const takeButton = (page: Page, take: keyof typeof en.tapTone.takes) =>
-  reader(page).getByRole("button", {
-    name: new RegExp(`^${en.tapTone.takes[take].replace(/[()]/g, "\\$&")}`),
-  });
+type Take = keyof typeof en.tapTone.takes.name;
+const takeButton = (page: Page, take: Take) =>
+  reader(page)
+    .getByRole("group", { name: en.tapTone.takes.label })
+    .getByRole("button", { name: new RegExp(`^${en.tapTone.takes.name[take]}`) });
+const currentValue = (page: Page, frequency: string) =>
+  reader(page).getByText(en.tapTone.main.current.replace("{frequency}", frequency));
 
-async function measure(page: Page, takes: ("longitudinal" | "crossGrain" | "diagonal")[]) {
+async function measure(page: Page, takes: Take[]) {
   await inputs(page).getByRole("button", { name: en.wood.plate.measure }).click();
   await expect(reader(page)).toContainText(en.tapTone.plateLabel);
   for (const take of takes) {
     await takeButton(page, take).click();
     await uploadFixture(page, "taps.wav");
     await waitForSpectrum(page);
-    await expect(takeButton(page, take)).toHaveText(/190\.0 Hz$/);
+    await expect(takeButton(page, take)).toContainText("190.0");
   }
 }
 
@@ -39,9 +42,7 @@ test.beforeEach(async () => {
 test("writes a measured cross-grain frequency, recalculates and shows its Q", async ({ page }) => {
   await signIn(page, LUTHIER, WOOD);
   await measure(page, ["crossGrain"]);
-  await expect(
-    reader(page).getByRole("region", { name: en.tapTone.detected.current }),
-  ).toContainText("90.00 Hz");
+  await expect(currentValue(page, "90.00")).toBeVisible();
   await confirm(page);
   await expect(reader(page)).toHaveCount(0);
   await expect(field(page, "freqCrossGrain")).toHaveValue("190.0");
@@ -71,9 +72,7 @@ test("keeps every value when the measurement is cancelled, and offers no current
   await signIn(page, LUTHIER, WOOD);
   await field(page, "freqLongitudinal").fill("");
   await measure(page, ["longitudinal"]);
-  await expect(reader(page).getByRole("region", { name: en.tapTone.detected.current })).toHaveCount(
-    0,
-  );
+  await expect(reader(page).getByText(/^Current value/)).toHaveCount(0);
   await reader(page).getByRole("button", { name: en.tapTone.actions.cancel }).click();
   await expect(reader(page)).toHaveCount(0);
   await expect(field(page, "freqLongitudinal")).toHaveValue("");
@@ -103,7 +102,7 @@ test("saves the measured spectrum and reopens it on the loaded panel", async ({ 
   await inputs(page).getByRole("button", { name: en.wood.plate.measure }).click();
   await takeButton(page, "crossGrain").click();
   await waitForSpectrum(page);
-  await expect(takeButton(page, "crossGrain")).toHaveText(/190\.0 Hz$/);
+  await expect(takeButton(page, "crossGrain")).toContainText("190.0");
 
   await takeButton(page, "diagonal").click();
   await expect(reader(page).getByRole("button", { name: en.tapTone.capture.start })).toBeVisible();

@@ -417,6 +417,7 @@
     "spectrum": {
       "caption": "Frequency Spectrum",
       "hint": "Click on a peak to select",
+      "instrumentHint": "Click on a peak to select it; drag a mode's label onto another peak to move it",
       "label": "Frequency spectrum. Peaks: {peaks}",
       "noPeaks": "Frequency spectrum, no peak detected",
       "frequency": "{frequency} Hz",
@@ -440,30 +441,12 @@
       "noneUsable": "None of the taps can be used"
     },
     "detected": {
-      "heading": "Detected Frequency",
-      "level": "Peak Level",
-      "note": "Note",
-      "spectralQ": "Spectral Q",
-      "decayQ": "Decay Q",
-      "current": "Current Value",
       "none": "—",
-      "hz": "{frequency} Hz",
-      "db": "{level} dB",
       "pending": "Measuring…"
     },
     "peaks": {
-      "heading": "Detected Peaks",
       "item": "{frequency} Hz",
       "highest": "{frequency} Hz (highest)"
-    },
-    "rolesPanel": {
-      "heading": "Body resonances",
-      "notIdentified": "Not identified",
-      "setByYou": "set by you",
-      "move": "Move {role}",
-      "clear": "Clear {role}",
-      "moving": "Choose a peak for {role}",
-      "value": "{frequency} Hz"
     },
     "qReasons": {
       "spectral": "The peak is too broad or merges with a neighbour",
@@ -499,8 +482,11 @@
       "longitudinal": "Longitudinal (f_L)",
       "crossGrain": "Cross-grain (f_C)",
       "diagonal": "Diagonal (f_LC)",
-      "value": "{take} {frequency} Hz",
-      "empty": "{take} —"
+      "name": {
+        "longitudinal": "Longitudinal",
+        "crossGrain": "Cross-grain",
+        "diagonal": "Diagonal"
+      }
     },
     "guidance": {
       "longitudinal": "Hold the plate lightly at 22.4% of its length from one end, near a long edge. Tap the middle of the plate.",
@@ -552,6 +538,29 @@
       "excluded": "excluded (tap contact and filter edges)",
       "fitEnds": "fit ends here",
       "noise": "noise floor"
+    },
+    "bodyModes": {
+      "heading": "Body modes",
+      "number": {
+        "air": "T(1,1)₁",
+        "top": "T(1,1)₂",
+        "back": "T(1,1)₃"
+      },
+      "spectralQ": "Q {value}",
+      "decayQ": "decay {value}",
+      "pending": "…",
+      "notIdentified": "Not identified",
+      "setByYou": "set by you",
+      "move": "Move {role}",
+      "assign": "Assign {role}",
+      "clear": "Clear {role}",
+      "moving": "Choose a peak for {role}"
+    },
+    "main": {
+      "heading": "Main frequency",
+      "sameAs": "Same peak as {role}",
+      "detail": "{level} dB · {note} · {q}",
+      "current": "Current value {frequency} Hz"
     }
   },
   "wood": {

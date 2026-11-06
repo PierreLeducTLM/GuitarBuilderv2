@@ -5,6 +5,7 @@ import {
   levelY,
   nearestPeakIndex,
   snapTargetIndex,
+  spreadLabels,
   tracePath,
   xOfFrequency,
 } from "./graph";
@@ -66,5 +67,58 @@ describe("peak picking on the graph", () => {
     expect(nearestPeakIndex(peaks, 600)).toBe(1);
     expect(nearestPeakIndex(peaksAt(720.4), 600)).toBeNull();
     expect(snapTargetIndex(peaksAt(610), 600)).toBeNull();
+  });
+});
+
+describe("spreadLabels", () => {
+  const spread = (centers: readonly number[], bounds = { min: 0, max: 640 }) =>
+    spreadLabels({ centers, width: 50, gap: 6, ...bounds });
+
+  it("keeps labels that do not touch centred on their peaks", () => {
+    expect(spread([100, 300])).toEqual([100, 300]);
+    expect(spread([100, 156])).toEqual([100, 156]);
+    expect(spread([100, 160])).toEqual([100, 160]);
+  });
+
+  it("centres touching labels on the mean of their peaks, a gap apart", () => {
+    const [left, right] = spread([100, 155.9]);
+    expect(left).toBeCloseTo(127.95 - 28, 6);
+    expect(right).toBeCloseTo(127.95 + 28, 6);
+    expect(spread([100, 120])).toEqual([82, 138]);
+  });
+
+  it("returns the labels in the order they were given", () => {
+    expect(spread([300, 100])).toEqual([300, 100]);
+    expect(spread([120, 100])).toEqual([138, 82]);
+  });
+
+  it("spreads three close body modes on a phone inside the plot", () => {
+    const placed = spreadLabels({
+      centers: [71.2, 118.0, 137.1],
+      width: 78,
+      gap: 6,
+      min: 30,
+      max: 350,
+    });
+    expect(placed).toEqual([69, 153, 237]);
+  });
+
+  it("shifts labels inside either edge of the plot", () => {
+    expect(spread([630])).toEqual([615]);
+    expect(spread([5])).toEqual([25]);
+    expect(spread([630, 635])).toEqual([559, 615]);
+    expect(spread([2, 8])).toEqual([25, 81]);
+  });
+
+  it("merges again when a merged group reaches its neighbour", () => {
+    const placed = spread([100, 140, 200]);
+    const mean = (100 + 140 + 200) / 3;
+    expect(placed[0]).toBeCloseTo(mean - 56, 6);
+    expect(placed[1]).toBeCloseTo(mean, 6);
+    expect(placed[2]).toBeCloseTo(mean + 56, 6);
+  });
+
+  it("places nothing without labels", () => {
+    expect(spread([])).toEqual([]);
   });
 });

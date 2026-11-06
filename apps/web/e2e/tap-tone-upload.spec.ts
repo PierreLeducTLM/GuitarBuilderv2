@@ -23,7 +23,7 @@ test("analyses an uploaded file: three taps, the 190 Hz peak and its note", asyn
   const dialog = reader(page);
   await expect(dialog.getByText("3 of 3 taps used")).toBeVisible();
   await expect(dialog.getByRole("button", { name: /^190\.0 Hz \(highest\)$/ })).toBeVisible();
-  await expect(dialog.getByRole("region", { name: en.tapTone.detected.heading })).toContainText(
+  await expect(dialog.getByRole("region", { name: en.tapTone.main.heading })).toContainText(
     "190.0",
   );
 });
@@ -58,9 +58,7 @@ test("drops the 134.8 Hz phone artifact on a phone @phone", async ({ page }) => 
   await uploadFixture(page, "mobile.wav");
   await waitForSpectrum(page);
   const dialog = reader(page);
-  await expect(dialog.getByRole("region", { name: en.tapTone.detected.heading })).toContainText(
-    "182.",
-  );
+  await expect(dialog.getByRole("region", { name: en.tapTone.main.heading })).toContainText("182.");
   await expect(dialog.getByRole("button", { name: /^134\.\d Hz/ })).toHaveCount(0);
 });
 
