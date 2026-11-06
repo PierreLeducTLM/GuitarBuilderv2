@@ -90,7 +90,7 @@
 These need `SUPABASE_ACCESS_TOKEN`, `LEGACY_SUPABASE_PROJECT_REF` and `SUPABASE_PROJECT_REF` in the environment, and network access to both `<ref>.supabase.co` hosts, so they run in a new session.
 
 - [x] 9.1 Run the dry run against the real projects and review the report with the owner (counts, admins, conflicts, untyped builds, missing photos, changed panel values, reduced or refused spectra). Verify the report is produced and the v2 data is unchanged
-- [ ] 9.2 Run with `--apply` once the owner approves. Verify the report's post-apply counts match, and that the owner signs in to v2 with their first-version email and password and sees their builds, photos and wood panels
+- [x] 9.2 Run with `--apply` once the owner approves. Verify the report's post-apply counts match, and that the owner signs in to v2 with their first-version email and password and sees their builds, photos and wood panels
 
 ## Workflow follow-up
 
