@@ -131,6 +131,52 @@ Sign-up, email verification and session lifetimes are Supabase Auth settings: `s
 - **Minimum password length**: 6. **JWT expiry**: 3600 seconds. **Refresh token rotation**: on.
 - **Confirm signup email template**: the content of `supabase/templates/confirmation.html`, whose link works on any device.
 
+## Moving data from the first version
+
+`pnpm legacy:import` (`packages/legacy-import`, `legacy-data-migration`) copies the first version's data into this project. Run with no options, it does a dry run that writes only a report; with `--apply`, it imports. Running it again updates what it imported earlier instead of duplicating it. It never writes to the first-version project.
+
+**What it imports:**
+
+- **Accounts:** same identifiers, emails, password hashes and confirmation state, so everyone signs in with their usual email and password. Sessions and MFA factors are not copied, so users sign in again. Roles are kept, and an account without a first-version profile becomes a user. An account whose email already belongs to a different account here is skipped, together with its builds and panels.
+- **Builds:** same identifiers and share links (a token is kept only when sharing was on), step completion, notes, photos and measurements. Each build gets a BOBO neck and a guitar type inferred from its steps; the report lists the builds whose type couldn't be inferred. Model name, width and length are dropped, and the report lists them.
+- **Step photos:** copied into the `step-photos` bucket. A photo whose file is missing is reported and left out.
+- **Wood panels and default panels:** the name and the ten inputs. The database recomputes the results with the corrected cross-grain formula, and the report lists every panel whose E_C, target thickness or estimated mass changed. Saved spectra are attached to their frequencies. A spectrum over 1024 points is reduced by keeping the loudest point of each run, so peaks don't move, and any other invalid spectrum is left out. Panels without an owner are skipped.
+- **Not yet:** saved FFT results, the analysis prompt template, reference documents and conversations. The report counts their rows.
+
+**Settings** (the deploy workflow uses the same token name):
+
+| Variable | Value |
+| --- | --- |
+| `SUPABASE_ACCESS_TOKEN` | A personal access token (Supabase dashboard → Account → Access Tokens) with access to both projects. Secret. |
+| `LEGACY_SUPABASE_PROJECT_REF` | The first-version project's ref, the `<ref>` in `https://<ref>.supabase.co`. |
+| `SUPABASE_PROJECT_REF` | This project's ref. |
+
+The command talks to both projects over HTTPS only: `api.supabase.com` for SQL and the API key, and both `<ref>.supabase.co` hosts for photo files. In a sandboxed environment, allow those three hosts in its network settings. The target project needs every migration in `supabase/migrations`, including `20261106120000_keep_updated_at_for_import.sql`.
+
+**Running it:**
+
+1. `pnpm legacy:import` runs a dry run. Review `reports/legacy-import/<time>-dry-run.md`: the counts, the administrators, the skipped accounts, the builds without a guitar type, the missing photos and the corrected panels.
+2. `pnpm legacy:import --apply` runs the import. Its report ends with a post-apply check of what the project now holds. The command exits with 1 if any record failed; run it again to retry them.
+
+The reports (Markdown, plus JSON for scripts) contain email addresses. `reports/` is git-ignored; keep them out of commits and chats. The terminal shows counts only.
+
+**Rolling back:** the import only adds or updates records under their first-version identifiers, and the JSON report lists every one of them. Deleting the imported accounts removes their profiles, builds and panels with them. In the SQL editor:
+
+```sql
+delete from auth.users where id in ('<account id>', ...);
+delete from public.default_wood_panels where id in ('<default panel id>', ...);
+```
+
+Then delete the photo folders `<build id>/` from the `step-photos` bucket (Storage in the dashboard).
+
+**Rehearsal.** `scripts/legacy-import/rehearse.sh` runs the whole import against throwaway local stacks. It starts a first-version stack from that repository's migrations and a fresh v2 stack, seeds accounts, builds, photos and panels, then runs a dry run, an apply and a second apply. It checks sign-in with the first-version passwords, roles, steps, photos, spectra, corrected panels, the skipped email conflict, the absence of duplicates and the untouched source. It finishes by opening the imported build and panel in the app with Playwright. It needs Docker, the Supabase CLI, `psql`, `jq` and the first-version checkout:
+
+```sh
+LEGACY_REPO_DIR=~/path/to/GuitarBuilder bash scripts/legacy-import/rehearse.sh
+```
+
+The same command runs between any two local stacks with `LEGACY_DATABASE_URL`, `LEGACY_SUPABASE_URL`, `TARGET_DATABASE_URL`, `TARGET_SUPABASE_URL` and `TARGET_SERVICE_KEY` set instead of the three settings above.
+
 ## Deployment
 
 - **Web app:** a Vercel project imported from this repository with **Root Directory** `apps/web` and the environment variables `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for Production and Preview (Supabase's Vercel integration creates both). Every pull request gets a preview deployment.

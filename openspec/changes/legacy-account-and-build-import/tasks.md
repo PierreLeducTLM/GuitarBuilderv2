@@ -79,7 +79,7 @@
 
 ## 7. Documentation
 
-- [ ] 7.1 Add a "Moving data from the first version" section to the root `README.md`: what is imported, the secret and settings to add to the environment, the two project hosts to allow in the network settings, dry run then `--apply`, where the report goes and that it holds emails, and how to roll back. Verify each documented command runs as written in local mode
+- [x] 7.1 Add a "Moving data from the first version" section to the root `README.md`: what is imported, the secret and settings to add to the environment, the two project hosts to allow in the network settings, dry run then `--apply`, where the report goes and that it holds emails, and how to roll back. Verify each documented command runs as written in local mode
 
 ## 8. Integration check
 
