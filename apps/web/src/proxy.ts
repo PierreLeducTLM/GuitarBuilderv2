@@ -1,19 +1,22 @@
 import type { NextRequest } from "next/server";
 import { classifyPath, DEFAULT_ROUTE, safeNextPath, signInUrl } from "@/lib/routes";
+import { sharedAccount } from "@/lib/sharedAccount";
 import { redirectWithSession, updateSession } from "@/lib/supabase/proxy";
 
 /**
  * The access gate (app-shell: Authenticated Access Gate, Public Build Story Route,
  * Default and Unknown Route Redirects). Refreshes the session on every request, then:
  * story pages are public; everything else needs a session; "/" and unknown paths go
- * to /builds. The admin-only rule needs the role and is applied by the admin layout.
+ * to /builds. With a shared account configured, a visitor without a session is signed
+ * in to it instead of being shown the sign-in screen. The admin-only rule needs the
+ * role and is applied by the admin layout.
  */
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const kind = classifyPath(pathname);
-  const { response, userId } = await updateSession(request);
+  if (kind === "story" || kind === "authCallback") return (await updateSession(request)).response;
 
-  if (kind === "story" || kind === "authCallback") return response;
+  const { response, userId } = await updateSession(request, sharedAccount());
 
   if (kind === "signIn") {
     if (!userId) return response;
