@@ -147,12 +147,12 @@ export type BodyModeView = {
 };
 
 const MODE_COLOUR: Record<RoleName, { ink: string; dot: string; chosen: string }> = {
-  air: { ink: "text-mode-air", dot: "bg-mode-air", chosen: "border-mode-air bg-mode-air-soft" },
-  top: { ink: "text-mode-top", dot: "bg-mode-top", chosen: "border-mode-top bg-mode-top-soft" },
+  air: { ink: "text-mode1", dot: "bg-mode1", chosen: "border-mode1 bg-mode1-soft" },
+  top: { ink: "text-mode2", dot: "bg-mode2", chosen: "border-mode2 bg-mode2-soft" },
   back: {
-    ink: "text-mode-back",
-    dot: "bg-mode-back",
-    chosen: "border-mode-back bg-mode-back-soft",
+    ink: "text-mode3",
+    dot: "bg-mode3",
+    chosen: "border-mode3 bg-mode3-soft",
   },
 };
 

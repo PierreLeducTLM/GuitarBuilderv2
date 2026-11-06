@@ -42,9 +42,9 @@ export interface TapToneSpectrumProps {
 
 const ROLE_ORDER: readonly RoleName[] = ["air", "top", "back"];
 const ROLE_COLOUR: Record<RoleName, string> = {
-  air: "text-mode-air",
-  top: "text-mode-top",
-  back: "text-mode-back",
+  air: "text-mode1",
+  top: "text-mode2",
+  back: "text-mode3",
 };
 const SAME_PEAK_HZ = 0.5;
 const DIMMED = 0.3;

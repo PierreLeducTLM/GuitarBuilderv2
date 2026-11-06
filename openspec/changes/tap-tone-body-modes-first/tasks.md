@@ -28,7 +28,7 @@ Every task is test-first: write the failing test named in the task, then the cod
 
 ## 6. Plate mode in the same design
 
-- [ ] 6.1 Rename the colour tokens to slots `mode1`, `mode2`, `mode3` (and `Soft`), keeping the values and contrast pairs. Verify `contrast.test.ts` and every tap-tone test still pass.
+- [x] 6.1 Rename the colour tokens to slots `mode1`, `mode2`, `mode3` (and `Soft`), keeping the values and contrast pairs. Verify `contrast.test.ts` and every tap-tone test still pass.
 - [ ] 6.2 Graph without a mode: `marks` with a colour slot, name and optional subscript, `onDragMark` only for Instrument; quiet markers in both modes; the band always present. Verify graph tests for the Plate chip ("fC 92.7", not draggable), quiet markers without chips, and the existing Instrument tests on `marks`.
 - [ ] 6.3 `PlateTakes` tiles (name, symbol, frequency or "—", note, pressed, disabled while recording) and `MainFrequency` for Plate (take heading, "Current value"); remove `DetectedFrequency` and `DetectedPeaks`. English and French.
 - [ ] 6.4 Dialog Plate layout: tiles above the guidance in every state, then the same results layout as Instrument. Verify the Plate dialog tests, update `e2e/wood-plate.spec.ts`, run `pnpm check`, the tap-tone and wood e2e specs, and `openspec validate --strict`.

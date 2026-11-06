@@ -125,10 +125,8 @@ describe("TapToneSpectrum", () => {
     });
     const air = svg.querySelector("[data-role=air]");
     expect(air?.textContent).toBe("Air 98.4");
-    expect(air?.getAttribute("class")).toContain("text-mode-air");
-    expect(svg.querySelector("[data-role=back]")?.getAttribute("class")).toContain(
-      "text-mode-back",
-    );
+    expect(air?.getAttribute("class")).toContain("text-mode1");
+    expect(svg.querySelector("[data-role=back]")?.getAttribute("class")).toContain("text-mode3");
     expect(svg.querySelector("[data-role=back]")?.getAttribute("data-x")).toBe(
       xOfFrequency(247.5).toFixed(1),
     );
