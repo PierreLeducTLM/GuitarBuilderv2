@@ -18,7 +18,7 @@
 
 ## 3. Transport
 
-- [ ] 3.1 Implement the SQL executors:
+- [x] 3.1 Implement the SQL executors:
   - Management API (`POST /v1/projects/<ref>/database/query`, bearer token, JSON rows, errors with status and message);
   - `psql` for local mode;
   - a read-only wrapper for the source that refuses anything but a single `select`;
