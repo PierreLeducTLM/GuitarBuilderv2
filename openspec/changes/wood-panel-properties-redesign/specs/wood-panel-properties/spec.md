@@ -18,3 +18,14 @@ The system SHALL offer, under "Frequency Measurements", three inputs in Hz with 
 #### Scenario: No note for an invalid value
 - **WHEN** the user clears the cross-grain frequency
 - **THEN** its tile shows no note label and the validation message
+
+### Requirement: Numeric Entry
+The system SHALL accept decimal values (increment 0.1) in every input, show each input's symbol and unit in its label, and treat an empty or non-numeric entry as missing (zero), displaying the field empty. Each input SHALL be shown as a tile with a short name, its symbol, the editable value and its unit; only the frequency tiles are coloured.
+
+#### Scenario: Clearing a field
+- **WHEN** the user deletes the content of the Sample Mass field
+- **THEN** the field is shown empty and is treated as missing for validation
+
+#### Scenario: Sample tiles
+- **WHEN** the user opens the calculator
+- **THEN** the sample measurements show four tiles, "Length" L 280 mm, "Width" W 70 mm, "Thickness" h 3.0 mm and "Mass" m 25 g
