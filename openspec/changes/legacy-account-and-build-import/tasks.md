@@ -56,7 +56,7 @@
 ## 5. Import run and report
 
 - [x] 5.1 Implement the source reads (users, identities, profiles, builds, wood panels and default panels as `to_jsonb`, storage object names, and row counts of the not-yet-imported and Instagram tables guarded by `to_regclass`) and the target reads (column lists, existing accounts by email, existing build ids, and the corrected E_C, target thickness and mass for each panel's inputs through the `public.wood_*` functions). Verify unit tests of the generated SQL against fixture responses
-- [ ] 5.2 Implement the writes:
+- [x] 5.2 Implement the writes:
   - per-account transaction: auth user, identities, role;
   - per-build: photo copies, then a transaction with `set local gb.keep_updated_at = 'on'` and the build upsert;
   - wood panels in batches of up to 50 under the same setting, then default panels in one transaction;
