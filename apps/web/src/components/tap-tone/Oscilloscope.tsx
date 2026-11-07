@@ -1,5 +1,6 @@
 "use client";
 
+import { CLIP_LEVEL } from "@gb/dsp";
 import { useEffect, useRef } from "react";
 
 const SAMPLES = 2048;
@@ -9,7 +10,13 @@ export type WaveformSource = {
 };
 
 /** tap-tone-capture: Recording Progress Display. The most recent 2048 input samples. */
-export function Oscilloscope({ analyser }: { analyser: WaveformSource | null }) {
+export function Oscilloscope({
+  analyser,
+  onClip,
+}: {
+  analyser: WaveformSource | null;
+  onClip?: () => void;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -21,6 +28,7 @@ export function Oscilloscope({ analyser }: { analyser: WaveformSource | null }) 
     let frame = 0;
     const draw = () => {
       analyser.getFloatTimeDomainData(samples);
+      if (samples.some((value) => Math.abs(value) >= CLIP_LEVEL)) onClip?.();
       const { width, height } = element;
       context.clearRect(0, 0, width, height);
       context.lineWidth = 1;
@@ -45,7 +53,7 @@ export function Oscilloscope({ analyser }: { analyser: WaveformSource | null }) 
     };
     frame = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(frame);
-  }, [analyser]);
+  }, [analyser, onClip]);
 
   return (
     // biome-ignore lint/a11y/noAriaHiddenOnFocusable: a decorative live trace; the canvas never takes focus

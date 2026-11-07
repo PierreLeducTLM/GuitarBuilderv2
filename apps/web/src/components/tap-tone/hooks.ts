@@ -5,6 +5,7 @@ import { ANALYSIS_SAMPLE_RATE, captureConstraints, pickRecordingType } from "./a
 
 export const MAX_RECORDING_SECONDS = 10;
 const TICK_MS = 100;
+const CLIP_HOLD_MS = 1000;
 const ANALYSER_SIZE = 2048;
 
 export type AudioInput = { readonly id: string; readonly label: string | null };
@@ -180,6 +181,21 @@ export function useRecorder(options: {
   useEffect(() => () => end(true), [end]);
 
   return { start, stop, cancel, recording, elapsed, analyser };
+}
+
+export function useClipFlag() {
+  const [clipping, setClipping] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const report = useCallback(() => {
+    setClipping(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setClipping(false), CLIP_HOLD_MS);
+  }, []);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  return { clipping, report };
 }
 
 export type Clip = {

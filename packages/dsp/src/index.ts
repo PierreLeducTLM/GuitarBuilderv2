@@ -16,6 +16,7 @@ export {
   identifyBodyResonances,
   reattachRole,
 } from "./tapTone/body.ts";
+export { CLIP_LEVEL } from "./tapTone/constants.ts";
 export type { DecayIsolation, DecayPeak, NeighbourPeak } from "./tapTone/decay/band.ts";
 export type { CombinedReason } from "./tapTone/decay/combine.ts";
 export type {

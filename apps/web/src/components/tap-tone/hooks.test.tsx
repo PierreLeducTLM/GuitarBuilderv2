@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { forgetChosenInput, useAudioInputs, usePlayback, useRecorder } from "./hooks";
+import { forgetChosenInput, useAudioInputs, useClipFlag, usePlayback, useRecorder } from "./hooks";
 
 type FakeDevice = { deviceId: string; kind: MediaDeviceKind; label: string };
 
@@ -328,6 +328,30 @@ describe("useRecorder measurements", () => {
     await act(() => unstated.hook.result.current.start());
     act(() => unstated.hook.result.current.stop());
     expect(unstated.onFinished.mock.calls[0]?.[0]).toMatchObject({ statedRate: 48000 });
+  });
+});
+
+describe("useClipFlag", () => {
+  it("raises the flag on a clip and lowers it 1 s after the last one", () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useClipFlag());
+    expect(result.current.clipping).toBe(false);
+    act(() => result.current.report());
+    expect(result.current.clipping).toBe(true);
+    act(() => vi.advanceTimersByTime(600));
+    act(() => result.current.report());
+    act(() => vi.advanceTimersByTime(999));
+    expect(result.current.clipping).toBe(true);
+    act(() => vi.advanceTimersByTime(1));
+    expect(result.current.clipping).toBe(false);
+  });
+
+  it("drops its timer on unmount", () => {
+    vi.useFakeTimers();
+    const { result, unmount } = renderHook(() => useClipFlag());
+    act(() => result.current.report());
+    unmount();
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 

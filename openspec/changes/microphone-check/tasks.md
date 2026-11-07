@@ -42,7 +42,9 @@ Production code is test-driven: write a failing test first, make it pass with th
 - [x] 2.2 Add the correction to `audio.ts`: relabel decoded samples at the true rate and resample them to 48,000 Hz with `resample` from `@gb/dsp` (design D2). Verify unit tests: a 440 Hz tone sampled at 44,100 Hz and labelled 48,000 Hz reads 440 ± 0.5 Hz after correction, and the result has 48,000 Hz and the expected length.
 
   Notes: `apps/web` has no Vitest browser mode, so the resampling moved from an `OfflineAudioContext` to a pure linear resampler in `@gb/dsp` (design D2 updated). Stryker: `resample` 13 killed and 1 timeout, `correctRate` 6 killed, no survivors.
-- [ ] 2.3 Add a live clip flag to `useRecorder`, from the oscilloscope's analyser read: on at |x| >= 0.999, off 1 s after the last such sample. Verify with a fake analyser and fake timers.
+- [x] 2.3 Add a live clip flag from the oscilloscope's analyser read: the oscilloscope reports a frame holding a sample with |x| >= 0.999, and `useClipFlag` holds the flag until 1 s after the last report. Verify with a fake analyser and fake timers.
+
+  Notes: the flag lives beside the oscilloscope's frame loop (`onClip` prop plus `useClipFlag` in `hooks.ts`), not inside `useRecorder`, which has no frame loop. `CLIP_LEVEL` is now exported from `@gb/dsp`, shared with tap rejection. Stryker: 18 killed. 3 equivalent survivors: two constant hook dependency arrays, and `>=` vs `>` at 0.999, which a `Float32Array` can't hold exactly.
 
 ## 3. Rate check in the Frequency Detector
 
