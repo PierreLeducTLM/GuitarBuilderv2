@@ -98,14 +98,18 @@ Production code is test-driven: write a failing test first, make it pass with th
   - The tone uses its own 3 s recorder, and `useRecorder.start()` now resolves whether recording began, so the tone never plays when the microphone is refused.
   - `useTestTone` plays the oscillator through a gain node to the default output and closes its context when replayed, closed or unmounted.
   - Stryker: 192 killed. Survivors are the 4.2 equivalents, plus the ≤ 10 cents boundary (a measured tone can't land exactly on 10.000 cents) and dependency arrays around stable callbacks.
-- [ ] 4.4 Make the dialog full-screen on narrow viewports and verify (component test at a narrow width) that it fills the viewport.
+- [x] 4.4 Make the dialog full-screen on narrow viewports and verify (Playwright phone test) that it fills the viewport.
+
+  Notes: the dialog uses the `xl` frame, which is the shared workbench size that fills a phone's screen. jsdom applies no media queries, so the check is a Playwright `@phone` test in `e2e/microphone-check.spec.ts` that compares the dialog's box with the viewport.
 
 ## 5. Entry points
 
 - [x] 5.1 Add the input check status ("Not checked" or "Checked <date>: <verdict>") and the "Check this input" link beside the Frequency Detector's selector. The link is disabled while recording, opens the Microphone Check over the dialog, and the status refreshes on close. Verify dialog tests: the status for unchecked and checked inputs, the take is unchanged after closing the check, and a choice made in the check shows in the selector.
 
   Notes: the link appears only in the idle state, so it is never available while recording. The status is read from storage on each render, and closing the check refreshes the detector's input list, so a choice made in the check carries back. `useCheckLabel` formats a remembered check for both dialogs. Stryker: 26 killed, no survivors.
-- [ ] 5.2 Add the "Microphone" group with "Check microphone" to the You page. Verify page tests on wide and narrow viewports that it opens the Microphone Check.
+- [x] 5.2 Add the "Microphone" group with "Check microphone" to the You page. Verify page tests on wide and narrow viewports that it opens the Microphone Check.
+
+  Notes: the `YouScreen` unit test opens and closes the check (English and French). The Playwright spec opens it from You on the desktop project and on the `@phone` project. Stryker: 7 killed, no survivors.
 
 ## 6. Text and styling
 

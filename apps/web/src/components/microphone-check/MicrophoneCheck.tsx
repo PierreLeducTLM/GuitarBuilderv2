@@ -139,7 +139,7 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
       }}
       title={t("title")}
       closeLabel={tDialog("close")}
-      size="lg"
+      size="xl"
       layer="top"
     >
       {inputs.inputs.length > 0 ? (
