@@ -69,7 +69,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
   - "justStarted" and "noDetails";
   - progress of 30 of 120 = 25% and 0 of 112 = 0%;
   - the leftover steel-string step on a classical build giving 12 of 120.
-- [ ] 6.2 Add `shouldNotify`, `promptDecision` and `updatesPreference` (`gb-story-updates:<token>`, safe when storage throws). Verify unit tests:
+- [x] 6.2 Add `shouldNotify`, `promptDecision` and `updatesPreference` (`gb-story-updates:<token>`, safe when storage throws). Verify unit tests:
   - notify only when the count goes up (4 to 5 yes, 5 to 5 no, 5 to 4 no);
   - the prompt only when supported, permission is "default" and nothing is stored;
   - a stored "on" restored only when permission is "granted".
