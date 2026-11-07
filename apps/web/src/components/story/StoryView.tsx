@@ -72,8 +72,8 @@ function StoryContent({ story, headerAction }: { story: Story; headerAction?: Re
           <StoryEmpty kind={empty} />
         ) : (
           <ol aria-label={t("timeline")} className="flex flex-col gap-4">
-            {timeline.map((step) => (
-              <li key={step.key}>
+            {timeline.map((step, index) => (
+              <li key={step.key} data-latest-step={index === timeline.length - 1 || undefined}>
                 <StoryStepCard step={step} />
               </li>
             ))}

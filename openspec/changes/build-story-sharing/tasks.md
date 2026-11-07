@@ -103,7 +103,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
   - "No thanks" stores off and the prompt does not return;
   - an unsupported browser gets the "does not support notifications" toast;
   - turning updates off is remembered on the next mount.
-- [ ] 8.3 Add `useStoryUpdates(token, enabled, onSignal)` on a private `story:<token>` channel, with 1 s coalescing, and wire it to refetch, `shouldNotify`, `showNotification("Update: <name>", { body, tag, data })` and the scroll to the last card on the click message. Verify component tests with an injected channel fake:
+- [x] 8.3 Add `useStoryUpdates(token, enabled, onSignal)` on a private `story:<token>` channel, with 1 s coalescing, and wire it to refetch, `shouldNotify`, `showNotification("Update: <name>", { body, tag, data })` and the scroll to the last card on the click message. Verify component tests with an injected channel fake:
   - no subscription while updates are off;
   - a signal refetches once even when 3 signals arrive within 1 s;
   - 4 to 5 steps shows one notification with the tag `story-<token>`;
