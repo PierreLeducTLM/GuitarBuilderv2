@@ -73,13 +73,25 @@ Production code is test-driven: write a failing test first, make it pass with th
 - [x] 4.1 Add remembered results in `localStorage` under `gb.microphoneChecks.v1`, validated by a schema on read, matched by device id with the label as fallback, and safe when storage throws (design D7). Verify unit tests: round trip, a corrupt value reads as empty, a throwing storage reads as empty and writes nothing, and a label match is used when the id differs.
 
   Notes: the project has no schema library and the proposal adds no dependency, so the stored value is checked by a hand-written parser that narrows from `unknown` (`src/lib/microphone-check/memory.ts`). Invalid entries are dropped, and a corrupt value is replaced by the next check. Stryker: 123 killed, 3 equivalent survivors. In each one, the surrounding `catch` already turns the mutated path into "nothing remembered" (`?? "[]"`, the array guard, and `null` vs `undefined` for blocked storage).
-- [ ] 4.2 Build the `MicrophoneCheck` dialog: input selector sharing the page-wide choice, the remembered result, "Start check" recording 5.0 s with the oscilloscope and the tap instruction, then the Clock Result and Level Result (spec wording). Verify component tests with a fake recorder:
+- [x] 4.2 Build the `MicrophoneCheck` dialog: input selector sharing the page-wide choice, the remembered result, "Start check" recording 5.0 s with the oscilloscope and the tap instruction, then the Clock Result and Level Result (spec wording). Verify component tests with a fake recorder:
   - no permission prompt on opening;
   - the Accurate, Corrected and Mismatch texts;
   - the four level verdicts;
   - "Check again" after a run;
   - the result is remembered;
   - the permission-denied message.
+
+  Notes:
+  - `judgeRecording` moved into `audio.ts` (refactor commit), so both dialogs judge and correct a recording the same way.
+  - `useRecorder` takes a `maxSeconds` limit, 5 s for the check.
+  - The spec's example dates now use the app's short date format ("Nov 7, 2026").
+  - A shared fake-recording helper lives in `src/test/recording-browser.ts`.
+  - Stryker: 127 killed. 7 equivalent survivors:
+    - `mixToMono` on a mono recording;
+    - `catch` returning `undefined` instead of `null`;
+    - the no-input guard and the `selected ?? ""` fallback, which only matter when no input is listed and the selector is hidden;
+    - a `trueRate: undefined` that JSON drops;
+    - `onOpenChange(true)`, which never fires while the dialog is open.
 - [ ] 4.3 Add "Play test tone": a 440 Hz sine at gain 0.5 for 3.0 s on the default output while the input records, then judged, corrected and measured (design D6). Verify component tests with a fake oscillator and recorder for Matches, "Corrected from 478.9 Hz", Off by N cents (with the clock-reference note when the clock is Accurate), Tone not heard, and the reference note always shown.
 - [ ] 4.4 Make the dialog full-screen on narrow viewports and verify (component test at a narrow width) that it fills the viewport.
 

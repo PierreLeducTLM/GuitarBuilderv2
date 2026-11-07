@@ -16,7 +16,7 @@ The unmerged change `tap-tone-capture-rate-check` (branch `PierreLeducTLM/Freque
   - *Clock*: a 5 s recording that gives the stated rate, the measured rate, the error in cents and a verdict (Accurate, Corrected or Mismatch). The user taps a part during it.
   - *Level*: from the same recording, the noise floor, the loudest tap's peak level and a verdict (Clipping, Low or Good).
   - *Tone* (optional): the device's speaker plays 440 Hz while the input records, and the frequency the app heard is shown. It confirms the clock result but never overrides it, because a speaker and microphone on the same clock can hide the error.
-- **Remembered results.** The browser remembers the last check of each input. The Frequency Detector shows it next to the selector ("Checked 7 Nov: Accurate"), or "Not checked". The remembered result is for display only: every recording is still judged on its own.
+- **Remembered results.** The browser remembers the last check of each input. The Frequency Detector shows it next to the selector ("Checked Nov 7, 2026: Accurate"), or "Not checked". The remembered result is for display only: every recording is still judged on its own.
 - **Clipping warnings** (carried over from the unmerged change): a live "Clipping" indicator beside the oscilloscope, and a results notice counting the clipped taps.
 - **Out of scope:** correcting measurements saved before this change; checking uploaded files; magnitude (frequency-response) calibration of the microphone; any database or saved-record change. Corrected audio is resampled to 48,000 Hz, so saved spectrum records keep their current shape.
 

@@ -46,9 +46,9 @@ The system SHALL show beside the input selector the selected input's remembered 
 - **THEN** it reads "Not checked" next to the "Check this input" link
 
 #### Scenario: Checked input
-- **GIVEN** "FastTrack Pro" was checked on 7 Nov 2026 with the verdict Accurate
+- **GIVEN** "FastTrack Pro" was checked on Nov 7, 2026 with the verdict Accurate
 - **WHEN** the user selects it
-- **THEN** it reads "Checked 7 Nov 2026: Accurate"
+- **THEN** it reads "Checked Nov 7, 2026: Accurate"
 
 #### Scenario: Status after a check
 - **WHEN** the user runs a check from "Check this input" and closes the Microphone Check

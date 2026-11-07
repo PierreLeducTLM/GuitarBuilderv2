@@ -150,9 +150,9 @@ The system SHALL, on "Play test tone", play a 440 Hz tone through the device's s
 The system SHALL remember in the browser the latest check result of each input: date, rate verdict, measured rate and level verdict. A new check replaces it. Results SHALL NOT be sent to the server, and the dialogs work normally when browser storage is unavailable. A remembered result is shown only; it never decides how a recording is judged.
 
 #### Scenario: Result shown on reopening
-- **GIVEN** "FastTrack Pro" was checked on 7 Nov 2026 with the verdict Corrected to 44,100 Hz
+- **GIVEN** "FastTrack Pro" was checked on Nov 7, 2026 with the verdict Corrected to 44,100 Hz
 - **WHEN** the Microphone Check opens with that input selected
-- **THEN** it shows "Last check: 7 Nov 2026. Corrected (44,100 Hz)"
+- **THEN** it shows "Last check: Nov 7, 2026. Corrected (44,100 Hz)"
 
 #### Scenario: Input identified across visits
 - **WHEN** the browser lists an input whose identifier or, failing that, name matches a remembered result

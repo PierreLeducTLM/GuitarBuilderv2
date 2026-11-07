@@ -567,6 +567,45 @@
       "current": "Current value {frequency} Hz"
     }
   },
+  "microphoneCheck": {
+    "title": "Microphone Check",
+    "input": "Input device",
+    "unnamedInput": "Microphone {number}",
+    "start": "Start check",
+    "again": "Check again",
+    "instruction": "Tap a part 2 or 3 times while the check records",
+    "remaining": "{seconds} s left",
+    "analyzing": "Analyzing...",
+    "notChecked": "Not checked",
+    "lastCheck": "Last check: {date}. {verdict}",
+    "verdict": {
+      "accurate": "Accurate",
+      "corrected": "Corrected ({rate, number} Hz)",
+      "mismatch": "Mismatch"
+    },
+    "clock": {
+      "heading": "Clock",
+      "stated": "Stated {rate, number} Hz",
+      "measured": "Measured {rate, number} Hz",
+      "cents": "{cents} {count, plural, one {cent} other {cents}}",
+      "accurate": "Accurate: frequencies from this input are correct.",
+      "corrected": "Corrected: this input runs at {trueRate, number} Hz, not the {statedRate, number} Hz the browser reports. The app corrects its recordings automatically. To remove the correction, set the interface to 48 kHz in your computer's audio settings (Audio MIDI Setup on a Mac).",
+      "mismatch": "Mismatch: this input does not deliver audio at a rate the app can correct, so its frequencies would be wrong. Set the interface to 48 kHz in your computer's audio settings, or record with another app and load the WAV file."
+    },
+    "level": {
+      "heading": "Level",
+      "noiseFloor": "Noise floor {db} dBFS",
+      "peak": "Peak {db} dBFS",
+      "noTap": "No tap heard. Tap a part firmly during the check.",
+      "clipping": "Clipping: turn the input gain down or tap more lightly.",
+      "low": "Low: raise the input gain or move the microphone closer.",
+      "good": "Good level."
+    },
+    "errors": {
+      "microphone": "Unable to access microphone. Please check permissions.",
+      "processing": "Error processing audio. Please try again."
+    }
+  },
   "wood": {
     "title": "Wood Panel Properties",
     "loading": "Loading wood panels...",

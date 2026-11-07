@@ -101,8 +101,9 @@ export function useRecorder(options: {
   deviceId: string | undefined;
   onFinished: (recording: Recording) => void;
   onError: (kind: "microphone") => void;
+  maxSeconds?: number;
 }) {
-  const { deviceId, onFinished, onError } = options;
+  const { deviceId, onFinished, onError, maxSeconds = MAX_RECORDING_SECONDS } = options;
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
@@ -142,7 +143,7 @@ export function useRecorder(options: {
     const timer = setInterval(() => {
       ticks += 1;
       setElapsed(ticks / 10);
-      if (ticks >= MAX_RECORDING_SECONDS * 10) end(false);
+      if (ticks >= maxSeconds * 10) end(false);
     }, TICK_MS);
     const track = stream.getAudioTracks()[0];
     const startedAt = performance.now();
@@ -173,7 +174,7 @@ export function useRecorder(options: {
     setAnalyser(node);
     setRecording(true);
     recorder.start(TICK_MS);
-  }, [deviceId, end, onError, onFinished]);
+  }, [deviceId, end, maxSeconds, onError, onFinished]);
 
   const stop = useCallback(() => end(false), [end]);
   const cancel = useCallback(() => end(true), [end]);

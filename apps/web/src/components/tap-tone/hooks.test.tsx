@@ -210,6 +210,25 @@ describe("useRecorder", () => {
     expect(media.tracks[0]?.stop).toHaveBeenCalled();
   });
 
+  it("stops by itself at a shorter limit when given one", async () => {
+    vi.useFakeTimers();
+    FakeRecorder.instances = [];
+    FakeRecorder.startsLater = false;
+    vi.stubGlobal("MediaRecorder", FakeRecorder);
+    fakeAudioContext();
+    fakeMediaDevices([input("usb", "USB")]);
+    const onFinished = vi.fn();
+    const hook = renderHook(() =>
+      useRecorder({ deviceId: "usb", onFinished, onError: vi.fn(), maxSeconds: 5 }),
+    );
+    await act(() => hook.result.current.start());
+    act(() => vi.advanceTimersByTime(4900));
+    expect(hook.result.current.recording).toBe(true);
+    act(() => vi.advanceTimersByTime(100));
+    expect(hook.result.current.recording).toBe(false);
+    expect(onFinished).toHaveBeenCalledTimes(1);
+  });
+
   it("hands over the recording and releases the microphone on Stop", async () => {
     const { media, onFinished, hook } = setup();
     await act(() => hook.result.current.start());
