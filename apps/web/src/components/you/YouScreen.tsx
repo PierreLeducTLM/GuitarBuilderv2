@@ -17,9 +17,18 @@ import { adminEntriesFor } from "@/lib/routes";
 
 /**
  * app-shell: You Page. The account, language and theme, the microphone check, the
- * administration areas for administrators, and sign-out, on every viewport.
+ * administration areas for administrators, and sign-out (not offered while every visitor
+ * shares one account), on every viewport.
  */
-export function YouScreen({ email, role }: { email: string; role: AppRole }) {
+export function YouScreen({
+  email,
+  role,
+  canSignOut,
+}: {
+  email: string;
+  role: AppRole;
+  canSignOut: boolean;
+}) {
   const t = useTranslations();
   const { signOut, pending } = useSignOut();
   const admin = adminEntriesFor(role);
@@ -85,16 +94,18 @@ export function YouScreen({ email, role }: { email: string; role: AppRole }) {
         </section>
       ) : null}
 
-      <div>
-        <Button
-          variant="secondary"
-          icon={<LogOut className="size-4" />}
-          disabled={pending}
-          onClick={() => void signOut()}
-        >
-          {t("shell.signOut")}
-        </Button>
-      </div>
+      {canSignOut ? (
+        <div>
+          <Button
+            variant="secondary"
+            icon={<LogOut className="size-4" />}
+            disabled={pending}
+            onClick={() => void signOut()}
+          >
+            {t("shell.signOut")}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -17,10 +17,13 @@ Object.assign(window, {
   matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }),
 });
 
-function renderYou(role: "user" | "admin", locale: TestLocale = "en") {
+function renderYou(
+  role: "user" | "admin",
+  { locale = "en", canSignOut = true }: { locale?: TestLocale; canSignOut?: boolean } = {},
+) {
   return renderWithIntl(
     <AppProviders>
-      <YouScreen email="luthier@example.com" role={role} />
+      <YouScreen email="luthier@example.com" role={role} canSignOut={canSignOut} />
     </AppProviders>,
     { locale },
   );
@@ -48,7 +51,7 @@ describe("YouScreen microphone", () => {
   });
 
   it("is in French", () => {
-    renderYou("user", "fr");
+    renderYou("user", { locale: "fr" });
     const group = screen.getByRole("region", { name: "Micro" });
     expect(within(group).getByRole("button", { name: "Vérifier le micro" })).toBeTruthy();
   });
@@ -82,6 +85,13 @@ describe("YouScreen", () => {
     ).toBeTruthy();
   });
 
+  it("offers no Sign Out while every visitor shares one account", () => {
+    renderYou("admin", { canSignOut: false });
+    expect(screen.getByText("luthier@example.com")).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Administration" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Sign Out" })).toBeNull();
+  });
+
   it("signs out and shows the sign-in screen", async () => {
     signOut.result = { ok: true };
     renderYou("user");
@@ -102,7 +112,7 @@ describe("YouScreen", () => {
   });
 
   it("is in French", () => {
-    renderYou("admin", "fr");
+    renderYou("admin", { locale: "fr" });
     expect(screen.getByRole("heading", { level: 1, name: "Vous" })).toBeTruthy();
     expect(screen.getByText("Connecté en tant que")).toBeTruthy();
     expect(screen.getByRole("region", { name: "Administration" })).toBeTruthy();
