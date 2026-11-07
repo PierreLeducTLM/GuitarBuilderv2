@@ -122,7 +122,9 @@ Production code is test-driven: write a failing test first, make it pass with th
 
 ## 7. Wrap-up
 
-- [ ] 7.1 Add a Playwright test that opens the Microphone Check from the You page and from the Frequency Detector with a faked input, runs a check, and sees the verdict and the remembered status. Verify `pnpm test:e2e` passes.
+- [x] 7.1 Add a Playwright test that opens the Microphone Check from the You page and from the Frequency Detector with a faked input, runs a check, and sees the verdict and the remembered status. Verify `pnpm test:e2e` passes.
+
+  Notes: `e2e/microphone-check.spec.ts`. With Chromium's fake microphone, the real clock check judged the input Accurate. The spec also caught a real bug: before permission Chrome lists inputs with an empty id, so checks were remembered under that placeholder (fixed in 76f41cb, with a unit test). Full suite: 155 passed.
 - [ ] 7.2 Retest on a preview deployment with the user:
   - Mac + Fast Track Pro at 44.1 kHz: the check shows Corrected (44,100 Hz, +147 cents), the test tone reads about 440 Hz "Corrected from 478.9 Hz", and the user's plate reads about 187.5 Hz with the corrected note;
   - Mac + Fast Track Pro set to 48 kHz, the Pixel + Fast Track Pro and the Pixel built-in mic: the check shows Accurate and the plate still reads about 187.5 Hz;
@@ -130,4 +132,6 @@ Production code is test-driven: write a failing test first, make it pass with th
   - the remembered status shows in the Frequency Detector after reloading the page.
 
   Verify each outcome is confirmed by the user.
-- [ ] 7.3 Run `pnpm check`, `pnpm test:e2e` and `openspec validate microphone-check --strict`, and verify all pass.
+- [x] 7.3 Run `pnpm check`, `pnpm test:e2e` and `openspec validate microphone-check --strict`, and verify all pass.
+
+  Notes: run on 2026-11-07. `pnpm check` exits 0, `pnpm test:e2e` gives 155 passed, and `openspec validate microphone-check --strict` is valid.
