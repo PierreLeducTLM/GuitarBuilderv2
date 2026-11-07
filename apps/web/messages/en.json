@@ -107,9 +107,52 @@
     "info": "Information"
   },
   "story": {
-    "title": "Build story",
-    "placeholder": "This shared build story will appear here.",
-    "shareLink": "Share link"
+    "title": "Build Story",
+    "loading": "Loading build story...",
+    "started": "Started {date}",
+    "progress": {
+      "title": "Build Progress",
+      "steps": "{completed} of {total} steps",
+      "percent": "{percent}% Complete"
+    },
+    "timeline": "Timeline",
+    "stepNumber": "Step {number}",
+    "photoCount": "{count, plural, one {# Photo} other {# Photos}}",
+    "previousPhoto": "Previous photo",
+    "nextPhoto": "Next photo",
+    "photoPosition": "{index} / {count}",
+    "soundAnalysis": "Sound Analysis ({count})",
+    "empty": {
+      "justStarted": {
+        "title": "Build Just Started",
+        "message": "No steps have been completed yet. Check back soon to see the progress!"
+      },
+      "noDetails": {
+        "title": "No Details Shared Yet",
+        "message": "Work is in progress, but no specific steps have been documented with photos or notes yet."
+      }
+    },
+    "notFound": {
+      "title": "Story Not Found",
+      "message": "Build not found or sharing has been disabled.",
+      "hint": "The build story you're looking for might have been removed or the link may be incorrect.",
+      "error": "Unable to load this build story."
+    },
+    "updates": {
+      "off": "Get Updates",
+      "on": "Updates On",
+      "unsupported": "This browser does not support notifications.",
+      "prompt": {
+        "title": "Get Build Updates?",
+        "message": "Would you like to be notified when new photos or notes are added to this build?",
+        "accept": "Yes, notify me",
+        "decline": "No thanks"
+      },
+      "notification": {
+        "title": "Update: {name}",
+        "body": "New progress has been posted! Click to see."
+      }
+    }
   },
   "builds": {
     "title": "Your Builds ({count})",
@@ -143,6 +186,23 @@
       "typeNotSet": "Guitar type not set",
       "boboNeck": "BOBO neck",
       "readOnly": "Read-only: this build belongs to another user."
+    },
+    "share": {
+      "title": "Share Build Story",
+      "publicAccess": "Public Access",
+      "statusOn": "Anyone with the link can view",
+      "statusOff": "Only you can see this build",
+      "disabledTitle": "Sharing is disabled",
+      "disabledHint": "Enable public access to generate a shareable link",
+      "link": "Share Link",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "preview": "Preview Build Story",
+      "tip": "Share this link with your clients so they can follow along with your build progress. They'll see all completed steps, notes, and photos.",
+      "done": "Done",
+      "loadFailed": "Failed to load the sharing settings",
+      "enableFailed": "Failed to enable sharing",
+      "disableFailed": "Failed to disable sharing"
     },
     "actions": {
       "more": "More actions",

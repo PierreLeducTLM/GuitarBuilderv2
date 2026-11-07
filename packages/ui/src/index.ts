@@ -31,6 +31,7 @@ export {
   type SegmentedOption,
 } from "./components/SegmentedControl.tsx";
 export { Sheet, SheetClose, type SheetProps } from "./components/Sheet.tsx";
+export { Switch, type SwitchProps } from "./components/Switch.tsx";
 export {
   TextInputDialog,
   type TextInputDialogProps,

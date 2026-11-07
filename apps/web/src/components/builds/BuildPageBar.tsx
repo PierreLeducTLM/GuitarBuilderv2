@@ -15,6 +15,7 @@ export interface BuildPageBarProps {
   deleting: boolean;
   onDelete: () => void;
   onChangeConstruction: () => void;
+  onShare: () => void;
 }
 
 /**
@@ -29,6 +30,7 @@ export function BuildPageBar({
   deleting,
   onDelete,
   onChangeConstruction,
+  onShare,
 }: BuildPageBarProps) {
   const t = useTranslations("builds");
   const tNav = useTranslations("nav");
@@ -46,7 +48,7 @@ export function BuildPageBar({
               </IconButton>
             </MenuTrigger>
             <MenuContent>
-              <MenuItem disabled>
+              <MenuItem onSelect={onShare}>
                 <Share2 aria-hidden="true" className="size-4 text-fg-dim" />
                 {t("detail.share")}
               </MenuItem>

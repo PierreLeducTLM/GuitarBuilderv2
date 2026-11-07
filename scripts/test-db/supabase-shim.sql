@@ -6,8 +6,9 @@
 -- auth.uid()/auth.jwt()/auth.role() helpers that read request.jwt.claims, the
 -- extensions schema, Supabase's default privileges on the public schema (every
 -- API role gets every privilege on new tables and functions), so a migration that
--- forgets to revoke something fails here too, and the storage tables that the
--- step-photo policies apply to (copied from the Supabase image's storage schema).
+-- forgets to revoke something fails here too, the storage tables that the
+-- step-photo policies apply to (copied from the Supabase image's storage schema),
+-- and the Realtime broadcast table with realtime.topic() and realtime.send().
 
 create role anon nologin noinherit;
 create role authenticated nologin noinherit;
@@ -139,3 +140,59 @@ create trigger protect_objects_delete
   for each statement execute function storage.protect_delete();
 
 grant execute on all functions in schema storage to anon, authenticated, service_role;
+
+-- Realtime: the broadcast message table with row-level security and the image's grants
+-- (the API roles read, insert and update; policies decide), realtime.topic(), which
+-- reads the topic a client is joining, and realtime.send(), which inserts a broadcast
+-- and, like the original, turns any failure into a warning. The image partitions
+-- messages by day; one table is enough here.
+create schema realtime;
+grant usage on schema realtime to anon, authenticated, service_role;
+
+create table realtime.messages (
+  topic text not null,
+  extension text not null,
+  payload jsonb,
+  event text,
+  private boolean default false,
+  updated_at timestamp not null default now(),
+  inserted_at timestamp not null default now(),
+  id uuid not null default gen_random_uuid(),
+  primary key (id, inserted_at)
+);
+
+alter table realtime.messages enable row level security;
+grant select, insert, update on table realtime.messages to anon, authenticated, service_role;
+
+create function realtime.topic() returns text
+language sql stable
+as $$
+  select nullif(current_setting('realtime.topic', true), '')::text;
+$$;
+
+create function realtime.send(payload jsonb, event text, topic text, private boolean default true)
+returns void
+language plpgsql
+as $$
+declare
+  generated_id uuid;
+  final_payload jsonb;
+begin
+  begin
+    generated_id := gen_random_uuid();
+    if payload ? 'id' then
+      final_payload := payload;
+    else
+      final_payload := jsonb_set(payload, '{id}', to_jsonb(generated_id));
+    end if;
+    execute format('SET LOCAL realtime.topic TO %L', topic);
+    insert into realtime.messages (id, payload, event, topic, private, extension)
+    values (generated_id, final_payload, event, topic, private, 'broadcast');
+  exception
+    when others then
+      raise warning 'WarnSendingBroadcastMessage: %', sqlerrm;
+  end;
+end;
+$$;
+
+grant execute on all functions in schema realtime to anon, authenticated, service_role;

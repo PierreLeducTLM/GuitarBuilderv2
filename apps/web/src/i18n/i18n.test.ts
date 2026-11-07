@@ -110,4 +110,12 @@ describe("formats", () => {
     expect(frFormat.dateTime(date, "short")).toBe("2 mars 2025");
     expect(frFormat.dateTime(date, "long")).toBe("2 mars 2025 à 10:30");
   });
+
+  it("writes a story's start date in full, without the time", () => {
+    const started = new Date("2025-12-06T15:30:00Z");
+    const enFormat = createFormatter({ locale: "en", formats, timeZone: "UTC" });
+    const frFormat = createFormatter({ locale: "fr", formats, timeZone: "UTC" });
+    expect(enFormat.dateTime(started, "dateLong")).toBe("December 6, 2025");
+    expect(frFormat.dateTime(started, "dateLong")).toBe("6 décembre 2025");
+  });
 });

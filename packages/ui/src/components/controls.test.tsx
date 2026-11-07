@@ -8,6 +8,7 @@ import { SelectField, TextField } from "./Field.tsx";
 import { IconButton } from "./IconButton.tsx";
 import { LedProgress, litSegments } from "./LedProgress.tsx";
 import { SegmentedControl } from "./SegmentedControl.tsx";
+import { Switch } from "./Switch.tsx";
 
 describe("Button", () => {
   it("is a real button that does not submit forms by default", () => {
@@ -148,5 +149,72 @@ describe("SelectField", () => {
       </SelectField>,
     );
     expect(screen.getByRole("combobox", { name: "Input device" })).toHaveProperty("disabled", true);
+  });
+});
+
+function UpdatesSwitch({
+  onCheckedChange,
+  disabled = false,
+}: {
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
+  const [checked, setChecked] = useState(false);
+  return (
+    <Switch
+      label="Public Access"
+      description={checked ? "Anyone with the link can view" : "Only you can see this build"}
+      checked={checked}
+      disabled={disabled}
+      onCheckedChange={(next) => {
+        setChecked(next);
+        onCheckedChange?.(next);
+      }}
+    />
+  );
+}
+
+describe("Switch", () => {
+  it("is a switch named by its label and described by its description", () => {
+    render(<UpdatesSwitch />);
+    const control = screen.getByRole("switch", { name: "Public Access" });
+    expect(control.getAttribute("aria-checked")).toBe("false");
+    const describedBy = control.getAttribute("aria-describedby") ?? "";
+    expect(document.getElementById(describedBy)?.textContent).toBe("Only you can see this build");
+  });
+
+  it("turns on and off when pressed", async () => {
+    const onCheckedChange = vi.fn();
+    render(<UpdatesSwitch onCheckedChange={onCheckedChange} />);
+    const control = screen.getByRole("switch", { name: "Public Access" });
+    await userEvent.click(control);
+    expect(control.getAttribute("aria-checked")).toBe("true");
+    expect(screen.getByText("Anyone with the link can view")).toBeTruthy();
+    await userEvent.click(control);
+    expect(onCheckedChange.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it("turns on when its label is pressed", async () => {
+    const onCheckedChange = vi.fn();
+    render(<UpdatesSwitch onCheckedChange={onCheckedChange} />);
+    await userEvent.click(screen.getByText("Public Access"));
+    expect(onCheckedChange).toHaveBeenCalledWith(true);
+  });
+
+  it("does nothing while disabled", async () => {
+    const onCheckedChange = vi.fn();
+    render(<UpdatesSwitch onCheckedChange={onCheckedChange} disabled />);
+    const control = screen.getByRole("switch", { name: "Public Access" });
+    expect(control.hasAttribute("disabled")).toBe(true);
+    await userEvent.click(control);
+    expect(onCheckedChange).not.toHaveBeenCalled();
+    expect(control.getAttribute("aria-checked")).toBe("false");
+  });
+
+  it("can go without a description", () => {
+    render(<Switch label="Get Updates" checked onCheckedChange={() => {}} />);
+    const control = screen.getByRole("switch", { name: "Get Updates" });
+    expect(control.getAttribute("aria-checked")).toBe("true");
+    expect(control.hasAttribute("aria-describedby")).toBe(false);
   });
 });

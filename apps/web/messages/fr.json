@@ -107,9 +107,52 @@
     "info": "Information"
   },
   "story": {
-    "title": "Histoire de la construction",
-    "placeholder": "L'histoire partagée de cette construction s'affichera ici.",
-    "shareLink": "Lien de partage"
+    "title": "Histoire de la fabrication",
+    "loading": "Chargement de l’histoire de la fabrication...",
+    "started": "Commencée le {date}",
+    "progress": {
+      "title": "Avancement de la fabrication",
+      "steps": "{completed, plural, one {# étape} other {# étapes}} sur {total}",
+      "percent": "{percent} % terminé"
+    },
+    "timeline": "Chronologie",
+    "stepNumber": "Étape {number}",
+    "photoCount": "{count, plural, one {# photo} other {# photos}}",
+    "previousPhoto": "Photo précédente",
+    "nextPhoto": "Photo suivante",
+    "photoPosition": "{index} / {count}",
+    "soundAnalysis": "Analyse sonore ({count})",
+    "empty": {
+      "justStarted": {
+        "title": "Fabrication tout juste commencée",
+        "message": "Aucune étape n’est encore terminée. Revenez bientôt pour voir l’avancement !"
+      },
+      "noDetails": {
+        "title": "Pas encore de détails partagés",
+        "message": "Le travail avance, mais aucune étape n’a encore été documentée avec des photos ou des notes."
+      }
+    },
+    "notFound": {
+      "title": "Histoire introuvable",
+      "message": "Fabrication introuvable ou partage désactivé.",
+      "hint": "L’histoire de fabrication que vous cherchez a peut-être été retirée, ou le lien est incorrect.",
+      "error": "Impossible de charger cette histoire de fabrication."
+    },
+    "updates": {
+      "off": "Recevoir les mises à jour",
+      "on": "Mises à jour activées",
+      "unsupported": "Ce navigateur ne prend pas en charge les notifications.",
+      "prompt": {
+        "title": "Recevoir les mises à jour de la fabrication ?",
+        "message": "Voulez-vous être averti quand de nouvelles photos ou notes sont ajoutées à cette fabrication ?",
+        "accept": "Oui, m’avertir",
+        "decline": "Non merci"
+      },
+      "notification": {
+        "title": "Mise à jour : {name}",
+        "body": "Nouvel avancement publié ! Cliquez pour voir."
+      }
+    }
   },
   "builds": {
     "title": "Vos fabrications ({count})",
@@ -143,6 +186,23 @@
       "typeNotSet": "Type de guitare non défini",
       "boboNeck": "Manche BOBO",
       "readOnly": "Lecture seule : cette fabrication appartient à un autre utilisateur."
+    },
+    "share": {
+      "title": "Partager l’histoire de la fabrication",
+      "publicAccess": "Accès public",
+      "statusOn": "Toute personne disposant du lien peut voir",
+      "statusOff": "Vous seul pouvez voir cette fabrication",
+      "disabledTitle": "Le partage est désactivé",
+      "disabledHint": "Activez l’accès public pour générer un lien de partage",
+      "link": "Lien de partage",
+      "copy": "Copier",
+      "copied": "Copié !",
+      "preview": "Aperçu de l’histoire de la fabrication",
+      "tip": "Partagez ce lien avec vos clients pour qu’ils suivent l’avancement de votre fabrication. Ils verront toutes les étapes terminées, les notes et les photos.",
+      "done": "Terminé",
+      "loadFailed": "Impossible de charger les paramètres de partage",
+      "enableFailed": "Impossible d’activer le partage",
+      "disableFailed": "Impossible de désactiver le partage"
     },
     "actions": {
       "more": "Plus d’actions",

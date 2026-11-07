@@ -243,11 +243,19 @@ export type Database = {
         };
       };
       build_photo_paths: { Args: { p_build_id: string }; Returns: string[] };
+      build_share_token: { Args: { p_build_id: string }; Returns: string };
+      can_follow_story: { Args: { p_topic: string }; Returns: boolean };
+      get_build_story: { Args: { p_token: string }; Returns: Json };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_own_step_photo_path: { Args: { p_name: string }; Returns: boolean };
       load_default_wood_panels: { Args: Record<PropertyKey, never>; Returns: number | null };
       measurement_roles_are_valid: { Args: { p_roles: Json }; Returns: boolean };
+      set_build_sharing: { Args: { p_build_id: string; p_enabled: boolean }; Returns: string };
       spectrum_record_is_valid: { Args: { p_record: Json }; Returns: boolean };
+      step_applies: {
+        Args: { p_bobo: boolean; p_guitar_type: string; p_key: string };
+        Returns: boolean;
+      };
       update_build_step: {
         Args: { p_build_id: string; p_change: Json; p_step_key: string };
         Returns: Json;

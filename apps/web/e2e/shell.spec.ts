@@ -307,7 +307,7 @@ test.describe("public story route", () => {
     await signIn(page, LUTHIER);
     await page.goto("/story/abc123");
     await expect(page).toHaveURL(/\/story\/abc123$/);
-    await expect(page.getByRole("heading", { name: en.story.title })).toBeVisible();
+    await expect(page.getByRole("heading", { name: en.story.notFound.title })).toBeVisible();
     await expect(page.getByRole("navigation")).toHaveCount(0);
     await expect(page.getByRole("button", { name: new RegExp(LUTHIER.email) })).toHaveCount(0);
   });
