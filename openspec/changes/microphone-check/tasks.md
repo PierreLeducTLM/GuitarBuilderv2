@@ -33,10 +33,12 @@ Production code is test-driven: write a failing test first, make it pass with th
 
 ## 2. Measuring and correcting captures (`apps/web`)
 
-- [ ] 2.1 Extend `useRecorder` so `onFinished` receives `{ blob, elapsedSeconds, statedRate, frames? }` (design D3). Verify hooks tests with a fake recorder and track:
-  - elapsed time follows the recorder's start and stop events, not the UI tick;
+- [x] 2.1 Extend `useRecorder` so `onFinished` receives `{ blob, elapsedSeconds, statedRate, frames? }` (design D3). Verify hooks tests with a fake recorder and track:
+  - elapsed time runs from the recorder's start event to the Stop request, not the UI tick;
   - frame counts are differences of `track.stats` and are left out when the track has no stats;
   - the stated rate falls back to 48,000 Hz.
+
+  Notes: the stop time and final frame counts are taken when Stop is requested, before the track is released (design D3 updated). Stryker on the new code: 49 killed, 1 equivalent survivor (`cancelled: false` as the initial value, which both the stop and cancel paths overwrite before the recorder stops).
 - [ ] 2.2 Add the correction to `audio.ts`: relabel decoded samples at the true rate and resample them to 48,000 Hz (design D2). Verify a browser-mode test: a 440 Hz tone sampled at 44,100 Hz and labelled 48,000 Hz reads 440 ± 0.5 Hz after correction, and the result has 48,000 Hz and the expected length.
 - [ ] 2.3 Add a live clip flag to `useRecorder`, from the oscilloscope's analyser read: on at |x| >= 0.999, off 1 s after the last such sample. Verify with a fake analyser and fake timers.
 

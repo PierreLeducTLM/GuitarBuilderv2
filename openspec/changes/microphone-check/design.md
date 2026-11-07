@@ -67,8 +67,8 @@ The correction can't restore content above S/2. That doesn't matter: analysis st
 
 ### D3. Measurements in `useRecorder`
 
-- **Elapsed time** is `performance.now()` at the recorder's `start` event and at its `stop` event, not the 100 ms UI tick. The tick drifts and starts before the recorder does.
-- **Frame counts** are read from `MediaStreamTrack.stats` (`totalFrames`, `deliveredFrames`) at start and at stop, and only the differences are used. The stats object is detected at runtime: when it's missing, `frames` is left out and the judge falls back to decoded length.
+- **Elapsed time** runs from `performance.now()` at the recorder's `start` event to the moment Stop is requested (the user's Stop or the 10 s limit), not the 100 ms UI tick. The tick drifts and starts before the recorder does. The later `stop` event is not used, because it fires only after the last chunk is flushed, while the audio itself ends when Stop is requested.
+- **Frame counts** are read from `MediaStreamTrack.stats` (`totalFrames`, `deliveredFrames`) at the start event and when Stop is requested, before the track is released, and only the differences are used: delivered = change in `deliveredFrames`, dropped = change in `totalFrames` minus delivered. The stats object is detected at runtime: when it's missing, `frames` is left out and the judge falls back to decoded length.
 - **Stated rate** is `track.getSettings().sampleRate`, falling back to 48,000 Hz.
 - `onFinished` receives `{ blob, elapsedSeconds, statedRate, frames? }`. Each dialog decodes, judges, corrects if needed, then analyses.
 - The live clip flag uses the oscilloscope's existing 2048-sample analyser read. At 48 kHz and 60 frames per second that covers every sample. The flag holds for 1 s, in a polite live region.

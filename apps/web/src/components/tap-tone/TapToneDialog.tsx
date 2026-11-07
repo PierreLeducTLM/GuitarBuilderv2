@@ -142,7 +142,7 @@ export function TapToneDialog(props: TapToneDialogProps) {
     onFinished: (recording) => {
       const run = latest.current.nextRun;
       void analyseAudio(
-        async () => decodeAudio(await recording.arrayBuffer(), { mixToMono: false }),
+        async () => decodeAudio(await recording.blob.arrayBuffer(), { mixToMono: false }),
         () => dispatch({ type: "analysisFailed", run }),
       );
     },
