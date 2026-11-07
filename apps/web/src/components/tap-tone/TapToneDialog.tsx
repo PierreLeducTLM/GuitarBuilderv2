@@ -2,7 +2,6 @@
 
 import {
   type DecayTarget,
-  judgeRate,
   type TakeCache,
   type TakeResult,
   type TapToneRecord,
@@ -30,12 +29,12 @@ import {
   type TakeAudio,
 } from "@/lib/tap-tone/machine";
 import {
-  correctRate,
   type DecodedAudio,
   decodeAudio,
   downloadWav,
   isMobileDevice,
   isSupportedAudioFile,
+  judgeRecording,
   prepareAudio,
 } from "./audio";
 import {
@@ -101,19 +100,8 @@ type Checked =
   | { readonly accepted: false };
 
 const checkRecording = (decoded: DecodedAudio, recording: Recording): Checked => {
-  const verdict = judgeRate({
-    elapsedSeconds: recording.elapsedSeconds,
-    statedRate: recording.statedRate,
-    decodedSeconds: (decoded.channels[0]?.length ?? 0) / decoded.sampleRate,
-    ...(recording.frames ? { frames: recording.frames } : {}),
-  });
-  if (verdict.verdict === "mismatch") return { accepted: false };
-  if (verdict.verdict === "accurate") return { accepted: true, audio: prepareAudio(decoded) };
-  const correction = { trueRate: verdict.trueRate, statedRate: recording.statedRate };
-  return {
-    accepted: true,
-    audio: { ...prepareAudio(correctRate(decoded, correction)), correction },
-  };
+  const { verdict, audio } = judgeRecording(decoded, recording);
+  return verdict.verdict === "mismatch" ? { accepted: false } : { accepted: true, audio };
 };
 
 const decayValue = (cache: TakeCache | null, result: TakeResult, target: DecayTarget) =>
