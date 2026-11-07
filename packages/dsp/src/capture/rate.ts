@@ -2,12 +2,13 @@ const STANDARD_RATES = [8000, 11025, 16000, 22050, 24000, 32000, 44100, 48000, 8
 const ACCURATE_TOLERANCE = 0.03;
 const SNAP_TOLERANCE = 0.01;
 const MAX_DROPPED_FRACTION = 0.01;
+const DURATION_FLOOR_SECONDS = 0.2;
 
 export type CaptureTiming = {
   readonly elapsedSeconds: number;
   readonly statedRate: number;
   readonly decodedSeconds: number;
-  readonly frames: { readonly delivered: number; readonly dropped: number };
+  readonly frames?: { readonly delivered: number; readonly dropped: number };
 };
 
 export type RateVerdict =
@@ -30,14 +31,25 @@ const nearestStandardRate = (rate: number): number =>
     Math.abs(candidate - rate) < Math.abs(best - rate) ? candidate : best,
   );
 
+const isAccurate = (capture: CaptureTiming, measuredRate: number): boolean =>
+  capture.frames
+    ? Math.abs(measuredRate - capture.statedRate) <= ACCURATE_TOLERANCE * capture.statedRate
+    : Math.abs(capture.decodedSeconds - capture.elapsedSeconds) <=
+      Math.max(ACCURATE_TOLERANCE * capture.elapsedSeconds, DURATION_FLOOR_SECONDS);
+
+const droppedTooMuch = ({ frames }: CaptureTiming): boolean =>
+  frames !== undefined &&
+  frames.dropped / (frames.delivered + frames.dropped) > MAX_DROPPED_FRACTION;
+
 export const judgeRate = (capture: CaptureTiming): RateVerdict => {
-  const { delivered, dropped } = capture.frames;
-  const measuredRate = delivered / capture.elapsedSeconds;
+  const measuredRate = capture.frames
+    ? capture.frames.delivered / capture.elapsedSeconds
+    : (capture.decodedSeconds * capture.statedRate) / capture.elapsedSeconds;
   const cents = 1200 * Math.log2(capture.statedRate / measuredRate);
-  if (dropped / (delivered + dropped) > MAX_DROPPED_FRACTION) {
+  if (droppedTooMuch(capture)) {
     return { verdict: "mismatch", reason: "dropped", measuredRate, cents };
   }
-  if (Math.abs(measuredRate - capture.statedRate) <= ACCURATE_TOLERANCE * capture.statedRate) {
+  if (isAccurate(capture, measuredRate)) {
     return { verdict: "accurate", measuredRate, cents };
   }
   const trueRate = nearestStandardRate(measuredRate);

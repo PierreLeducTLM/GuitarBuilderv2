@@ -11,10 +11,12 @@ Production code is test-driven: write a failing test first, make it pass with th
   - 210,000 frames (42,000 Hz) is Mismatch, reason "rate".
 
   Notes: the limits compare in Hz (|R - fs| <= 0.03 * fs, |R - S| <= 0.01 * S), the same formulas as the spec, because the ratio form misjudges the exact boundaries in floating point (|46560/48000 - 1| reads 0.030000000000000027). Stryker: 43 killed, 1 survivor, which is equivalent: the nearest-rate tie-break (`<` vs `<=`) only matters halfway between two standard rates, which is always a Mismatch that exposes no rate.
-- [ ] 1.2 Add the decoded-length fallback. Verify unit tests:
+- [x] 1.2 Add the decoded-length fallback. Verify unit tests:
   - E 6.0 s and D 5.51 s is Corrected to 44,100 Hz (R = 44,080 Hz);
   - E 1.0 s and D 0.85 s is Accurate thanks to the 0.2 s floor;
   - E 5.0 s and D 4.95 s is Accurate.
+
+  Notes: Stryker 62 killed; the only survivor is the equivalent tie-break noted in 1.1.
 - [ ] 1.3 Add `measureLevel` (noise floor and peak in dBFS, with the No tap heard / Clipping / Low / Good verdicts) and `measureTone` (centre 32768 samples, strongest refined point from 220 to 880 Hz, cents from 440 Hz, not heard below −60 dB). Verify unit tests with synthetic signals:
   - a full-scale tap gives Clipping, a 0.03 peak gives Low, silence gives No tap heard;
   - a 440.2 Hz sine reads +1 cent, a 478.9 Hz sine reads about +147 cents, and a −70 dB sine is not heard.

@@ -97,3 +97,44 @@ describe("capture rate verdict from frame counts", () => {
     });
   });
 });
+
+describe("capture rate verdict from the decoded length", () => {
+  const withoutFrames = (elapsedSeconds: number, decodedSeconds: number) => {
+    const { frames: _ignored, ...timing } = capture({ elapsedSeconds, decodedSeconds });
+    return judgeRate(timing);
+  };
+
+  it("corrects a 6.0 s recording that decodes to 5.51 s", () => {
+    expect(withoutFrames(6, 5.51)).toEqual({
+      verdict: "corrected",
+      trueRate: 44100,
+      measuredRate: expect.closeTo(44080, 6),
+      cents: expect.closeTo(147.5, 1),
+    });
+  });
+
+  it("finds a 1.0 s recording decoding to 0.85 s accurate, within the 0.2 s floor", () => {
+    expect(withoutFrames(1, 0.85)).toMatchObject({ verdict: "accurate" });
+  });
+
+  it("finds a 5.0 s recording decoding to 4.95 s accurate", () => {
+    expect(withoutFrames(5, 4.95)).toMatchObject({
+      verdict: "accurate",
+      measuredRate: expect.closeTo(47520, 6),
+    });
+  });
+
+  it("accepts exactly the 0.2 s floor", () => {
+    expect(withoutFrames(0.2, 0.4)).toMatchObject({ verdict: "accurate" });
+  });
+
+  it("allows 3% of the elapsed time on long recordings, and no more", () => {
+    expect(withoutFrames(100, 103)).toMatchObject({ verdict: "accurate" });
+    expect(withoutFrames(100, 97)).toMatchObject({ verdict: "accurate" });
+    expect(withoutFrames(100, 96.5)).toMatchObject({ verdict: "mismatch", reason: "rate" });
+  });
+
+  it("prefers the frame counts when the browser reports them", () => {
+    expect(judgeRate(capture({ decodedSeconds: 4.5 }))).toMatchObject({ verdict: "accurate" });
+  });
+});
