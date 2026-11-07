@@ -10,7 +10,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
   - `send(payload, event, topic, private)`, which inserts a broadcast row.
 
   Verify `pnpm test:db` still passes on the existing files.
-- [ ] 1.2 Write `supabase/tests/database/14_build_sharing.test.sql`, then add `set_build_sharing` and `build_share_token` in a new migration `2026110712xxxx_build_story_sharing.sql`. Verify the pgTAP cases:
+- [x] 1.2 Write `supabase/tests/database/14_build_sharing.test.sql`, then add `set_build_sharing` and `build_share_token` in a new migration `2026110712xxxx_build_story_sharing.sql`. Verify the pgTAP cases:
   - the owner turns sharing on and gets a UUID;
   - on again keeps the token;
   - off nulls the token and the flag;
