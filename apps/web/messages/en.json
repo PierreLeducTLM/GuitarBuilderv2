@@ -503,7 +503,8 @@
       "upload": "Upload Audio File",
       "recording": "Recording...",
       "elapsed": "{elapsed}s / {max}s",
-      "analyzing": "Analyzing..."
+      "analyzing": "Analyzing...",
+      "corrected": "Corrected: this input runs at {trueRate, number} Hz, not the {statedRate, number} Hz the browser reports."
     },
     "actions": {
       "play": "Play",
@@ -515,6 +516,7 @@
     },
     "errors": {
       "microphone": "Unable to access microphone. Please check permissions.",
+      "captureRate": "This audio input does not deliver audio at a rate the app can correct, so the frequencies would be wrong. Set the interface to 48 kHz in your computer's audio settings (Audio MIDI Setup on a Mac), or record with another app and load the WAV file here.",
       "processing": "Error processing audio. Please try again.",
       "noTap": "No tap detected. Tap the part firmly and try again.",
       "unsupported": "Unsupported audio format. Supported formats: WAV, MP3, OGG",

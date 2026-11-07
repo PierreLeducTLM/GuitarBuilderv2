@@ -48,12 +48,19 @@ Production code is test-driven: write a failing test first, make it pass with th
 
 ## 3. Rate check in the Frequency Detector
 
-- [ ] 3.1 Judge each decoded recording in `TapToneDialog` before analysis, and add the `captureRate` error to the dialog machine. Verify dialog and machine tests:
+- [x] 3.1 Judge each decoded recording in `TapToneDialog` before analysis, and add the `captureRate` error to the dialog machine. Verify dialog and machine tests:
   - Accurate is analysed as before, with no note;
   - Corrected is analysed after correction, and the results show the corrected note;
   - Mismatch returns the take to idle with the banner and never starts analysis;
   - a loaded file is never judged;
   - loading a file clears the banner.
+
+  Notes: the dialog's rate-check strings (the corrected note and the mismatch banner) were added to `en.json` and `fr.json` here, because the dialog renders them. Two extra dialog tests: the decoded-length fallback when the browser reports no frame counts, and an empty recording showing "Error processing audio" (spec: Recording Analysis Hand-off). Stryker on the new code: the machine's `captureRejected` 6 of 6 killed. In the dialog, the remaining survivors are equivalent:
+  - `{}` behaves like `{ accepted: false }` at runtime;
+  - `channels[0]` always exists, because decoding throws on empty audio;
+  - `mixToMono` makes no difference for a mono recording.
+
+  `setChosenTap(null)` predates this change.
 - [ ] 3.2 Confirm a corrected take and verify (dialog test) that the record returned to the caller has sampleRate 48000, fftSize 32768 and binWidth 1.46484375.
 - [ ] 3.3 Show the "Clipping" indicator beside the oscilloscope as text in a polite live region, and the results notice "N of M taps clipped…" for recorded and loaded takes. Verify component tests: the indicator appears and clears, 2 of 3 clipped shows the notice, and no clipped taps shows nothing.
 

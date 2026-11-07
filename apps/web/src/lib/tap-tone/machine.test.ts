@@ -100,6 +100,27 @@ describe("a take's lifecycle", () => {
     expect(failed.error).toEqual({ key: "processing" });
   });
 
+  it("returns to idle with the rate-mismatch error when a recording fails the rate check", () => {
+    const started = reduce(createDialog({ mode: "instrument" }), { type: "analysisStarted" });
+    const take = started.takes.instrument;
+    const rejected = reduce(started, {
+      type: "captureRejected",
+      run: take?.status === "analyzing" ? take.run : -1,
+    });
+    expect(rejected.takes.instrument?.status).toBe("idle");
+    expect(rejected.error).toEqual({ key: "captureRate" });
+    expect(reduce(rejected, { type: "analysisStarted" }).error).toBeNull();
+  });
+
+  it("ignores a rate rejection for a run that was superseded", () => {
+    const first = reduce(createDialog({ mode: "instrument" }), { type: "analysisStarted" });
+    const oldRun = first.takes.instrument?.status === "analyzing" ? first.takes.instrument.run : -1;
+    const second = run(first, { type: "reRecorded" }, { type: "analysisStarted" });
+    const late = reduce(second, { type: "captureRejected", run: oldRun });
+    expect(late.takes.instrument?.status).toBe("analyzing");
+    expect(late.error).toBeNull();
+  });
+
   it("stays idle with the error when the microphone or a file is refused, and a new attempt clears it", () => {
     const refused = reduce(createDialog({ mode: "instrument" }), {
       type: "failed",

@@ -2,6 +2,7 @@
 
 import {
   type DecayTarget,
+  judgeRate,
   type TakeCache,
   type TakeResult,
   type TapToneRecord,
@@ -29,6 +30,7 @@ import {
   type TakeAudio,
 } from "@/lib/tap-tone/machine";
 import {
+  correctRate,
   type DecodedAudio,
   decodeAudio,
   downloadWav,
@@ -36,7 +38,13 @@ import {
   isSupportedAudioFile,
   prepareAudio,
 } from "./audio";
-import { MAX_RECORDING_SECONDS, useAudioInputs, usePlayback, useRecorder } from "./hooks";
+import {
+  MAX_RECORDING_SECONDS,
+  type Recording,
+  useAudioInputs,
+  usePlayback,
+  useRecorder,
+} from "./hooks";
 import { Oscilloscope } from "./Oscilloscope";
 import { PeakInspector } from "./PeakInspector";
 import { BodyModes, MainFrequency, PlateTakes, TAKE_SYMBOL } from "./panels";
@@ -87,6 +95,26 @@ const targetFor = (result: TakeResult, frequency: number, level: number): DecayT
     spectralQ: null,
   };
 
+type Checked =
+  | { readonly accepted: true; readonly audio: TakeAudio }
+  | { readonly accepted: false };
+
+const checkRecording = (decoded: DecodedAudio, recording: Recording): Checked => {
+  const verdict = judgeRate({
+    elapsedSeconds: recording.elapsedSeconds,
+    statedRate: recording.statedRate,
+    decodedSeconds: (decoded.channels[0]?.length ?? 0) / decoded.sampleRate,
+    ...(recording.frames ? { frames: recording.frames } : {}),
+  });
+  if (verdict.verdict === "mismatch") return { accepted: false };
+  if (verdict.verdict === "accurate") return { accepted: true, audio: prepareAudio(decoded) };
+  const correction = { trueRate: verdict.trueRate, statedRate: recording.statedRate };
+  return {
+    accepted: true,
+    audio: { ...prepareAudio(correctRate(decoded, correction)), correction },
+  };
+};
+
 const decayValue = (cache: TakeCache | null, result: TakeResult, target: DecayTarget) =>
   cache ? takeDecayQ(cache, result, target).q : null;
 
@@ -124,6 +152,10 @@ export function TapToneDialog(props: TapToneDialogProps) {
   const analyseAudio = async (
     load: () => Promise<DecodedAudio>,
     onLoadError: (error: unknown) => void,
+    check: (decoded: DecodedAudio) => Checked = (decoded) => ({
+      accepted: true,
+      audio: prepareAudio(decoded),
+    }),
   ) => {
     const run = latest.current.nextRun;
     dispatch({ type: "analysisStarted" });
@@ -133,8 +165,12 @@ export function TapToneDialog(props: TapToneDialogProps) {
       return null;
     });
     if (!decoded) return;
-    const prepared = prepareAudio(decoded);
-    analyse({ run, audio: prepared, mode: props.mode, mobile });
+    const checked = check(decoded);
+    if (!checked.accepted) {
+      dispatch({ type: "captureRejected", run });
+      return;
+    }
+    analyse({ run, audio: checked.audio, mode: props.mode, mobile });
   };
 
   const recorder = useRecorder({
@@ -144,6 +180,7 @@ export function TapToneDialog(props: TapToneDialogProps) {
       void analyseAudio(
         async () => decodeAudio(await recording.blob.arrayBuffer(), { mixToMono: false }),
         () => dispatch({ type: "analysisFailed", run }),
+        (decoded) => checkRecording(decoded, recording),
       );
     },
     onError: () => dispatch({ type: "failed", error: { key: "microphone" } }),
@@ -470,6 +507,11 @@ export function TapToneDialog(props: TapToneDialogProps) {
 
       {results ? (
         <div className="flex flex-col gap-4">
+          {audio?.correction ? (
+            <p className="rounded-xl border border-line bg-inset px-3 py-2 text-sm text-fg-dim">
+              {t("capture.corrected", audio.correction)}
+            </p>
+          ) : null}
           {audio?.filtered[0] ? (
             <TapWaveform
               signal={audio.filtered[0]}

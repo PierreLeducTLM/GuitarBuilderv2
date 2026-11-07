@@ -503,7 +503,8 @@
       "upload": "Importer un fichier audio",
       "recording": "Enregistrement...",
       "elapsed": "{elapsed} s / {max} s",
-      "analyzing": "Analyse..."
+      "analyzing": "Analyse...",
+      "corrected": "Corrigé : cette entrée fonctionne à {trueRate, number} Hz, et non aux {statedRate, number} Hz annoncés par le navigateur."
     },
     "actions": {
       "play": "Écouter",
@@ -515,6 +516,7 @@
     },
     "errors": {
       "microphone": "Impossible d'accéder au microphone. Vérifiez les autorisations.",
+      "captureRate": "Cette entrée audio ne fournit pas le son à une fréquence que l'application peut corriger, les fréquences seraient donc fausses. Réglez l'interface sur 48 kHz dans les réglages audio de votre ordinateur (Configuration audio et MIDI sur Mac), ou enregistrez avec une autre application et chargez le fichier WAV ici.",
       "processing": "Erreur lors du traitement de l'audio. Veuillez réessayer.",
       "noTap": "Aucune frappe détectée. Frappez la pièce fermement et réessayez.",
       "unsupported": "Format audio non pris en charge. Formats acceptés : WAV, MP3, OGG",

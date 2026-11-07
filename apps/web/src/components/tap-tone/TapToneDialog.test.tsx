@@ -345,3 +345,179 @@ describe("TapToneDialog in Plate mode", () => {
     expect(screen.queryByRole("button", { name: "Play" })).toBeNull();
   }, 30000);
 });
+
+const stubRecording = (options: { stats: boolean } = { stats: true }) => {
+  stubBrowser();
+  const track: {
+    stop: () => void;
+    getSettings: () => { sampleRate: number };
+    stats?: { totalFrames: number; deliveredFrames: number };
+  } = {
+    stop: vi.fn(),
+    getSettings: () => ({ sampleRate: SAMPLE_RATE }),
+    ...(options.stats ? { stats: { totalFrames: 0, deliveredFrames: 0 } } : {}),
+  };
+  const stream = { getTracks: () => [track], getAudioTracks: () => [track] };
+  vi.stubGlobal("navigator", {
+    ...navigator,
+    mediaDevices: { ...navigator.mediaDevices, getUserMedia: vi.fn(async () => stream) },
+  });
+  vi.stubGlobal(
+    "MediaRecorder",
+    class {
+      static isTypeSupported = () => true;
+      readonly mimeType = "audio/webm;codecs=pcm";
+      ondataavailable: ((event: { data: Blob }) => void) | null = null;
+      onstart: (() => void) | null = null;
+      onstop: (() => void) | null = null;
+      start() {
+        this.ondataavailable?.({ data: new Blob(["pcm"]) });
+        this.onstart?.();
+      }
+      stop() {
+        this.onstop?.();
+      }
+    },
+  );
+  vi.stubGlobal(
+    "AudioContext",
+    class {
+      createAnalyser = () => ({ fftSize: 0, getFloatTimeDomainData: vi.fn() });
+      createMediaStreamSource = () => ({ connect: vi.fn() });
+      close = async () => undefined;
+    },
+  );
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  return { track, clock };
+};
+
+const ENGLISH_BUTTONS = { start: "Start Recording", stop: "Stop Recording" };
+
+const record = async (
+  browser: ReturnType<typeof stubRecording>,
+  take: { samples: Float32Array; seconds: number; delivered: number; dropped?: number },
+  buttons = ENGLISH_BUTTONS,
+) => {
+  decodes.push(take.samples);
+  const user = userEvent.setup();
+  const counted = browser.track.stats !== undefined;
+  browser.clock.mockReturnValue(0);
+  if (counted) browser.track.stats = { totalFrames: 0, deliveredFrames: 0 };
+  await user.click(screen.getByRole("button", { name: buttons.start }));
+  if (counted) {
+    browser.track.stats = {
+      totalFrames: take.delivered + (take.dropped ?? 0),
+      deliveredFrames: take.delivered,
+    };
+  }
+  browser.clock.mockReturnValue(take.seconds * 1000);
+  await user.click(await screen.findByRole("button", { name: buttons.stop }));
+};
+
+const plateDialog = (locale: "en" | "fr" = "en", onConfirm = vi.fn()) =>
+  withIntl(
+    <TapToneDialog open mode="plate" label="Plate" onConfirm={onConfirm} onCancel={vi.fn()} />,
+    locale,
+  );
+
+const correctedNote =
+  "Corrected: this input runs at 44,100 Hz, not the 48,000 Hz the browser reports.";
+const mismatchBanner =
+  "This audio input does not deliver audio at a rate the app can correct, so the frequencies would be wrong. Set the interface to 48 kHz in your computer's audio settings (Audio MIDI Setup on a Mac), or record with another app and load the WAV file here.";
+
+describe("TapToneDialog rate check", () => {
+  it("analyses an accurate recording as before, with no correction note", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: plate(181.8), seconds: 4, delivered: 192000 });
+    await screen.findByRole("img", { name: /Frequency spectrum/ }, { timeout: 10000 });
+    expect(screen.getByRole("region", { name: "Longitudinal (f_L)" }).textContent).toMatch(
+      /181\.\d/,
+    );
+    expect(screen.queryByText(/^Corrected:/)).toBeNull();
+  }, 30000);
+
+  it("corrects a recording from an input at 44,100 Hz labelled 48,000 Hz", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, {
+      samples: plate((181.8 * 48000) / 44100),
+      seconds: 192000 / 44100,
+      delivered: 192000,
+    });
+    await screen.findByRole("img", { name: /Frequency spectrum/ }, { timeout: 10000 });
+    expect(screen.getByRole("region", { name: "Longitudinal (f_L)" }).textContent).toMatch(
+      /181\.\d/,
+    );
+    expect(screen.getByText(correctedNote)).toBeTruthy();
+  }, 30000);
+
+  it("corrects from the recording's length when the browser reports no frame counts", async () => {
+    const browser = stubRecording({ stats: false });
+    plateDialog();
+    await record(browser, {
+      samples: plate((181.8 * 48000) / 44100),
+      seconds: 192000 / 44100,
+      delivered: 0,
+    });
+    await screen.findByRole("img", { name: /Frequency spectrum/ }, { timeout: 10000 });
+    expect(screen.getByText(correctedNote)).toBeTruthy();
+  }, 30000);
+
+  it("says the audio could not be processed when a recording holds no audio", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: new Float32Array(0), seconds: 4, delivered: 192000 });
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Error processing audio. Please try again.",
+    );
+  });
+
+  it("refuses a recording at a rate it cannot correct, without analysing it", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: plate(181.8), seconds: 5, delivered: 210000 });
+    expect((await screen.findByRole("alert")).textContent).toBe(mismatchBanner);
+    expect(screen.getByRole("button", { name: "Start Recording" })).toBeTruthy();
+    expect(screen.queryByRole("img", { name: /Frequency spectrum/ })).toBeNull();
+  });
+
+  it("refuses a recording that dropped too much audio", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: plate(181.8), seconds: 4, delivered: 188000, dropped: 4000 });
+    expect((await screen.findByRole("alert")).textContent).toBe(mismatchBanner);
+  });
+
+  it("clears the banner and analyses a loaded file without a rate check", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: plate(181.8), seconds: 5, delivered: 210000 });
+    await screen.findByRole("alert");
+    await upload(plate(181.8));
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.queryByText(/^Corrected:/)).toBeNull();
+  }, 30000);
+
+  it("shows the correction note and the banner in French", async () => {
+    const browser = stubRecording();
+    plateDialog("fr");
+    const french = { start: "Démarrer l'enregistrement", stop: "Arrêter l'enregistrement" };
+    await record(browser, { samples: plate(181.8), seconds: 5, delivered: 210000 }, french);
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Cette entrée audio ne fournit pas le son à une fréquence que l'application peut corriger, les fréquences seraient donc fausses. Réglez l'interface sur 48 kHz dans les réglages audio de votre ordinateur (Configuration audio et MIDI sur Mac), ou enregistrez avec une autre application et chargez le fichier WAV ici.",
+    );
+    await record(
+      browser,
+      { samples: plate((181.8 * 48000) / 44100), seconds: 192000 / 44100, delivered: 192000 },
+      french,
+    );
+    await screen.findByRole("img", { name: /Spectre/ }, { timeout: 10000 });
+    expect(
+      screen.getByText(
+        /^Corrigé : cette entrée fonctionne à 44\s100 Hz, et non aux 48\s000 Hz annoncés par le navigateur\.$/,
+      ),
+    ).toBeTruthy();
+  }, 30000);
+});
