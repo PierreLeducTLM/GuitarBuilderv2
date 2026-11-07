@@ -118,6 +118,9 @@
     "timeline": "Timeline",
     "stepNumber": "Step {number}",
     "photoCount": "{count, plural, one {# Photo} other {# Photos}}",
+    "previousPhoto": "Previous photo",
+    "nextPhoto": "Next photo",
+    "photoPosition": "{index} / {count}",
     "soundAnalysis": "Sound Analysis ({count})",
     "empty": {
       "justStarted": {

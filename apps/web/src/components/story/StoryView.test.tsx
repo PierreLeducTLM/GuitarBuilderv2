@@ -80,7 +80,10 @@ describe("StoryView", () => {
       BendSides: stepState(),
     };
     renderWithIntl(<StoryView story={story({}, states)} />);
-    const items = within(screen.getByRole("list", { name: "Timeline" })).getAllByRole("listitem");
+    const timeline = screen.getByRole("list", { name: "Timeline" });
+    const items = within(timeline)
+      .getAllByRole("listitem")
+      .filter((item) => item.parentElement === timeline);
     expect(
       items.map((item) => within(item).getByRole("heading", { level: 3 }).textContent),
     ).toEqual(["Truss rod", "Join panels"]);

@@ -91,7 +91,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
   - "Sound Analysis (<n>)" with description, "Peak: <f> Hz" (one decimal), date and `SpectrumGraph`.
 
   Verify the "Card with all content" scenario (2 photos, 187.4 Hz) and the singular "1 Photo".
-- [ ] 7.5 Build `StoryPhotos` on `Lightbox`, with previous and next controls and an "i / n" counter. Verify component tests: from the third of 3 photos, next shows the first with "1 / 3"; a single photo shows no controls and no counter; × and a click outside close it.
+- [x] 7.5 Build `StoryPhotos` on `Lightbox`, with previous and next controls and an "i / n" counter. Verify component tests: from the third of 3 photos, next shows the first with "1 / 3"; a single photo shows no controls and no counter; × and a click outside close it.
 
 ## 8. Updates and notifications (decision 7)
 
