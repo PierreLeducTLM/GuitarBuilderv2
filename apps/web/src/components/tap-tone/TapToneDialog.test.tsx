@@ -453,6 +453,22 @@ describe("TapToneDialog rate check", () => {
     expect(screen.getByText(correctedNote)).toBeTruthy();
   }, 30000);
 
+  it("returns the usual 48 kHz record for a corrected take", async () => {
+    const browser = stubRecording();
+    const onConfirm = vi.fn();
+    plateDialog("en", onConfirm);
+    await record(browser, {
+      samples: plate((181.8 * 48000) / 44100),
+      seconds: 192000 / 44100,
+      delivered: 192000,
+    });
+    await screen.findByRole("img", { name: /Frequency spectrum/ }, { timeout: 10000 });
+    await userEvent.setup().click(screen.getByRole("button", { name: "Confirm" }));
+    const { spectrum } = onConfirm.mock.calls[0]?.[0].longitudinal ?? {};
+    expect(spectrum).toMatchObject({ sampleRate: 48000, fftSize: 32768, binWidth: 1.46484375 });
+    expect(spectrum.frequencies).toHaveLength(662);
+  }, 30000);
+
   it("corrects from the recording's length when the browser reports no frame counts", async () => {
     const browser = stubRecording({ stats: false });
     plateDialog();
