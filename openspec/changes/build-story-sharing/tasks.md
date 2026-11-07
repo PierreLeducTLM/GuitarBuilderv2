@@ -61,7 +61,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
 
 ## 6. Story logic (`apps/web/src/lib/story/`)
 
-- [ ] 6.1 Add `parseStory` (the function's JSON to `{ name, variant, createdAt, states }` via `mergeStepState`), `storyTimeline` and `storyEmptyState`. Verify unit tests built from the spec scenarios:
+- [x] 6.1 Add `parseStory` (the function's JSON to `{ name, variant, createdAt, states }` via `mergeStepState`), `storyTimeline` and `storyEmptyState`. Verify unit tests built from the spec scenarios:
   - "Join panels" shown and "Bend sides" hidden;
   - an incomplete step with content hidden;
   - whitespace-only notes hidden;
