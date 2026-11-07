@@ -130,4 +130,4 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
   - repeat with Android Chrome device emulation, or a phone on the LAN if available.
 
   Record the outcome in the PR description.
-- [ ] 9.3 Run `pnpm check`, `pnpm test:db` and `openspec validate build-story-sharing --type change --strict`, and verify all three are green.
+- [x] 9.3 Run `pnpm check`, `pnpm test:db` and `openspec validate build-story-sharing --type change --strict`, and verify all three are green.
