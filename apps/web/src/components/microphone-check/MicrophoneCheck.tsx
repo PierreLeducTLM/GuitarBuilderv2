@@ -1,16 +1,24 @@
 "use client";
 
-import { type CheckLevel, measureLevel, type RateVerdict } from "@gb/dsp";
+import {
+  type CheckLevel,
+  measureLevel,
+  measureTone,
+  type RateVerdict,
+  type ToneReading,
+} from "@gb/dsp";
 import { Button, DialogFrame, SelectField } from "@gb/ui";
 import { LoaderCircle } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { type RememberedCheck, readCheck, rememberCheck } from "@/lib/microphone-check/memory";
-import { decodeAudio, judgeRecording } from "../tap-tone/audio";
+import { decodeAudio, judgeRecording, prepareAudio } from "../tap-tone/audio";
 import { type Recording, useAudioInputs, useRecorder } from "../tap-tone/hooks";
 import { Oscilloscope } from "../tap-tone/Oscilloscope";
+import { TONE_SECONDS, useTestTone } from "./useTestTone";
 
 const CHECK_SECONDS = 5;
+const MATCH_CENTS = 10;
 
 type Outcome = {
   readonly verdict: RateVerdict;
@@ -18,7 +26,13 @@ type Outcome = {
   readonly level: CheckLevel;
 };
 
-type Phase = "idle" | "recording" | "analyzing";
+type ToneOutcome = {
+  readonly heard: ToneReading;
+  readonly before: ToneReading | null;
+  readonly clock: RateVerdict["verdict"];
+};
+
+type Phase = "idle" | "recording" | "tone" | "analyzing";
 
 const browserStorage = () => window.localStorage;
 
@@ -30,11 +44,12 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
   const inputs = useAudioInputs();
   const [phase, setPhase] = useState<Phase>("idle");
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const [tone, setTone] = useState<ToneOutcome | null>(null);
   const [error, setError] = useState<"microphone" | "processing" | null>(null);
   const input = inputs.inputs.find((candidate) => candidate.id === inputs.selected);
   const remembered = input ? readCheck(browserStorage, input) : null;
 
-  const finish = async (recording: Recording) => {
+  const decodeRecording = async (recording: Recording) => {
     setPhase("analyzing");
     const decoded = await decodeAudio(await recording.blob.arrayBuffer(), {
       mixToMono: false,
@@ -42,8 +57,27 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
     if (!decoded) {
       setError("processing");
       setPhase("idle");
-      return;
     }
+    return decoded;
+  };
+
+  const finishTone = async (recording: Recording) => {
+    const decoded = await decodeRecording(recording);
+    if (!decoded) return;
+    const { verdict, audio } = judgeRecording(decoded, recording);
+    const heardIn = (filtered: Float64Array | undefined) =>
+      measureTone({ samples: filtered ?? new Float64Array(0), sampleRate: audio.sampleRate });
+    setTone({
+      heard: heardIn(audio.filtered[0]),
+      before: verdict.verdict === "corrected" ? heardIn(prepareAudio(decoded).filtered[0]) : null,
+      clock: verdict.verdict,
+    });
+    setPhase("idle");
+  };
+
+  const finish = async (recording: Recording) => {
+    const decoded = await decodeRecording(recording);
+    if (!decoded) return;
     const { verdict, audio } = judgeRecording(decoded, recording);
     const level = measureLevel({
       raw: audio.raw[0] ?? new Float32Array(0),
@@ -62,15 +96,23 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
     setPhase("idle");
   };
 
+  const refuse = () => {
+    setError("microphone");
+    setPhase("idle");
+  };
   const recorder = useRecorder({
     deviceId: inputs.selected,
     maxSeconds: CHECK_SECONDS,
     onFinished: (recording) => void finish(recording),
-    onError: () => {
-      setError("microphone");
-      setPhase("idle");
-    },
+    onError: refuse,
   });
+  const toneRecorder = useRecorder({
+    deviceId: inputs.selected,
+    maxSeconds: TONE_SECONDS,
+    onFinished: (recording) => void finishTone(recording),
+    onError: refuse,
+  });
+  const testTone = useTestTone();
 
   const verdictLabel = (check: RememberedCheck) =>
     check.rate === "corrected"
@@ -78,7 +120,10 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
       : t(`verdict.${check.rate}`);
 
   const signed = (value: number) => format.number(value, { signDisplay: "exceptZero" });
-  const cents = outcome ? Math.round(outcome.verdict.cents) : 0;
+  const centsText = (key: "clock.cents" | "tone.heard" | "tone.off", value: number, extra = {}) => {
+    const rounded = Math.round(value);
+    return t(key, { ...extra, cents: signed(rounded), count: Math.abs(rounded) });
+  };
 
   return (
     <DialogFrame
@@ -86,6 +131,8 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
       onOpenChange={(next) => {
         if (!next) {
           recorder.cancel();
+          toneRecorder.cancel();
+          testTone.stop();
           onClose();
         }
       }}
@@ -140,6 +187,12 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
           <Oscilloscope analyser={recorder.analyser} />
         </div>
       ) : null}
+      {phase === "tone" ? (
+        <div className="flex flex-col gap-3">
+          <p className="font-semibold text-fg">{t("tone.playing")}</p>
+          <Oscilloscope analyser={toneRecorder.analyser} />
+        </div>
+      ) : null}
       {phase === "analyzing" ? (
         <p className="flex items-center gap-2 text-fg-dim">
           <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
@@ -147,7 +200,7 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
         </p>
       ) : null}
       {phase === "idle" ? (
-        <div>
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={async () => {
               setError(null);
@@ -158,6 +211,17 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
             }}
           >
             {outcome || remembered ? t("again") : t("start")}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={async () => {
+              setError(null);
+              setTone(null);
+              setPhase("tone");
+              if (await toneRecorder.start()) testTone.play();
+            }}
+          >
+            {t("tone.button")}
           </Button>
         </div>
       ) : null}
@@ -173,7 +237,7 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
               {t("clock.measured", { rate: Math.round(outcome.verdict.measuredRate) })}
             </p>
             <p className="font-mono text-sm text-fg-dim">
-              {t("clock.cents", { cents: signed(cents), count: Math.abs(cents) })}
+              {centsText("clock.cents", outcome.verdict.cents)}
             </p>
             <p className="text-sm text-fg">
               {outcome.verdict.verdict === "corrected"
@@ -195,6 +259,39 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
             <p className="text-sm text-fg">{t(`level.${outcome.level.verdict}`)}</p>
           </section>
         </div>
+      ) : null}
+      {tone ? (
+        <section className="flex flex-col gap-1 rounded-xl border border-line bg-inset p-4">
+          {tone.heard.heard ? (
+            <>
+              <p className="font-mono text-sm text-fg">
+                {centsText("tone.heard", tone.heard.cents, {
+                  frequency: format.number(tone.heard.frequency, "decimal1"),
+                })}
+              </p>
+              {tone.before?.heard ? (
+                <p className="font-mono text-sm text-fg-dim">
+                  {t("tone.correctedFrom", {
+                    frequency: format.number(tone.before.frequency, "decimal1"),
+                  })}
+                </p>
+              ) : null}
+              {Math.abs(tone.heard.cents) <= MATCH_CENTS ? (
+                <p className="text-sm text-fg">{t("tone.matches")}</p>
+              ) : (
+                <>
+                  <p className="text-sm text-fg">{centsText("tone.off", tone.heard.cents)}</p>
+                  {tone.clock === "mismatch" ? null : (
+                    <p className="text-sm text-fg-dim">{t("tone.clockReference")}</p>
+                  )}
+                </>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-fg">{t("tone.notHeard")}</p>
+          )}
+          <p className="text-sm text-fg-dim">{t("tone.note")}</p>
+        </section>
       ) : null}
     </DialogFrame>
   );

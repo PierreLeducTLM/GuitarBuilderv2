@@ -247,6 +247,13 @@ describe("useRecorder", () => {
     expect(hook.result.current.recording).toBe(false);
   });
 
+  it("says whether the recording started", async () => {
+    const { media, hook } = setup();
+    media.mediaDevices.getUserMedia.mockRejectedValueOnce(new Error("NotAllowedError"));
+    expect(await act(() => hook.result.current.start())).toBe(false);
+    expect(await act(() => hook.result.current.start())).toBe(true);
+  });
+
   it("reports a microphone that cannot be opened", async () => {
     const { media, onError, hook } = setup();
     media.mediaDevices.getUserMedia.mockRejectedValueOnce(new Error("NotAllowedError"));

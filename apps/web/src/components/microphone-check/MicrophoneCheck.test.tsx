@@ -141,6 +141,7 @@ describe("Microphone Check", () => {
     expect(screen.getByText("0 cents")).toBeTruthy();
     expect(screen.getByText("Good level.")).toBeTruthy();
     expect(screen.getByText("Peak -6.1 dBFS")).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.getByText(/^Noise floor -\d+\.\d dBFS$/)).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Clock" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Level" })).toBeTruthy();
@@ -248,5 +249,185 @@ describe("Microphone Check", () => {
     expect(await screen.findByText(/^Mesuré 44\s100 Hz$/)).toBeTruthy();
     expect(screen.getByText("+147 cents")).toBeTruthy();
     expect(screen.getByText(/^Corrigé : cette entrée fonctionne à 44\s100 Hz/)).toBeTruthy();
+  });
+});
+
+const toneOf = (frequency: number, length = 3 * SAMPLE_RATE, amplitude = 0.3) =>
+  Float32Array.from(
+    { length },
+    (_, n) => amplitude * Math.sin((2 * Math.PI * frequency * n) / SAMPLE_RATE),
+  );
+
+const playTone = async (
+  browser: ReturnType<typeof stubRecordingBrowser>,
+  take: { samples: Float32Array; delivered: number },
+  label = "Play test tone",
+) => {
+  const finish = browser.prepare({ ...take, seconds: 3 });
+  await userEvent.setup().click(await screen.findByRole("button", { name: label }));
+  finish();
+  act(() => vi.advanceTimersByTime(3000));
+};
+
+const referenceNote =
+  "If the speaker and the microphone are on the same device, a rate error can go unnoticed here. The clock check is the reference.";
+const clockReference =
+  "The clock check is the reference: recordings from this input are not affected. The speaker's own rate may be off.";
+
+describe("Microphone Check test tone", () => {
+  it("plays 440 Hz at half gain for 3 s while it records the input", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    browser.prepare({ samples: toneOf(440), seconds: 3, delivered: 144000 });
+    await userEvent.setup().click(await screen.findByRole("button", { name: "Play test tone" }));
+    expect(screen.getByText("Playing a 440 Hz tone and listening")).toBeTruthy();
+    expect(browser.getUserMedia).toHaveBeenCalledTimes(1);
+    expect(browser.tones).toEqual([
+      {
+        frequency: 440,
+        gain: 0.5,
+        stopAt: 3,
+        started: true,
+        toGain: true,
+        toSpeakers: true,
+        closed: false,
+      },
+    ]);
+    expect(screen.queryByRole("button", { name: "Start check" })).toBeNull();
+    act(() => vi.advanceTimersByTime(2900));
+    expect(screen.getByText("Playing a 440 Hz tone and listening")).toBeTruthy();
+  });
+
+  it("shows the tone it heard and that it matches", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    await playTone(browser, { samples: toneOf(440.2), delivered: 144000 });
+    expect(await screen.findByText("Heard 440.2 Hz (+1 cent)")).toBeTruthy();
+    expect(screen.getByText("Matches")).toBeTruthy();
+    expect(screen.getByText(referenceNote)).toBeTruthy();
+    expect(screen.queryByText(/^Corrected from/)).toBeNull();
+    expect(screen.queryByText(clockReference)).toBeNull();
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.queryByText("Playing a 440 Hz tone and listening")).toBeNull();
+    expect(screen.getByRole("button", { name: "Play test tone" })).toBeTruthy();
+  });
+
+  it("clears the last tone result and stops the previous tone when it plays again", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    await playTone(browser, { samples: toneOf(440.2), delivered: 144000 });
+    await screen.findByText("Matches");
+    browser.prepare({ samples: toneOf(440), seconds: 3, delivered: 144000 });
+    await userEvent.setup().click(screen.getByRole("button", { name: "Play test tone" }));
+    expect(screen.queryByText("Matches")).toBeNull();
+    expect(browser.tones.map((tone) => tone.closed)).toEqual([true, false]);
+  });
+
+  it("stops the tone and the recording when closed", async () => {
+    const browser = stubRecordingBrowser();
+    const onClose = vi.fn();
+    showCheck("en", onClose);
+    browser.prepare({ samples: toneOf(440), seconds: 3, delivered: 144000 });
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Play test tone" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(browser.tones[0]?.closed).toBe(true);
+    expect(browser.track.stop).toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(3000));
+    expect(screen.queryByText(/^Heard/)).toBeNull();
+  });
+
+  it("stops the tone when the dialog goes away", async () => {
+    const browser = stubRecordingBrowser();
+    const { unmount } = showCheck();
+    browser.prepare({ samples: toneOf(440), seconds: 3, delivered: 144000 });
+    await userEvent.setup().click(await screen.findByRole("button", { name: "Play test tone" }));
+    unmount();
+    expect(browser.tones[0]?.closed).toBe(true);
+  });
+
+  it("shows the corrected reading of an interface read at 44,100 Hz", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    await playTone(browser, { samples: toneOf((440 * 48000) / 44100, 132300), delivered: 132300 });
+    expect(await screen.findByText("Heard 440.0 Hz (0 cents)")).toBeTruthy();
+    expect(screen.getByText("Corrected from 478.9 Hz")).toBeTruthy();
+    expect(screen.getByText("Matches")).toBeTruthy();
+  });
+
+  it("says how far off a tone is, and that the clock is the reference", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    await playTone(browser, { samples: toneOf(452), delivered: 144000 });
+    expect(await screen.findByText("Off by +47 cents")).toBeTruthy();
+    expect(screen.getByText(clockReference)).toBeTruthy();
+  });
+
+  it("leaves out the clock reference when the clock itself is off", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    await playTone(browser, { samples: toneOf(452), delivered: 126000 });
+    expect(await screen.findByText("Off by +47 cents")).toBeTruthy();
+    expect(screen.queryByText(clockReference)).toBeNull();
+    expect(screen.getByText(referenceNote)).toBeTruthy();
+  });
+
+  it("says when it did not hear the tone", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    await playTone(browser, { samples: new Float32Array(3 * SAMPLE_RATE), delivered: 144000 });
+    expect(
+      await screen.findByText(
+        "Tone not heard. Turn the volume up or bring the microphone closer to the speaker.",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByText(referenceNote)).toBeTruthy();
+    expect(screen.queryByText("Matches")).toBeNull();
+  });
+
+  it("keeps the check result next to the tone result", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    await runCheck(browser, { samples: fiveSeconds(0.5), delivered: 240000 });
+    await screen.findByText("Good level.");
+    await playTone(browser, { samples: toneOf(440), delivered: 144000 });
+    expect(await screen.findByText("Matches")).toBeTruthy();
+    expect(screen.getByText("Good level.")).toBeTruthy();
+  });
+
+  it("says when the microphone cannot be opened for the tone", async () => {
+    const browser = stubRecordingBrowser();
+    browser.getUserMedia.mockRejectedValueOnce(new Error("NotAllowedError"));
+    showCheck();
+    await userEvent.setup().click(await screen.findByRole("button", { name: "Play test tone" }));
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Unable to access microphone. Please check permissions.",
+    );
+    expect(browser.tones).toEqual([]);
+    browser.prepare({ samples: toneOf(440), seconds: 3, delivered: 144000 });
+    await userEvent.setup().click(screen.getByRole("button", { name: "Play test tone" }));
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("says when the tone recording cannot be processed", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck();
+    await playTone(browser, { samples: new Float32Array(0), delivered: 144000 });
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Error processing audio. Please try again.",
+    );
+  });
+
+  it("is in French", async () => {
+    const browser = stubRecordingBrowser();
+    showCheck("fr");
+    await playTone(
+      browser,
+      { samples: toneOf(440.2), delivered: 144000 },
+      "Jouer la tonalité de test",
+    );
+    expect(await screen.findByText(/^Entendu 440,2 Hz \(\+1 cent\)$/)).toBeTruthy();
+    expect(screen.getByText("Concorde")).toBeTruthy();
   });
 });

@@ -92,7 +92,12 @@ Production code is test-driven: write a failing test first, make it pass with th
     - the no-input guard and the `selected ?? ""` fallback, which only matter when no input is listed and the selector is hidden;
     - a `trueRate: undefined` that JSON drops;
     - `onOpenChange(true)`, which never fires while the dialog is open.
-- [ ] 4.3 Add "Play test tone": a 440 Hz sine at gain 0.5 for 3.0 s on the default output while the input records, then judged, corrected and measured (design D6). Verify component tests with a fake oscillator and recorder for Matches, "Corrected from 478.9 Hz", Off by N cents (with the clock-reference note when the clock is Accurate), Tone not heard, and the reference note always shown.
+- [x] 4.3 Add "Play test tone": a 440 Hz sine at gain 0.5 for 3.0 s on the default output while the input records, then judged, corrected and measured (design D6). Verify component tests with a fake oscillator and recorder for Matches, "Corrected from 478.9 Hz", Off by N cents (with the clock-reference note when the clock is Accurate), Tone not heard, and the reference note always shown.
+
+  Notes:
+  - The tone uses its own 3 s recorder, and `useRecorder.start()` now resolves whether recording began, so the tone never plays when the microphone is refused.
+  - `useTestTone` plays the oscillator through a gain node to the default output and closes its context when replayed, closed or unmounted.
+  - Stryker: 192 killed. Survivors are the 4.2 equivalents, plus the ≤ 10 cents boundary (a measured tone can't land exactly on 10.000 cents) and dependency arrays around stable callbacks.
 - [ ] 4.4 Make the dialog full-screen on narrow viewports and verify (component test at a narrow width) that it fills the viewport.
 
 ## 5. Entry points

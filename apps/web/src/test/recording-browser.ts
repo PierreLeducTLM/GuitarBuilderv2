@@ -83,15 +83,75 @@ export const stubRecordingBrowser = (
       }
     },
   );
+  type Tone = {
+    frequency: number;
+    gain: number;
+    stopAt: number | null;
+    started: boolean;
+    toGain: boolean;
+    toSpeakers: boolean;
+    closed: boolean;
+  };
+  const tones: Tone[] = [];
   vi.stubGlobal(
     "AudioContext",
     class {
+      destination = { kind: "speakers" };
+      currentTime = 0;
+      tone: Tone | null = null;
+      gainNode: unknown = null;
+      createOscillator = () => {
+        const tone: Tone = {
+          frequency: 0,
+          gain: 0,
+          stopAt: null,
+          started: false,
+          toGain: false,
+          toSpeakers: false,
+          closed: false,
+        };
+        this.tone = tone;
+        tones.push(tone);
+        return {
+          frequency: {
+            set value(value: number) {
+              tone.frequency = value;
+            },
+          },
+          connect: (target: unknown) => {
+            if (target === this.gainNode) tone.toGain = true;
+          },
+          start: () => {
+            tone.started = true;
+          },
+          stop: (when: number) => {
+            tone.stopAt = when;
+          },
+        };
+      };
+      createGain = () => {
+        const tone = this.tone;
+        const node = {
+          gain: {
+            set value(value: number) {
+              if (tone) tone.gain = value;
+            },
+          },
+          connect: (target: unknown) => {
+            if (tone && target === this.destination) tone.toSpeakers = true;
+          },
+        };
+        this.gainNode = node;
+        return node;
+      };
       createAnalyser = () => ({
         fftSize: 0,
         getFloatTimeDomainData: (target: Float32Array) => target.fill(options.inputLevel ?? 0.2),
       });
       createMediaStreamSource = () => ({ connect: vi.fn() });
-      close = async () => undefined;
+      close = async () => {
+        if (this.tone) this.tone.closed = true;
+      };
     },
   );
   const context = {
@@ -109,6 +169,7 @@ export const stubRecordingBrowser = (
   const clock = vi.spyOn(performance, "now").mockReturnValue(0);
   return {
     decodes,
+    tones,
     track,
     getUserMedia,
     releaseDecode: () => held.shift()?.(),

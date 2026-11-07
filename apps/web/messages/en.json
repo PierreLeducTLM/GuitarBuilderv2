@@ -604,6 +604,17 @@
     "errors": {
       "microphone": "Unable to access microphone. Please check permissions.",
       "processing": "Error processing audio. Please try again."
+    },
+    "tone": {
+      "button": "Play test tone",
+      "playing": "Playing a 440 Hz tone and listening",
+      "heard": "Heard {frequency} Hz ({cents} {count, plural, one {cent} other {cents}})",
+      "matches": "Matches",
+      "off": "Off by {cents} {count, plural, one {cent} other {cents}}",
+      "clockReference": "The clock check is the reference: recordings from this input are not affected. The speaker's own rate may be off.",
+      "correctedFrom": "Corrected from {frequency} Hz",
+      "notHeard": "Tone not heard. Turn the volume up or bring the microphone closer to the speaker.",
+      "note": "If the speaker and the microphone are on the same device, a rate error can go unnoticed here. The clock check is the reference."
     }
   },
   "wood": {

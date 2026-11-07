@@ -604,6 +604,17 @@
     "errors": {
       "microphone": "Impossible d'accéder au microphone. Vérifiez les autorisations.",
       "processing": "Erreur lors du traitement de l'audio. Veuillez réessayer."
+    },
+    "tone": {
+      "button": "Jouer la tonalité de test",
+      "playing": "Lecture d'une tonalité de 440 Hz et écoute",
+      "heard": "Entendu {frequency} Hz ({cents} {count, plural, one {cent} other {cents}})",
+      "matches": "Concorde",
+      "off": "Écart de {cents} {count, plural, one {cent} other {cents}}",
+      "clockReference": "La vérification de l'horloge fait référence : les enregistrements de cette entrée ne sont pas touchés. C'est peut-être la fréquence du haut-parleur qui est décalée.",
+      "correctedFrom": "Corrigé depuis {frequency} Hz",
+      "notHeard": "Tonalité non entendue. Montez le volume ou rapprochez le micro du haut-parleur.",
+      "note": "Si le haut-parleur et le micro sont sur le même appareil, une erreur de fréquence peut passer inaperçue ici. La vérification de l'horloge fait référence."
     }
   },
   "wood": {

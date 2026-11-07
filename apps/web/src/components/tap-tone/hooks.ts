@@ -124,13 +124,13 @@ export function useRecorder(options: {
     setAnalyser(null);
   }, []);
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (): Promise<boolean> => {
     const stream = await navigator.mediaDevices
       .getUserMedia(captureConstraints(deviceId))
       .catch(() => null);
     if (!stream) {
       onError("microphone");
-      return;
+      return false;
     }
     const mimeType = pickRecordingType((type) => MediaRecorder.isTypeSupported(type));
     const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
@@ -174,6 +174,7 @@ export function useRecorder(options: {
     setAnalyser(node);
     setRecording(true);
     recorder.start(TICK_MS);
+    return true;
   }, [deviceId, end, maxSeconds, onError, onFinished]);
 
   const stop = useCallback(() => end(false), [end]);
