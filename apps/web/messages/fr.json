@@ -137,6 +137,21 @@
       "message": "Fabrication introuvable ou partage désactivé.",
       "hint": "L’histoire de fabrication que vous cherchez a peut-être été retirée, ou le lien est incorrect.",
       "error": "Impossible de charger cette histoire de fabrication."
+    },
+    "updates": {
+      "off": "Recevoir les mises à jour",
+      "on": "Mises à jour activées",
+      "unsupported": "Ce navigateur ne prend pas en charge les notifications.",
+      "prompt": {
+        "title": "Recevoir les mises à jour de la fabrication ?",
+        "message": "Voulez-vous être averti quand de nouvelles photos ou notes sont ajoutées à cette fabrication ?",
+        "accept": "Oui, m’avertir",
+        "decline": "Non merci"
+      },
+      "notification": {
+        "title": "Mise à jour : {name}",
+        "body": "Nouvel avancement publié ! Cliquez pour voir."
+      }
     }
   },
   "builds": {

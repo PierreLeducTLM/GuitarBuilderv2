@@ -137,6 +137,21 @@
       "message": "Build not found or sharing has been disabled.",
       "hint": "The build story you're looking for might have been removed or the link may be incorrect.",
       "error": "Unable to load this build story."
+    },
+    "updates": {
+      "off": "Get Updates",
+      "on": "Updates On",
+      "unsupported": "This browser does not support notifications.",
+      "prompt": {
+        "title": "Get Build Updates?",
+        "message": "Would you like to be notified when new photos or notes are added to this build?",
+        "accept": "Yes, notify me",
+        "decline": "No thanks"
+      },
+      "notification": {
+        "title": "Update: {name}",
+        "body": "New progress has been posted! Click to see."
+      }
     }
   },
   "builds": {
