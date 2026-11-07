@@ -22,7 +22,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
 ## 2. Database: story data and variant rules (decisions 2 and 3)
 
 - [x] 2.1 Add `step_applies(p_key, p_guitar_type, p_bobo)` with its three arrays between the `step-variant-rules` markers. Verify pgTAP counts of applicable template keys for the six variants (classical, steel-string and not set, each with and without BOBO) against the `build-sequence` spec figures, including 120 for steel-string with BOBO and 112 for classical without BOBO.
-- [ ] 2.2 Add `apps/web/src/lib/story/variantRulesSql.test.ts`. It reads the migration, extracts the three arrays and compares them with the keys derived from `TEMPLATE_STEPS` (`guitarType` and `needsBobo`). Verify it passes, and that it fails when one key is removed from the SQL during a quick local check.
+- [x] 2.2 Add `apps/web/src/lib/story/variantRulesSql.test.ts`. It reads the migration, extracts the three arrays and compares them with the keys derived from `TEMPLATE_STEPS` (`guitarType` and `needsBobo`). Verify it passes, and that it fails when one key is removed from the SQL during a quick local check.
 - [ ] 2.3 Write `15_build_story.test.sql`, then add `get_build_story(p_token)` granted to `anon` and `authenticated`. Verify:
   - a valid token returns exactly the keys `name`, `guitarType`, `boboNeck`, `createdAt` and `steps`;
   - an incomplete step with notes and photos comes back as `{key, completed: false}`;
