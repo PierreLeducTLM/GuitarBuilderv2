@@ -39,7 +39,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
   - deleting writes one;
   - an unshared build writes none;
   - with `realtime.topic` set to a valid topic `anon` can read the message, and an unknown, revoked or malformed topic reads nothing.
-- [ ] 3.2 Regenerate or extend `packages/db/src/database.types.ts` with the three client-facing functions (`set_build_sharing`, `build_share_token`, `get_build_story`). Verify `pnpm typecheck`.
+- [x] 3.2 Regenerate or extend `packages/db/src/database.types.ts` with the three client-facing functions (`set_build_sharing`, `build_share_token`, `get_build_story`). Verify `pnpm typecheck`.
 
 ## 4. UI package
 
