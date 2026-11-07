@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { TakePeak } from "@gb/dsp";
+import type { TakePeak, Tap } from "@gb/dsp";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from "vitest";
 import { formats } from "@/i18n/config";
 import en from "../../../messages/en.json";
 import fr from "../../../messages/fr.json";
-import { BodyModes, type BodyModeView, MainFrequency, PlateTakes } from "./panels";
+import { BodyModes, type BodyModeView, ClippingNotice, MainFrequency, PlateTakes } from "./panels";
 
 const withIntl = (node: ReactNode, locale: "en" | "fr" = "en") =>
   render(
@@ -301,5 +301,38 @@ describe("Main frequency", () => {
       />,
     );
     expect(screen.getByRole("region", { name: "Main frequency" }).textContent).toContain("—");
+  });
+});
+
+describe("Clipping notice", () => {
+  const taps = (rejections: readonly Tap["rejection"][]): readonly Tap[] =>
+    rejections.map((rejection, i) => ({ number: i + 1, onset: 24000 * (i + 1), rejection }));
+
+  it("counts the clipped taps and asks for a lighter tap or less gain", () => {
+    withIntl(<ClippingNotice taps={taps(["clipped", null, "clipped"])} />);
+    expect(
+      screen.getByText("2 of 3 taps clipped. Tap more lightly or turn the input gain down."),
+    ).toBeTruthy();
+  });
+
+  it("is in French", () => {
+    withIntl(<ClippingNotice taps={taps(["clipped", "tooClose", "clipped"])} />, "fr");
+    expect(
+      screen.getByText(
+        "2 taps sur 3 ont saturé. Tapez plus doucement ou baissez le gain d'entrée.",
+      ),
+    ).toBeTruthy();
+  });
+
+  it("uses the singular in French for one clipped tap", () => {
+    withIntl(<ClippingNotice taps={taps(["clipped", null])} />, "fr");
+    expect(
+      screen.getByText("1 tap sur 2 a saturé. Tapez plus doucement ou baissez le gain d'entrée."),
+    ).toBeTruthy();
+  });
+
+  it("shows nothing when no tap clipped", () => {
+    const { container } = withIntl(<ClippingNotice taps={taps([null, "cutOff"])} />);
+    expect(container.textContent).toBe("");
   });
 });

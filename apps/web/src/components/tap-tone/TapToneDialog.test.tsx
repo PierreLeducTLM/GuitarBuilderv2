@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
@@ -346,7 +346,7 @@ describe("TapToneDialog in Plate mode", () => {
   }, 30000);
 });
 
-const stubRecording = (options: { stats: boolean } = { stats: true }) => {
+const stubRecording = (options: { stats?: boolean; inputLevel?: number } = {}) => {
   stubBrowser();
   const track: {
     stop: () => void;
@@ -355,7 +355,7 @@ const stubRecording = (options: { stats: boolean } = { stats: true }) => {
   } = {
     stop: vi.fn(),
     getSettings: () => ({ sampleRate: SAMPLE_RATE }),
-    ...(options.stats ? { stats: { totalFrames: 0, deliveredFrames: 0 } } : {}),
+    ...(options.stats === false ? {} : { stats: { totalFrames: 0, deliveredFrames: 0 } }),
   };
   const stream = { getTracks: () => [track], getAudioTracks: () => [track] };
   vi.stubGlobal("navigator", {
@@ -382,14 +382,28 @@ const stubRecording = (options: { stats: boolean } = { stats: true }) => {
   vi.stubGlobal(
     "AudioContext",
     class {
-      createAnalyser = () => ({ fftSize: 0, getFloatTimeDomainData: vi.fn() });
+      createAnalyser = () => ({
+        fftSize: 0,
+        getFloatTimeDomainData: (target: Float32Array) => target.fill(options.inputLevel ?? 0.2),
+      });
       createMediaStreamSource = () => ({ connect: vi.fn() });
       close = async () => undefined;
     },
   );
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+  const context = {
+    clearRect: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    stroke: vi.fn(),
+    setLineDash: vi.fn(),
+  };
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(context as never);
+  const frames: FrameRequestCallback[] = [];
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
+  vi.stubGlobal("cancelAnimationFrame", vi.fn());
   const clock = vi.spyOn(performance, "now").mockReturnValue(0);
-  return { track, clock };
+  return { track, clock, nextFrame: () => frames.shift()?.(0) };
 };
 
 const ENGLISH_BUTTONS = { start: "Start Recording", stop: "Stop Recording" };
@@ -534,6 +548,37 @@ describe("TapToneDialog rate check", () => {
       screen.getByText(
         /^Corrigé : cette entrée fonctionne à 44\s100 Hz, et non aux 48\s000 Hz annoncés par le navigateur\.$/,
       ),
+    ).toBeTruthy();
+  }, 30000);
+});
+
+describe("TapToneDialog clipping warnings", () => {
+  const startRecording = async (inputLevel: number) => {
+    const browser = stubRecording({ inputLevel });
+    plateDialog();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Start Recording" }));
+    await screen.findByRole("button", { name: "Stop Recording" });
+    act(() => browser.nextFrame());
+    return screen.getByTestId("clip-indicator");
+  };
+
+  it("shows Clipping beside the oscilloscope when the input reaches full scale", async () => {
+    const indicator = await startRecording(1);
+    expect(indicator.textContent).toBe("Clipping");
+    expect(indicator.getAttribute("aria-live")).toBe("polite");
+  });
+
+  it("stays quiet below full scale", async () => {
+    expect((await startRecording(0.5)).textContent).toBe("");
+  });
+
+  it("counts the clipped taps of a loaded file", async () => {
+    stubBrowser();
+    plateDialog();
+    const clipped = plate(181.8).map((x, n) => (n === 24010 || n === 76810 ? 1 : x));
+    await upload(clipped);
+    expect(
+      screen.getByText("2 of 3 taps clipped. Tap more lightly or turn the input gain down."),
     ).toBeTruthy();
   }, 30000);
 });

@@ -436,6 +436,7 @@
       "waveformLabel": "Enregistrement de {seconds} s avec {total} frappes",
       "seconds": "{seconds} s",
       "clipped": "Saturée",
+      "clippedNotice": "{clipped, plural, one {# tap sur {total} a saturé} other {# taps sur {total} ont saturé}}. Tapez plus doucement ou baissez le gain d'entrée.",
       "tooClose": "Trop proche d'une autre frappe",
       "cutOff": "Coupée par la fin de l'enregistrement",
       "noneUsable": "Aucune frappe n'est exploitable"
@@ -504,7 +505,8 @@
       "recording": "Enregistrement...",
       "elapsed": "{elapsed} s / {max} s",
       "analyzing": "Analyse...",
-      "corrected": "Corrigé : cette entrée fonctionne à {trueRate, number} Hz, et non aux {statedRate, number} Hz annoncés par le navigateur."
+      "corrected": "Corrigé : cette entrée fonctionne à {trueRate, number} Hz, et non aux {statedRate, number} Hz annoncés par le navigateur.",
+      "clipping": "Saturation"
     },
     "actions": {
       "play": "Écouter",

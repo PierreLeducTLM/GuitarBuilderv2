@@ -436,6 +436,7 @@
       "waveformLabel": "Recording of {seconds} s with {total} taps",
       "seconds": "{seconds} s",
       "clipped": "Clipped",
+      "clippedNotice": "{clipped} of {total} taps clipped. Tap more lightly or turn the input gain down.",
       "tooClose": "Too close to another tap",
       "cutOff": "Cut off by the end of the recording",
       "noneUsable": "None of the taps can be used"
@@ -504,7 +505,8 @@
       "recording": "Recording...",
       "elapsed": "{elapsed}s / {max}s",
       "analyzing": "Analyzing...",
-      "corrected": "Corrected: this input runs at {trueRate, number} Hz, not the {statedRate, number} Hz the browser reports."
+      "corrected": "Corrected: this input runs at {trueRate, number} Hz, not the {statedRate, number} Hz the browser reports.",
+      "clipping": "Clipping"
     },
     "actions": {
       "play": "Play",

@@ -64,7 +64,9 @@ Production code is test-driven: write a failing test first, make it pass with th
 - [x] 3.2 Confirm a corrected take and verify (dialog test) that the record returned to the caller has sampleRate 48000, fftSize 32768 and binWidth 1.46484375.
 
   Notes: a verification test with no new production code. It passed first time, because the correction resamples to 48 kHz before analysis (design D2).
-- [ ] 3.3 Show the "Clipping" indicator beside the oscilloscope as text in a polite live region, and the results notice "N of M taps clipped…" for recorded and loaded takes. Verify component tests: the indicator appears and clears, 2 of 3 clipped shows the notice, and no clipped taps shows nothing.
+- [x] 3.3 Show the "Clipping" indicator beside the oscilloscope as text in a polite live region, and the results notice "N of M taps clipped…" for recorded and loaded takes. Verify component tests: the indicator appears and clears, 2 of 3 clipped shows the notice, and no clipped taps shows nothing.
+
+  Notes: the indicator clearing after 1 s is covered by the `useClipFlag` tests (2.3). The dialog tests show it appearing at full scale and staying empty below. Strings added in English and French; the French notice uses a plural ("1 tap sur 2 a saturé"). Stryker: 15 killed, no survivors.
 
 ## 4. Microphone Check dialog
 

@@ -42,12 +42,13 @@ import {
   MAX_RECORDING_SECONDS,
   type Recording,
   useAudioInputs,
+  useClipFlag,
   usePlayback,
   useRecorder,
 } from "./hooks";
 import { Oscilloscope } from "./Oscilloscope";
 import { PeakInspector } from "./PeakInspector";
-import { BodyModes, MainFrequency, PlateTakes, TAKE_SYMBOL } from "./panels";
+import { BodyModes, ClippingNotice, MainFrequency, PlateTakes, TAKE_SYMBOL } from "./panels";
 import { type GraphMark, type ModeSlot, TapToneSpectrum } from "./TapToneSpectrum";
 import { TapWaveform } from "./TapWaveform";
 import { useDecayQ } from "./useDecayQ";
@@ -148,6 +149,7 @@ export function TapToneDialog(props: TapToneDialogProps) {
   const { analyse } = useTakeAnalysis(dispatch);
   const inputs = useAudioInputs();
   const playback = usePlayback();
+  const clip = useClipFlag();
 
   const analyseAudio = async (
     load: () => Promise<DecodedAudio>,
@@ -494,7 +496,14 @@ export function TapToneDialog(props: TapToneDialogProps) {
               {t("capture.stop")}
             </Button>
           </div>
-          <Oscilloscope analyser={recorder.analyser} />
+          <Oscilloscope analyser={recorder.analyser} onClip={clip.report} />
+          <p
+            data-testid="clip-indicator"
+            aria-live="polite"
+            className="text-sm font-semibold text-danger-ink"
+          >
+            {clip.clipping ? t("capture.clipping") : ""}
+          </p>
         </div>
       ) : null}
 
@@ -512,6 +521,7 @@ export function TapToneDialog(props: TapToneDialogProps) {
               {t("capture.corrected", audio.correction)}
             </p>
           ) : null}
+          {audio ? <ClippingNotice taps={results.result.taps} /> : null}
           {audio?.filtered[0] ? (
             <TapWaveform
               signal={audio.filtered[0]}
