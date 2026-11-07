@@ -83,7 +83,7 @@ test.describe("language", () => {
     await page.getByRole("radio", { name: en.language.frName }).check();
     await expect(page.getByTestId("auth-subtitle")).toHaveText(fr.auth.subtitleSignIn);
     await page.goto("/story/abc123");
-    await expect(page.getByRole("heading", { name: fr.story.title })).toBeVisible();
+    await expect(page.getByRole("heading", { name: fr.story.notFound.title })).toBeVisible();
     await page.goto("/sign-in");
     await expect(page).toHaveTitle(fr.app.documentTitle);
     await expect(page.getByText(fr.auth.note)).toBeVisible();

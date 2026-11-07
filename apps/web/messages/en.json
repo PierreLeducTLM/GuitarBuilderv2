@@ -107,9 +107,14 @@
     "info": "Information"
   },
   "story": {
-    "title": "Build story",
-    "placeholder": "This shared build story will appear here.",
-    "shareLink": "Share link"
+    "title": "Build Story",
+    "loading": "Loading build story...",
+    "notFound": {
+      "title": "Story Not Found",
+      "message": "Build not found or sharing has been disabled.",
+      "hint": "The build story you're looking for might have been removed or the link may be incorrect.",
+      "error": "Unable to load this build story."
+    }
   },
   "builds": {
     "title": "Your Builds ({count})",

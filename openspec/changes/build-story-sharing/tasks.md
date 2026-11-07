@@ -77,7 +77,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
 ## 7. Public story page (decision 6)
 
 - [x] 7.1 Add the `dateLong` format to `i18n/config.ts`. Verify a unit test that 6 December 2025 formats as "December 6, 2025" in English and "6 décembre 2025" in French.
-- [ ] 7.2 Replace the placeholder `app/story/[token]/page.tsx` with the server page, and add `loading.tsx` ("Loading build story...") and `StoryNotFound`, with both messages and the "Unable to load this build story." variant. Verify component tests for both messages, and a unit test that `abc` never calls the function.
+- [x] 7.2 Replace the placeholder `app/story/[token]/page.tsx` with the server page, and add `loading.tsx` ("Loading build story...") and `StoryNotFound`, with both messages and the "Unable to load this build story." variant. Verify component tests for both messages, and a unit test that `abc` never calls the function.
 - [ ] 7.3 Build `StoryView`: header ("Build Story", name, "Started <date>", switch slot), "Build Progress" with `LedProgress`, "<C> of <T> steps" and "<P>% Complete", the timeline or an empty state, and no app navigation. Verify component tests:
   - the "OM #3 / Started December 6, 2025" header;
   - the progress figures;

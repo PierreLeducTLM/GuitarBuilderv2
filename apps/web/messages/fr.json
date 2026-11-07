@@ -107,9 +107,14 @@
     "info": "Information"
   },
   "story": {
-    "title": "Histoire de la construction",
-    "placeholder": "L'histoire partagée de cette construction s'affichera ici.",
-    "shareLink": "Lien de partage"
+    "title": "Histoire de la fabrication",
+    "loading": "Chargement de l’histoire de la fabrication...",
+    "notFound": {
+      "title": "Histoire introuvable",
+      "message": "Fabrication introuvable ou partage désactivé.",
+      "hint": "L’histoire de fabrication que vous cherchez a peut-être été retirée, ou le lien est incorrect.",
+      "error": "Impossible de charger cette histoire de fabrication."
+    }
   },
   "builds": {
     "title": "Vos fabrications ({count})",

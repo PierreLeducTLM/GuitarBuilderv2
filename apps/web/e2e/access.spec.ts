@@ -24,8 +24,7 @@ test.describe("access gate without a session", () => {
   test("serves the public story page without the sign-in screen or the shell", async ({ page }) => {
     await page.goto("/story/abc123");
     await expect(page).toHaveURL(/\/story\/abc123$/);
-    await expect(page.getByRole("heading", { name: en.story.title })).toBeVisible();
-    await expect(page.getByText("abc123")).toBeVisible();
+    await expect(page.getByRole("heading", { name: en.story.notFound.title })).toBeVisible();
     await expect(page.getByRole("button", { name: en.auth.signIn, exact: true })).toHaveCount(0);
     await expect(page.getByRole("navigation")).toHaveCount(0);
   });
