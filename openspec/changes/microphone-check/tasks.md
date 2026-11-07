@@ -113,7 +113,9 @@ Production code is test-driven: write a failing test first, make it pass with th
 
 ## 6. Text and styling
 
-- [ ] 6.1 Add every new string to `en.json` and `fr.json` with the spec wording, including the French verdicts, the corrected note, the mismatch banner, the clipping notice and the You page group. Verify French tests for the corrected note, the mismatch banner and the check dialog title, and verify `pnpm check` finds no missing keys.
+- [x] 6.1 Add every new string to `en.json` and `fr.json` with the spec wording, including the French verdicts, the corrected note, the mismatch banner, the clipping notice and the You page group. Verify French tests for the corrected note, the mismatch banner and the check dialog title, and verify `pnpm check` finds no missing keys.
+
+  Notes: strings were added with each feature task. The French tests are in `TapToneDialog.test.tsx` (corrected note, banner), `MicrophoneCheck.test.tsx` (title, verdicts, tone), `panels.test.tsx` (clipping notice, with a plural) and `YouScreen.test.tsx`. The key-parity test in `i18n.test.ts` is green, and `pnpm check` exits 0.
 - [ ] 6.2 Style the verdicts, indicator and dialog with `packages/ui` tokens only (no raw hex), with verdicts in words as well as colour. Verify `pnpm check` passes and AA contrast holds in both themes.
 
 ## 7. Wrap-up
