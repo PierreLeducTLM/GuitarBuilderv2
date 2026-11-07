@@ -161,7 +161,7 @@ The arrays sit between `-- step-variant-rules:begin` and `-- step-variant-rules:
   - Turning it on without support shows the toast "This browser does not support notifications.". With support, it requests permission as above.
   - Turning it off stores `off`.
   - On load, a stored `on` is restored only if `Notification.permission === "granted"`.
-- **Service worker.** `public/story-sw.js` is plain JavaScript under the scope `/story/`, registered when updates turn on. It has no `fetch` handler and no cache, and it does only two things:
+- **Service worker.** `public/story/sw.js` is plain JavaScript; served under `/story/`, it passes the access gate like any story path and its scope is `/story/`. It is registered when updates turn on. It has no `fetch` handler and no cache, and it does only two things:
   - On `notificationclick`, it closes the notification and focuses an open window whose URL matches the notification's `data.url`, then posts `{ type: "story-notification-click" }` to it. If no such window is open, it opens `data.url`.
   - It is otherwise idle.
 - **Showing a notification.** The page shows notifications itself through `registration.showNotification("Update: <name>", { body, tag: "story-<token>", data: { url } })`, so a newer one replaces the older one. That call is the same on desktop and Android.

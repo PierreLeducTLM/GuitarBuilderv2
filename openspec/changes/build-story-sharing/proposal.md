@@ -64,7 +64,7 @@ None.
   - the share dialog in `components/builds/`;
   - the story route and its components under `components/story/`;
   - pure story logic under `lib/story/`;
-  - a service worker in `public/`;
+  - a service worker in `public/story/`;
   - a long date format;
   - new message keys in both catalogs.
 - **Tests:**

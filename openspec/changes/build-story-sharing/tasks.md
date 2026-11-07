@@ -95,7 +95,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
 
 ## 8. Updates and notifications (decision 7)
 
-- [ ] 8.1 Add `public/story-sw.js` (scope `/story/`, `notificationclick` only: close, focus the matching window and post `story-notification-click`, otherwise open `data.url`; no fetch handler) and a `registerStoryWorker()` helper. Verify a unit test of the helper with a fake `navigator.serviceWorker`, and a review that the worker has no `fetch` listener.
+- [x] 8.1 Add `public/story/sw.js` (scope `/story/`, `notificationclick` only: close, focus the matching window and post `story-notification-click`, otherwise open `data.url`; no fetch handler) and a `registerStoryWorker()` helper. Verify a unit test of the helper with a fake `navigator.serviceWorker`, and a review that the worker has no `fetch` listener.
 - [ ] 8.2 Build the "Get Build Updates?" prompt and the "Get Updates" / "Updates On" switch in `StoryView`. Verify component tests with a fake `Notification`, fake storage and fake timers:
   - the prompt appears after 2 s for a first-time visitor;
   - "Yes" plus granted turns updates on and stores it;
