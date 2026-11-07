@@ -112,47 +112,48 @@ The system SHALL initialize every new build as follows:
 - **THEN** public access is shown as off and no share link exists
 
 ### Requirement: Build Detail Header
-The system SHALL show a header on a build's detail page with the following elements:
-- a "Back to Builds" control that returns to `/builds`;
-- a "Share" action that opens the sharing dialog (`build-story-sharing`);
-- a "Delete Build" action;
-- the build name as the title;
-- the guitar type and, when chosen, "BOBO neck", or "Guitar type not set" for a migrated build without one;
-- "Created <date>", showing the creation date without a time, for example "Dec 6, 2025".
+The system SHALL show a build's page bar (`app-shell`) with the elements listed in the scenarios: a "Builds" control, the build name, its variant and creation date, and a "More actions" menu. The menu holds "Share" (`build-story-sharing`), "Change construction" and "Delete Build", in that order. Delete Build is set apart as a destructive action. Build actions are not shown as separate buttons.
 
 #### Scenario: Header content
 - **GIVEN** a steel-string build with a BOBO neck named "Build #1", created on 6 December 2025
-- **WHEN** the user opens its detail page
-- **THEN** the header shows "Build #1", "Steel-string", "BOBO neck" and "Created Dec 6, 2025"
-- **AND** it offers "Back to Builds", "Share" and "Delete Build"
+- **WHEN** its owner opens the build's page
+- **THEN** the bar shows "Build #1", "Steel-string", "BOBO neck" and "Created Dec 6, 2025"
+- **AND** it offers a "Builds" control and a "More actions" menu
+
+#### Scenario: Variant not set
+- **GIVEN** a migrated build whose guitar type is not set
+- **WHEN** its owner opens the build's page
+- **THEN** the bar shows "Guitar type not set" in place of the guitar type
+
+#### Scenario: More actions
+- **WHEN** the owner opens "More actions"
+- **THEN** it lists "Share", "Change construction" and "Delete Build"
+- **AND** "Change construction" opens the same dialog as the Construction section's "Change" action
 
 #### Scenario: Back to list
-- **WHEN** the user presses "Back to Builds"
+- **WHEN** the user presses "Builds"
 - **THEN** the browser navigates to `/builds`
 
+#### Scenario: Read-only build has no actions menu
+- **WHEN** an administrator opens another user's build
+- **THEN** no "More actions" menu is shown
+
 ### Requirement: Build Summary Strip
-The system SHALL show under the build detail header a summary strip with: the progress bar and "<C> of <T> steps · <P>%" (as the public story computes them, `build-story-sharing`); the latest step measurement's frequency, or "No measurement yet"; and "Next up": the first ready step in template order (`build-sequence`), which opens that step's details when activated, or "All steps done".
+The system SHALL show under the build's page bar a summary strip with: the progress bar and "<C> of <T> steps · <P>%" (as the public story computes them, `build-story-sharing`); the latest step measurement's frequency, or "No measurement yet"; and "Next up": the first ready step in template order (`build-sequence`), which opens that step's screen when activated, or "All steps done".
 
 #### Scenario: Summary of a build in progress
 - **GIVEN** a steel-string build with a BOBO neck, 30 completed steps, a latest measurement of 181.6 Hz and FitTopBack as its first ready step
-- **WHEN** its owner opens the detail page
+- **WHEN** its owner opens the build's page
 - **THEN** the strip shows "30 of 120 steps · 25%", "181.6 Hz" and "Next up: Fit top and back"
 
 #### Scenario: Next up opens the step
 - **WHEN** the owner activates "Next up: Fit top and back"
-- **THEN** the Sequence tab is shown with the details of "Fit top and back" open
+- **THEN** the URL becomes `/builds/<build id>/steps/FitTopBack`
+- **AND** the step screen of "Fit top and back" is shown
 
-### Requirement: Build Detail Tabs
-The system SHALL organize the detail page into two tabs: "Overview", which is selected when the page opens, and "Sequence Diagram", which shows the build's process diagram (`build-sequence`). The selected tab is not part of the URL, so opening or reloading the page always starts on Overview.
-
-#### Scenario: Switching to the sequence tab
-- **WHEN** the user selects "Sequence Diagram"
-- **THEN** the build's process diagram is shown and the acoustic analysis tools are hidden
-
-#### Scenario: Reload resets the tab
-- **GIVEN** the user is on the "Sequence Diagram" tab
-- **WHEN** the user reloads the page
-- **THEN** the "Overview" tab is selected
+#### Scenario: Strip on every view
+- **WHEN** the user switches between the Steps, Map and Overview views
+- **THEN** the summary strip stays shown above the view
 
 ### Requirement: Build Overview Tab
 The system SHALL show on the Overview tab a "Construction" section with the build's guitar type and BOBO neck choice, with a "Change" action for the owner. Below it the tab SHALL show the build's acoustic analysis tools and saved acoustic results (`build-acoustic-analysis`).
@@ -178,26 +179,35 @@ The system SHALL let a build's owner change its guitar type and BOBO neck choice
 - **THEN** the construction section reads "Guitar type not set" and invites the owner to choose one, so that steps that don't apply are hidden
 
 ### Requirement: Build Deep Links
-The system SHALL expose bookmarkable URLs: `/builds` opens the builds list and `/builds/<build id>` opens that build's detail page. The root path `/` and any unknown path SHALL redirect to `/builds`.
-- Opening `/builds/<build id>` directly shows "Loading build..." until the build is available.
+The system SHALL expose bookmarkable URLs for the builds list, each build's views, its part flows and its step screens, as listed in the scenarios. The root path `/` and any unknown path SHALL redirect to `/builds`.
+- Opening a build URL directly shows "Loading build..." until the build is available.
 - A visitor who is not signed in is asked to sign in first (`user-auth`). After signing in, the visitor sees the page at the requested URL.
+
+#### Scenario: Build URLs
+- **WHEN** the URLs of a build X are listed
+- **THEN** they are `/builds/X` (Steps view), `/builds/X/map` (Map view), `/builds/X/map/<group>` (a part flow, `build-sequence`), `/builds/X/overview` (Overview view) and `/builds/X/steps/<step key>` (a step screen)
 
 #### Scenario: Direct link to an own build
 - **GIVEN** a signed-in user who owns build X
 - **WHEN** the user opens `/builds/X` in a new browser tab
-- **THEN** the detail page of build X is shown
+- **THEN** the Steps view of build X is shown
+
+#### Scenario: Direct link to a step
+- **GIVEN** a signed-in user who owns steel-string build X
+- **WHEN** the user opens `/builds/X/steps/FitTopBack`
+- **THEN** the step screen of "Fit top and back" of build X is shown
 
 #### Scenario: Root path
 - **WHEN** a signed-in user opens `/`
 - **THEN** the browser is redirected to `/builds`
 
 #### Scenario: Signed-out visitor follows a build link
-- **WHEN** a visitor who is not signed in opens `/builds/X`
+- **WHEN** a visitor who is not signed in opens `/builds/X/steps/FitTopBack`
 - **THEN** the sign-in screen is shown
-- **AND** after signing in as the owner of X, the detail page of build X is shown
+- **AND** after signing in as the owner of X, the step screen of "Fit top and back" is shown
 
 ### Requirement: Inaccessible Build Links
-The system SHALL redirect the user to `/builds` when a `/builds/<build id>` link points to a build that does not exist or that the user may not read.
+The system SHALL redirect the user to `/builds` when a build URL points to a build that does not exist or that the user may not read. When the build is readable but the URL names a step or group that does not exist, or a step that does not apply to the build's variant, the system SHALL redirect to the build's Steps view at `/builds/<build id>`. Both redirects replace the current history entry.
 
 #### Scenario: Link to another user's build
 - **WHEN** a signed-in regular user opens `/builds/Y` and Y belongs to another user
@@ -206,6 +216,19 @@ The system SHALL redirect the user to `/builds` when a `/builds/<build id>` link
 #### Scenario: Link to a deleted build
 - **WHEN** a signed-in user opens a link to a build that has been deleted
 - **THEN** the user is redirected to `/builds`
+
+#### Scenario: Unknown step key
+- **WHEN** the owner of build X opens `/builds/X/steps/NoSuchStep`
+- **THEN** the user is redirected to `/builds/X`
+
+#### Scenario: Step hidden by the variant
+- **GIVEN** a classical build X
+- **WHEN** its owner opens `/builds/X/steps/FabricateBridge`
+- **THEN** the user is redirected to `/builds/X`
+
+#### Scenario: Unknown group
+- **WHEN** the owner of build X opens `/builds/X/map/no-such-group`
+- **THEN** the user is redirected to `/builds/X`
 
 ### Requirement: Delete Build Confirmation
 The system SHALL delete a build only after the user confirms a dialog titled "Delete Build" with the message "Are you sure you want to delete this guitar build?" and the actions "Delete" and "Cancel".
@@ -306,9 +329,31 @@ The system SHALL store these attributes for each build:
 - **THEN** the build's updated-at timestamp changes to the time of that change
 
 ### Requirement: Builds Localization
-The system SHALL present all text of the builds list, the creation dialog, the detail page and the deletion dialog in English and French according to the user's selected language. This includes the tab labels, the "Share" action, the guitar type names and the formatting of dates.
+The system SHALL present all text of the builds list, the creation dialog, the build's page and the deletion dialog in English and French according to the user's selected language. This includes the view labels, the "More actions" menu entries, the guitar type names and the formatting of dates.
 
 #### Scenario: French user
 - **GIVEN** the user selected French
-- **WHEN** the user opens a build's detail page
-- **THEN** the back control, the tab labels, the Share and Delete actions and the creation date are shown in French
+- **WHEN** the user opens a build's page
+- **THEN** the return control, the view labels, the "More actions" entries and the creation date are shown in French
+
+### Requirement: Build Views
+The system SHALL organize a build's page into three views, chosen with a control under the summary strip: "Steps" (the default, `build-sequence` Steps Checklist), "Map" (`build-sequence` Build Map and Part Flow) and "Overview" (Build Overview Tab). Each view has its own URL (Build Deep Links), so reloading or going back keeps the view. Other requirements' "Overview tab" means the Overview view.
+
+#### Scenario: Default view
+- **WHEN** the owner opens `/builds/X`
+- **THEN** the Steps view is selected and shown
+
+#### Scenario: Switching views
+- **GIVEN** the owner is on the Steps view of build X
+- **WHEN** the owner selects "Map"
+- **THEN** the URL becomes `/builds/X/map` and the build map is shown
+
+#### Scenario: Reload keeps the view
+- **GIVEN** the owner is on `/builds/X/overview`
+- **WHEN** the owner reloads the page
+- **THEN** the Overview view is still selected
+
+#### Scenario: Back returns to the previous view
+- **GIVEN** the owner went from the Steps view to the Map view of build X
+- **WHEN** the owner presses the browser Back button
+- **THEN** the Steps view is shown

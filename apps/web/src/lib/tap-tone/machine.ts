@@ -20,13 +20,25 @@ export const ROLE_NAMES: readonly RoleName[] = ["air", "top", "back"];
 const ALL_TAKES: readonly TakeKey[] = [...PLATE_TAKES, "instrument"];
 
 export type DialogError =
-  | { key: "microphone" | "processing" | "noTap" | "unsupported" | "export" | "playback" }
+  | {
+      key:
+        | "microphone"
+        | "captureRate"
+        | "processing"
+        | "noTap"
+        | "unsupported"
+        | "export"
+        | "playback";
+    }
   | { key: "decode"; reason: string };
+
+export type RateCorrection = { readonly trueRate: number; readonly statedRate: number };
 
 export type TakeAudio = {
   readonly filtered: readonly Float64Array[];
   readonly raw: readonly Float32Array[];
   readonly sampleRate: number;
+  readonly correction?: RateCorrection;
 };
 
 export type ResultsTake = {
@@ -59,6 +71,7 @@ export type DialogEvent =
   | { type: "analysisStarted" }
   | { type: "analysisDone"; run: number; analysis: TakeAnalysis; audio: TakeAudio }
   | { type: "analysisFailed"; run: number }
+  | { type: "captureRejected"; run: number }
   | { type: "failed"; error: DialogError }
   | { type: "tapToggled"; number: number }
   | { type: "peakSelected"; index: number }
@@ -207,6 +220,10 @@ export const reduce = (state: DialogState, event: DialogEvent): DialogState => {
     case "analysisFailed": {
       const key = takeRunning(state, event.run);
       return key ? { ...withTake(state, key, IDLE), error: { key: "processing" } } : state;
+    }
+    case "captureRejected": {
+      const key = takeRunning(state, event.run);
+      return key ? { ...withTake(state, key, IDLE), error: { key: "captureRate" } } : state;
     }
     case "failed":
       return { ...withTake(state, state.active, IDLE), error: event.error };

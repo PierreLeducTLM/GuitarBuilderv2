@@ -12,6 +12,7 @@ import { Button, DialogFrame, IconButton, SelectField, Tooltip } from "@gb/ui";
 import { CircleHelp, LoaderCircle } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useId, useMemo, useReducer, useRef, useState } from "react";
+import { readCheck } from "@/lib/microphone-check/memory";
 import {
   canConfirm,
   createDialog,
@@ -28,18 +29,28 @@ import {
   selectedPeak,
   type TakeAudio,
 } from "@/lib/tap-tone/machine";
+import { MicrophoneCheck } from "../microphone-check/MicrophoneCheck";
+import { useCheckLabel } from "../microphone-check/useCheckLabel";
 import {
   type DecodedAudio,
   decodeAudio,
   downloadWav,
   isMobileDevice,
   isSupportedAudioFile,
+  judgeRecording,
   prepareAudio,
 } from "./audio";
-import { MAX_RECORDING_SECONDS, useAudioInputs, usePlayback, useRecorder } from "./hooks";
+import {
+  MAX_RECORDING_SECONDS,
+  type Recording,
+  useAudioInputs,
+  useClipFlag,
+  usePlayback,
+  useRecorder,
+} from "./hooks";
 import { Oscilloscope } from "./Oscilloscope";
 import { PeakInspector } from "./PeakInspector";
-import { BodyModes, MainFrequency, PlateTakes, TAKE_SYMBOL } from "./panels";
+import { BodyModes, ClippingNotice, MainFrequency, PlateTakes, TAKE_SYMBOL } from "./panels";
 import { type GraphMark, type ModeSlot, TapToneSpectrum } from "./TapToneSpectrum";
 import { TapWaveform } from "./TapWaveform";
 import { useDecayQ } from "./useDecayQ";
@@ -87,6 +98,15 @@ const targetFor = (result: TakeResult, frequency: number, level: number): DecayT
     spectralQ: null,
   };
 
+type Checked =
+  | { readonly accepted: true; readonly audio: TakeAudio }
+  | { readonly accepted: false };
+
+const checkRecording = (decoded: DecodedAudio, recording: Recording): Checked => {
+  const { verdict, audio } = judgeRecording(decoded, recording);
+  return verdict.verdict === "mismatch" ? { accepted: false } : { accepted: true, audio };
+};
+
 const decayValue = (cache: TakeCache | null, result: TakeResult, target: DecayTarget) =>
   cache ? takeDecayQ(cache, result, target).q : null;
 
@@ -120,10 +140,19 @@ export function TapToneDialog(props: TapToneDialogProps) {
   const { analyse } = useTakeAnalysis(dispatch);
   const inputs = useAudioInputs();
   const playback = usePlayback();
+  const clip = useClipFlag();
+  const [checking, setChecking] = useState(false);
+  const checkLabel = useCheckLabel();
+  const selectedInput = inputs.inputs.find((input) => input.id === inputs.selected);
+  const lastCheck = selectedInput ? readCheck(() => window.localStorage, selectedInput) : null;
 
   const analyseAudio = async (
     load: () => Promise<DecodedAudio>,
     onLoadError: (error: unknown) => void,
+    check: (decoded: DecodedAudio) => Checked = (decoded) => ({
+      accepted: true,
+      audio: prepareAudio(decoded),
+    }),
   ) => {
     const run = latest.current.nextRun;
     dispatch({ type: "analysisStarted" });
@@ -133,8 +162,12 @@ export function TapToneDialog(props: TapToneDialogProps) {
       return null;
     });
     if (!decoded) return;
-    const prepared = prepareAudio(decoded);
-    analyse({ run, audio: prepared, mode: props.mode, mobile });
+    const checked = check(decoded);
+    if (!checked.accepted) {
+      dispatch({ type: "captureRejected", run });
+      return;
+    }
+    analyse({ run, audio: checked.audio, mode: props.mode, mobile });
   };
 
   const recorder = useRecorder({
@@ -142,8 +175,9 @@ export function TapToneDialog(props: TapToneDialogProps) {
     onFinished: (recording) => {
       const run = latest.current.nextRun;
       void analyseAudio(
-        async () => decodeAudio(await recording.arrayBuffer(), { mixToMono: false }),
+        async () => decodeAudio(await recording.blob.arrayBuffer(), { mixToMono: false }),
         () => dispatch({ type: "analysisFailed", run }),
+        (decoded) => checkRecording(decoded, recording),
       );
     },
     onError: () => dispatch({ type: "failed", error: { key: "microphone" } }),
@@ -394,6 +428,21 @@ export function TapToneDialog(props: TapToneDialogProps) {
               ))}
             </SelectField>
           ) : null}
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-fg-dim">
+              {lastCheck ? t("capture.checked", checkLabel(lastCheck)) : t("capture.notChecked")}
+            </span>
+            <Button variant="ghost" onClick={() => setChecking(true)}>
+              {t("capture.checkInput")}
+            </Button>
+          </div>
+          <MicrophoneCheck
+            open={checking}
+            onClose={() => {
+              setChecking(false);
+              void inputs.refresh();
+            }}
+          />
           <div className="flex flex-wrap items-center gap-3">
             <Button
               onClick={async () => {
@@ -457,7 +506,14 @@ export function TapToneDialog(props: TapToneDialogProps) {
               {t("capture.stop")}
             </Button>
           </div>
-          <Oscilloscope analyser={recorder.analyser} />
+          <Oscilloscope analyser={recorder.analyser} onClip={clip.report} />
+          <p
+            data-testid="clip-indicator"
+            aria-live="polite"
+            className="text-sm font-semibold text-danger-ink"
+          >
+            {clip.clipping ? t("capture.clipping") : ""}
+          </p>
         </div>
       ) : null}
 
@@ -470,6 +526,12 @@ export function TapToneDialog(props: TapToneDialogProps) {
 
       {results ? (
         <div className="flex flex-col gap-4">
+          {audio?.correction ? (
+            <p className="rounded-xl border border-line bg-inset px-3 py-2 text-sm text-fg-dim">
+              {t("capture.corrected", audio.correction)}
+            </p>
+          ) : null}
+          {audio ? <ClippingNotice taps={results.result.taps} /> : null}
           {audio?.filtered[0] ? (
             <TapWaveform
               signal={audio.filtered[0]}

@@ -1,6 +1,6 @@
 "use client";
 
-import { noteLabel, type TakePeak } from "@gb/dsp";
+import { noteLabel, type TakePeak, type Tap } from "@gb/dsp";
 import { Button, cx } from "@gb/ui";
 import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
@@ -358,5 +358,17 @@ export function MainFrequency({
       ) : null}
       <PeakButtons peaks={peaks} selected={selected} onSelect={onSelect} />
     </section>
+  );
+}
+
+/** tap-tone-capture: Clipping Warnings. How many taps were rejected as clipped. */
+export function ClippingNotice({ taps }: { taps: readonly Tap[] }) {
+  const t = useTranslations("tapTone");
+  const clipped = taps.filter((tap) => tap.rejection === "clipped").length;
+  if (clipped === 0) return null;
+  return (
+    <p className="rounded-xl border border-line bg-inset px-3 py-2 text-sm text-fg-dim">
+      {t("taps.clippedNotice", { clipped, total: taps.length })}
+    </p>
   );
 }

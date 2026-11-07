@@ -1,14 +1,32 @@
 // @vitest-environment jsdom
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { forgetChosenInput, useAudioInputs, usePlayback, useRecorder } from "./hooks";
+import { forgetChosenInput, useAudioInputs, useClipFlag, usePlayback, useRecorder } from "./hooks";
 
 type FakeDevice = { deviceId: string; kind: MediaDeviceKind; label: string };
 
-const fakeMediaDevices = (initial: readonly FakeDevice[]) => {
+type FakeTrack = {
+  stop: ReturnType<typeof vi.fn>;
+  getSettings: () => { sampleRate?: number };
+  stats?: { totalFrames?: number; deliveredFrames?: number } | null;
+};
+
+const fakeTrack = (overrides: Partial<FakeTrack> = {}): FakeTrack => ({
+  stop: vi.fn(),
+  getSettings: () => ({ sampleRate: 48000 }),
+  ...overrides,
+});
+
+const fakeMediaDevices = (
+  initial: readonly FakeDevice[],
+  track: FakeTrack | null = fakeTrack(),
+) => {
   const state = { devices: [...initial], listeners: [] as (() => void)[] };
-  const tracks = [{ stop: vi.fn() }];
-  const getUserMedia = vi.fn(async () => ({ getTracks: () => tracks }));
+  const tracks = track ? [track] : [];
+  const getUserMedia = vi.fn(async () => ({
+    getTracks: () => tracks,
+    getAudioTracks: () => tracks,
+  }));
   const mediaDevices = {
     enumerateDevices: vi.fn(async () => state.devices),
     getUserMedia,
@@ -88,10 +106,12 @@ describe("useAudioInputs", () => {
 
 class FakeRecorder {
   static instances: FakeRecorder[] = [];
+  static startsLater = false;
   static isTypeSupported = (type: string) => type === "audio/webm;codecs=opus";
   readonly mimeType: string;
   ondataavailable: ((event: { data: Blob }) => void) | null = null;
   onstop: (() => void) | null = null;
+  onstart: (() => void) | null = null;
   started: number | null = null;
   constructor(_stream: unknown, options: { mimeType: string }) {
     this.mimeType = options.mimeType;
@@ -100,6 +120,7 @@ class FakeRecorder {
   start(timeslice: number) {
     this.started = timeslice;
     this.ondataavailable?.({ data: new Blob(["chunk"]) });
+    if (!FakeRecorder.startsLater) this.onstart?.();
   }
   stop() {
     this.onstop?.();
@@ -146,11 +167,12 @@ const fakeAudioContext = () => {
 };
 
 describe("useRecorder", () => {
-  const setup = () => {
+  const setup = (track: FakeTrack = fakeTrack()) => {
     FakeRecorder.instances = [];
+    FakeRecorder.startsLater = false;
     vi.stubGlobal("MediaRecorder", FakeRecorder);
     fakeAudioContext();
-    const media = fakeMediaDevices([input("usb", "USB")]);
+    const media = fakeMediaDevices([input("usb", "USB")], track);
     const onFinished = vi.fn();
     const onError = vi.fn();
     const hook = renderHook(() => useRecorder({ deviceId: "usb", onFinished, onError }));
@@ -184,8 +206,27 @@ describe("useRecorder", () => {
     act(() => vi.advanceTimersByTime(7700));
     expect(hook.result.current.recording).toBe(false);
     expect(onFinished).toHaveBeenCalledTimes(1);
-    expect(onFinished.mock.calls[0]?.[0]).toMatchObject({ type: "audio/webm;codecs=opus" });
+    expect(onFinished.mock.calls[0]?.[0].blob).toMatchObject({ type: "audio/webm;codecs=opus" });
     expect(media.tracks[0]?.stop).toHaveBeenCalled();
+  });
+
+  it("stops by itself at a shorter limit when given one", async () => {
+    vi.useFakeTimers();
+    FakeRecorder.instances = [];
+    FakeRecorder.startsLater = false;
+    vi.stubGlobal("MediaRecorder", FakeRecorder);
+    fakeAudioContext();
+    fakeMediaDevices([input("usb", "USB")]);
+    const onFinished = vi.fn();
+    const hook = renderHook(() =>
+      useRecorder({ deviceId: "usb", onFinished, onError: vi.fn(), maxSeconds: 5 }),
+    );
+    await act(() => hook.result.current.start());
+    act(() => vi.advanceTimersByTime(4900));
+    expect(hook.result.current.recording).toBe(true);
+    act(() => vi.advanceTimersByTime(100));
+    expect(hook.result.current.recording).toBe(false);
+    expect(onFinished).toHaveBeenCalledTimes(1);
   });
 
   it("hands over the recording and releases the microphone on Stop", async () => {
@@ -193,6 +234,7 @@ describe("useRecorder", () => {
     await act(() => hook.result.current.start());
     act(() => hook.result.current.stop());
     expect(onFinished).toHaveBeenCalledTimes(1);
+    expect(await onFinished.mock.calls[0]?.[0].blob.text()).toBe("chunk");
     expect(media.tracks[0]?.stop).toHaveBeenCalled();
   });
 
@@ -205,12 +247,137 @@ describe("useRecorder", () => {
     expect(hook.result.current.recording).toBe(false);
   });
 
+  it("says whether the recording started", async () => {
+    const { media, hook } = setup();
+    media.mediaDevices.getUserMedia.mockRejectedValueOnce(new Error("NotAllowedError"));
+    expect(await act(() => hook.result.current.start())).toBe(false);
+    expect(await act(() => hook.result.current.start())).toBe(true);
+  });
+
   it("reports a microphone that cannot be opened", async () => {
     const { media, onError, hook } = setup();
     media.mediaDevices.getUserMedia.mockRejectedValueOnce(new Error("NotAllowedError"));
     await act(() => hook.result.current.start());
     expect(onError).toHaveBeenCalledWith("microphone");
     expect(hook.result.current.recording).toBe(false);
+  });
+});
+
+describe("useRecorder measurements", () => {
+  const setup = (track: FakeTrack | null = fakeTrack()) => {
+    FakeRecorder.instances = [];
+    FakeRecorder.startsLater = false;
+    vi.stubGlobal("MediaRecorder", FakeRecorder);
+    fakeAudioContext();
+    fakeMediaDevices([input("usb", "USB")], track);
+    const clock = vi.spyOn(performance, "now");
+    const onFinished = vi.fn();
+    const hook = renderHook(() => useRecorder({ deviceId: "usb", onFinished, onError: vi.fn() }));
+    return { clock, onFinished, hook };
+  };
+
+  it("times the recording from the recorder's start event to the stop request, not the UI tick", async () => {
+    vi.useFakeTimers();
+    FakeRecorder.startsLater = true;
+    const { clock, onFinished, hook } = setup();
+    clock.mockReturnValue(1000);
+    await act(() => hook.result.current.start());
+    clock.mockReturnValue(1250);
+    act(() => FakeRecorder.instances[0]?.onstart?.());
+    act(() => vi.advanceTimersByTime(3000));
+    clock.mockReturnValue(4571);
+    act(() => hook.result.current.stop());
+    expect(onFinished.mock.calls[0]?.[0]).toMatchObject({
+      elapsedSeconds: 3.321,
+      statedRate: 48000,
+    });
+  });
+
+  it("counts the frames delivered and dropped between start and stop", async () => {
+    const stats = { totalFrames: 5000, deliveredFrames: 4990 };
+    const track = fakeTrack({ stats });
+    const { clock, onFinished, hook } = setup(track);
+    clock.mockReturnValue(0);
+    await act(() => hook.result.current.start());
+    track.stats = { totalFrames: 5000 + 220600, deliveredFrames: 4990 + 220500 };
+    clock.mockReturnValue(5000);
+    act(() => hook.result.current.stop());
+    expect(onFinished.mock.calls[0]?.[0]).toMatchObject({
+      elapsedSeconds: 5,
+      frames: { delivered: 220500, dropped: 100 },
+    });
+  });
+
+  it("leaves the frame counts out when the track has no stats", async () => {
+    const { clock, onFinished, hook } = setup();
+    clock.mockReturnValue(0);
+    await act(() => hook.result.current.start());
+    act(() => hook.result.current.stop());
+    expect(onFinished.mock.calls[0]?.[0]).not.toHaveProperty("frames");
+  });
+
+  it.each([
+    ["null stats", null],
+    ["empty stats", {}],
+    ["no delivered count", { totalFrames: 5000 }],
+    ["no total count", { deliveredFrames: 5000 }],
+  ])("leaves the frame counts out for %s", async (_, stats) => {
+    const { onFinished, hook } = setup(fakeTrack({ stats }));
+    await act(() => hook.result.current.start());
+    act(() => hook.result.current.stop());
+    expect(onFinished.mock.calls[0]?.[0]).not.toHaveProperty("frames");
+  });
+
+  it("leaves the frame counts out when stats appear only after the start", async () => {
+    const track = fakeTrack();
+    const { onFinished, hook } = setup(track);
+    await act(() => hook.result.current.start());
+    track.stats = { totalFrames: 240000, deliveredFrames: 240000 };
+    act(() => hook.result.current.stop());
+    expect(onFinished.mock.calls[0]?.[0]).not.toHaveProperty("frames");
+  });
+
+  it("states 48,000 Hz for a stream without an audio track", async () => {
+    const { onFinished, hook } = setup(null);
+    await act(() => hook.result.current.start());
+    act(() => hook.result.current.stop());
+    expect(onFinished.mock.calls[0]?.[0]).toMatchObject({ statedRate: 48000 });
+  });
+
+  it("reads the stated rate from the track, defaulting to 48,000 Hz", async () => {
+    const stated = setup(fakeTrack({ getSettings: () => ({ sampleRate: 44100 }) }));
+    await act(() => stated.hook.result.current.start());
+    act(() => stated.hook.result.current.stop());
+    expect(stated.onFinished.mock.calls[0]?.[0]).toMatchObject({ statedRate: 44100 });
+    stated.hook.unmount();
+    const unstated = setup(fakeTrack({ getSettings: () => ({}) }));
+    await act(() => unstated.hook.result.current.start());
+    act(() => unstated.hook.result.current.stop());
+    expect(unstated.onFinished.mock.calls[0]?.[0]).toMatchObject({ statedRate: 48000 });
+  });
+});
+
+describe("useClipFlag", () => {
+  it("raises the flag on a clip and lowers it 1 s after the last one", () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useClipFlag());
+    expect(result.current.clipping).toBe(false);
+    act(() => result.current.report());
+    expect(result.current.clipping).toBe(true);
+    act(() => vi.advanceTimersByTime(600));
+    act(() => result.current.report());
+    act(() => vi.advanceTimersByTime(999));
+    expect(result.current.clipping).toBe(true);
+    act(() => vi.advanceTimersByTime(1));
+    expect(result.current.clipping).toBe(false);
+  });
+
+  it("drops its timer on unmount", () => {
+    vi.useFakeTimers();
+    const { result, unmount } = renderHook(() => useClipFlag());
+    act(() => result.current.report());
+    unmount();
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 

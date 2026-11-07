@@ -21,3 +21,5 @@ next-env.d.ts
 packages/*/reports/
 apps/*/reports/
 .vitest/
+/reports/
+.next-rehearsal/

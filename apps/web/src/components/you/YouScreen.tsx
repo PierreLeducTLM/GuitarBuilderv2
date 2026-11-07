@@ -2,11 +2,13 @@
 
 import type { AppRole } from "@gb/db";
 import { Button } from "@gb/ui";
-import { LogOut } from "lucide-react";
+import { LogOut, Mic } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { MicrophoneCheck } from "@/components/microphone-check/MicrophoneCheck";
 import { entryIcons } from "@/components/shell/navigation";
 import { PageBar } from "@/components/shell/PageBar";
 import { useSignOut } from "@/components/shell/useSignOut";
@@ -14,9 +16,9 @@ import { ThemeSelector } from "@/components/ThemeSelector";
 import { adminEntriesFor } from "@/lib/routes";
 
 /**
- * app-shell: You Page. The account, language and theme, the administration areas for
- * administrators, and sign-out (not offered while every visitor shares one account), on
- * every viewport.
+ * app-shell: You Page. The account, language and theme, the microphone check, the
+ * administration areas for administrators, and sign-out (not offered while every visitor
+ * shares one account), on every viewport.
  */
 export function YouScreen({
   email,
@@ -30,6 +32,7 @@ export function YouScreen({
   const t = useTranslations();
   const { signOut, pending } = useSignOut();
   const admin = adminEntriesFor(role);
+  const [checking, setChecking] = useState(false);
   return (
     <div className="flex max-w-xl flex-col gap-8">
       <PageBar title={t("you.title")} />
@@ -51,6 +54,22 @@ export function YouScreen({
           <span className="text-sm text-fg-dim">{t("you.theme")}</span>
           <ThemeSelector className="w-full sm:w-auto" />
         </div>
+      </section>
+
+      <section aria-labelledby="you-microphone" className="flex flex-col gap-3">
+        <h2 id="you-microphone" className="text-base font-semibold text-fg">
+          {t("you.microphone")}
+        </h2>
+        <div>
+          <Button
+            variant="secondary"
+            icon={<Mic className="size-4" />}
+            onClick={() => setChecking(true)}
+          >
+            {t("you.checkMicrophone")}
+          </Button>
+        </div>
+        {checking ? <MicrophoneCheck open onClose={() => setChecking(false)} /> : null}
       </section>
 
       {admin.length > 0 ? (

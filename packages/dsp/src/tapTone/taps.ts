@@ -43,6 +43,9 @@ const percentile = (values: readonly number[], fraction: number) => {
   return sorted[Math.floor(fraction * (sorted.length - 1))] ?? 0;
 };
 
+export const noiseFloor = (signal: Samples): number =>
+  percentile(blockLevels(signal), TAP_NOISE_PERCENTILE);
+
 const onsetBlocks = (levels: readonly number[]): readonly number[] => {
   const threshold = Math.max(
     TAP_MIN_LEVEL,

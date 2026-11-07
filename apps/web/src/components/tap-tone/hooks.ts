@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { captureConstraints, pickRecordingType } from "./audio";
+import { ANALYSIS_SAMPLE_RATE, captureConstraints, pickRecordingType } from "./audio";
 
 export const MAX_RECORDING_SECONDS = 10;
 const TICK_MS = 100;
+const CLIP_HOLD_MS = 1000;
 const ANALYSER_SIZE = 2048;
 
 export type AudioInput = { readonly id: string; readonly label: string | null };
@@ -51,20 +52,58 @@ export function useAudioInputs() {
   return { inputs, selected, select, refresh };
 }
 
+type FrameCounts = { readonly total: number; readonly delivered: number };
+
+export type Recording = {
+  readonly blob: Blob;
+  readonly elapsedSeconds: number;
+  readonly statedRate: number;
+  readonly frames?: { readonly delivered: number; readonly dropped: number };
+};
+
 type Session = {
   readonly stream: MediaStream;
+  readonly track: MediaStreamTrack | undefined;
   readonly recorder: MediaRecorder;
   readonly context: AudioContext;
   readonly timer: ReturnType<typeof setInterval>;
   cancelled: boolean;
+  startedAt: number;
+  startFrames: FrameCounts | undefined;
+  stoppedAt: number;
+  stopFrames: FrameCounts | undefined;
+};
+
+const readFrames = (track: MediaStreamTrack | undefined): FrameCounts | undefined => {
+  const stats: unknown = track && Reflect.get(track, "stats");
+  if (typeof stats !== "object" || stats === null) return undefined;
+  const total: unknown = Reflect.get(stats, "totalFrames");
+  const delivered: unknown = Reflect.get(stats, "deliveredFrames");
+  return typeof total === "number" && typeof delivered === "number"
+    ? { total, delivered }
+    : undefined;
+};
+
+const recordingOf = (session: Session, blob: Blob): Recording => {
+  const timing = {
+    blob,
+    elapsedSeconds: (session.stoppedAt - session.startedAt) / 1000,
+    statedRate: session.track?.getSettings().sampleRate ?? ANALYSIS_SAMPLE_RATE,
+  };
+  const { startFrames, stopFrames } = session;
+  if (!startFrames || !stopFrames) return timing;
+  const delivered = stopFrames.delivered - startFrames.delivered;
+  const dropped = stopFrames.total - startFrames.total - delivered;
+  return { ...timing, frames: { delivered, dropped } };
 };
 
 export function useRecorder(options: {
   deviceId: string | undefined;
-  onFinished: (recording: Blob) => void;
+  onFinished: (recording: Recording) => void;
   onError: (kind: "microphone") => void;
+  maxSeconds?: number;
 }) {
-  const { deviceId, onFinished, onError } = options;
+  const { deviceId, onFinished, onError, maxSeconds = MAX_RECORDING_SECONDS } = options;
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
@@ -75,6 +114,8 @@ export function useRecorder(options: {
     if (!current) return;
     session.current = null;
     current.cancelled = cancelled;
+    current.stoppedAt = performance.now();
+    current.stopFrames = readFrames(current.track);
     clearInterval(current.timer);
     current.recorder.stop();
     for (const track of current.stream.getTracks()) track.stop();
@@ -83,13 +124,13 @@ export function useRecorder(options: {
     setAnalyser(null);
   }, []);
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (): Promise<boolean> => {
     const stream = await navigator.mediaDevices
       .getUserMedia(captureConstraints(deviceId))
       .catch(() => null);
     if (!stream) {
       onError("microphone");
-      return;
+      return false;
     }
     const mimeType = pickRecordingType((type) => MediaRecorder.isTypeSupported(type));
     const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
@@ -102,19 +143,39 @@ export function useRecorder(options: {
     const timer = setInterval(() => {
       ticks += 1;
       setElapsed(ticks / 10);
-      if (ticks >= MAX_RECORDING_SECONDS * 10) end(false);
+      if (ticks >= maxSeconds * 10) end(false);
     }, TICK_MS);
-    const current: Session = { stream, recorder, context, timer, cancelled: false };
+    const track = stream.getAudioTracks()[0];
+    const startedAt = performance.now();
+    const current: Session = {
+      stream,
+      track,
+      recorder,
+      context,
+      timer,
+      cancelled: false,
+      startedAt,
+      startFrames: readFrames(track),
+      stoppedAt: startedAt,
+      stopFrames: undefined,
+    };
     recorder.ondataavailable = (event) => chunks.push(event.data);
+    recorder.onstart = () => {
+      current.startedAt = performance.now();
+      current.startFrames = readFrames(track);
+    };
     recorder.onstop = () => {
-      if (!current.cancelled) onFinished(new Blob(chunks, { type: recorder.mimeType }));
+      if (!current.cancelled) {
+        onFinished(recordingOf(current, new Blob(chunks, { type: recorder.mimeType })));
+      }
     };
     session.current = current;
     setElapsed(0);
     setAnalyser(node);
     setRecording(true);
     recorder.start(TICK_MS);
-  }, [deviceId, end, onError, onFinished]);
+    return true;
+  }, [deviceId, end, maxSeconds, onError, onFinished]);
 
   const stop = useCallback(() => end(false), [end]);
   const cancel = useCallback(() => end(true), [end]);
@@ -122,6 +183,21 @@ export function useRecorder(options: {
   useEffect(() => () => end(true), [end]);
 
   return { start, stop, cancel, recording, elapsed, analyser };
+}
+
+export function useClipFlag() {
+  const [clipping, setClipping] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const report = useCallback(() => {
+    setClipping(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setClipping(false), CLIP_HOLD_MS);
+  }, []);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  return { clipping, report };
 }
 
 export type Clip = {
