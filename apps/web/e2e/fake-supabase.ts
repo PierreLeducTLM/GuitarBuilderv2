@@ -9,6 +9,9 @@
  *          GET|POST|PATCH|DELETE /rest/v1/builds (the select, eq, order, limit and
  *          object-response forms the app sends)
  *          POST /rest/v1/rpc/update_build_step, POST /rest/v1/rpc/build_photo_paths
+ *          POST /rest/v1/rpc/set_build_sharing, POST /rest/v1/rpc/build_share_token,
+ *          POST /rest/v1/rpc/get_build_story (without the variant filter, which the
+ *          story page applies too)
  *          GET|POST|PATCH|DELETE /rest/v1/wood_panels, GET /rest/v1/default_wood_panels,
  *          POST /rest/v1/rpc/load_default_wood_panels
  * Storage: POST /storage/v1/object/step-photos/<path> (upload),
@@ -46,6 +49,7 @@ interface Build {
   bobo_neck: boolean;
   sequence_state: Record<string, unknown>[];
   share_enabled: boolean;
+  share_token: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -772,6 +776,7 @@ async function handleBuilds(request: IncomingMessage, response: ServerResponse, 
         bobo_neck: input.bobo_neck === true,
         sequence_state: [],
         share_enabled: false,
+        share_token: null,
         created_at: now,
         updated_at: now,
       };
@@ -934,6 +939,7 @@ const server = createServer(async (request, response) => {
           bobo_neck: input.bobo_neck !== false,
           sequence_state: (input.sequence_state ?? []) as Build["sequence_state"],
           share_enabled: false,
+          share_token: null,
           created_at: created,
           updated_at: String(input.updated_at ?? created),
         };
@@ -1036,6 +1042,48 @@ const server = createServer(async (request, response) => {
         } catch (error) {
           return restError(response, 400, "22023", (error as Error).message);
         }
+      }
+
+      case "POST /rest/v1/rpc/set_build_sharing": {
+        const viewer = bearerUser(request);
+        const input = await body(request);
+        const build = builds.get(String(input.p_build_id));
+        if (!viewer || !build || build.owner_id !== viewer.id) {
+          return restError(response, 403, "42501", "Not allowed");
+        }
+        const keep = input.p_enabled === true && build.share_enabled && build.share_token;
+        build.share_token =
+          input.p_enabled === true ? (keep ? build.share_token : randomUUID()) : null;
+        build.share_enabled = build.share_token !== null;
+        build.updated_at = new Date().toISOString();
+        return send(response, 200, build.share_token);
+      }
+
+      case "POST /rest/v1/rpc/build_share_token": {
+        const viewer = bearerUser(request);
+        const input = await body(request);
+        const build = builds.get(String(input.p_build_id));
+        if (!viewer || !build || build.owner_id !== viewer.id) {
+          return restError(response, 403, "42501", "Not allowed");
+        }
+        return send(response, 200, build.share_enabled ? build.share_token : null);
+      }
+
+      case "POST /rest/v1/rpc/get_build_story": {
+        const input = await body(request);
+        const build = [...builds.values()].find(
+          (candidate) => candidate.share_enabled && candidate.share_token === input.p_token,
+        );
+        if (!build) return send(response, 200, null);
+        return send(response, 200, {
+          name: build.name,
+          guitarType: build.guitar_type,
+          boboNeck: build.bobo_neck,
+          createdAt: build.created_at,
+          steps: build.sequence_state.map((entry) =>
+            entry.completed === true ? entry : { key: entry.key, completed: false },
+          ),
+        });
       }
 
       case "POST /rest/v1/rpc/build_photo_paths": {

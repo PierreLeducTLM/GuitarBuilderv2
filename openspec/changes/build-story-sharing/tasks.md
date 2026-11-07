@@ -113,7 +113,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
 
 ## 9. End-to-end and verification
 
-- [ ] 9.1 Teach `e2e/fake-supabase.ts` the three functions, mirroring the SQL behavior. Write `e2e/story.spec.ts`:
+- [x] 9.1 Teach `e2e/fake-supabase.ts` the three functions, mirroring the SQL behavior. Write `e2e/story.spec.ts`:
   - the owner enables sharing, copies the link and previews it in a new tab;
   - an anonymous context sees the story without navigation;
   - the owner disables sharing, and reloading shows Story Not Found;
