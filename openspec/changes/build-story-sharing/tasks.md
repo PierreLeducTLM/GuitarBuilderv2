@@ -43,7 +43,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
 
 ## 4. UI package
 
-- [ ] 4.1 Add `@radix-ui/react-switch` (pinned exactly) and a token-styled `Switch` to `@gb/ui`: amber when on, a visible focus ring, label and description slots. Verify component tests for toggling, the disabled state and the accessible name, and that the contrast tests still pass in both themes.
+- [x] 4.1 Add `@radix-ui/react-switch` (pinned exactly) and a token-styled `Switch` to `@gb/ui`: amber when on, a visible focus ring, label and description slots. Verify component tests for toggling, the disabled state and the accessible name, and that the contrast tests still pass in both themes.
 
 ## 5. Share dialog (decision 5)
 
