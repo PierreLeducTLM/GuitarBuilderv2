@@ -1,4 +1,4 @@
-import { applyBiquad, biquadHighPass, encodeWav, wavFileName } from "@gb/dsp";
+import { applyBiquad, biquadHighPass, encodeWav, resample, wavFileName } from "@gb/dsp";
 
 export const ANALYSIS_SAMPLE_RATE = 48000;
 
@@ -72,6 +72,19 @@ export const decodeAudio = async (
   return {
     channels: options.mixToMono ? [mixToMono(channels)] : channels,
     sampleRate: buffer.sampleRate,
+  };
+};
+
+export const correctRate = (
+  decoded: DecodedAudio,
+  rates: { statedRate: number; trueRate: number },
+): DecodedAudio => {
+  const fromRate = (decoded.sampleRate * rates.trueRate) / rates.statedRate;
+  return {
+    channels: decoded.channels.map((samples) =>
+      resample({ samples, fromRate, toRate: ANALYSIS_SAMPLE_RATE }),
+    ),
+    sampleRate: ANALYSIS_SAMPLE_RATE,
   };
 };
 

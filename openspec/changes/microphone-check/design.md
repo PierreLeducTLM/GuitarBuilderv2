@@ -57,13 +57,15 @@ The Frequency Detector and the Microphone Check call the same function, so a che
 
 ### D2. Correct by reinterpreting the samples, then resampling to 48 kHz
 
-When the verdict is Corrected to S, the decoded samples are labelled S Hz (they really were sampled at S) and resampled to 48,000 Hz with an `OfflineAudioContext`. This is the same mechanism the file path already uses for files that aren't at 48 kHz. Everything after that point (high-pass, taps, spectrum, peaks, Q, saved record, playback, WAV export) sees an ordinary 48 kHz signal.
+When the verdict is Corrected to S, the decoded samples are relabelled at their true rate, decoded rate × S / stated rate (just S when the browser states 48 kHz), and resampled to 48,000 Hz by `resample` in `@gb/dsp`, a linear interpolation. Everything after that point (high-pass, taps, spectrum, peaks, Q, saved record, playback, WAV export) sees an ordinary 48 kHz signal.
 
 *Why not refuse* (the earlier change's D4): its objection was that a measured ratio is noisy, so a "corrected" number would be a guess. Snapping to a standard rate removes the guess. The device test measured 0.9183–0.9188 against an exact 0.91875, and the nearest other candidate pair is more than 8% away. Inside the 1% window the true rate is known exactly. Outside it, the judge still refuses.
 
 *Why not analyse at S directly:* bin width, tap block length, the 662-point range and the saved record shape are all specified at 48 kHz. Analysing at 44.1 kHz would change all of them and the saved records' shape. Resampling keeps one pipeline and needs no spec changes downstream.
 
 The correction can't restore content above S/2. That doesn't matter: analysis stops at 1000 Hz and the lowest standard rate is 8000 Hz.
+
+*Why linear interpolation in `@gb/dsp`, not an `OfflineAudioContext`:* it is pure and unit-tested in Node, while the app's unit tests have no real Web Audio. It keeps the pitch exact, since pitch depends only on the time mapping. It loses about 0.015 dB at 1 kHz from 44.1 kHz, which is negligible. And it never produces a sample beyond the input's range, so clip detection is unaffected.
 
 ### D3. Measurements in `useRecorder`
 
@@ -110,7 +112,7 @@ The remembered result is display-only (spec). The judge never reads it, so a sta
 
 - **[Duration-only browsers and short recordings]** → Without frame counts, a recording shorter than about 2.3 s hides an 8.8% error behind the 0.2 s floor and is judged Accurate. Chrome on Mac and Android reports frame counts, and the Microphone Check always records 5 s. Accepted.
 - **[A wrong snap]** → Neighbouring standard-rate candidates are at least 8% apart, and the window is 1%. A wrong snap would need about 7% of timing error, far beyond anything measured (0.3%).
-- **[Resampling quality]** → The browser's resampler is the one already trusted for loaded files. A unit-style browser test checks a 440 Hz tone at 44.1 kHz, labelled 48 kHz, reads 440 ± 0.5 Hz after correction.
+- **[Resampling quality]** → Linear interpolation is exact in pitch and negligible in level below 1 kHz (D2). A unit test checks that a 440 Hz tone at 44.1 kHz, labelled 48 kHz, reads 440 ± 0.5 Hz after correction.
 - **[The tone test disagrees with the clock]** → The clock wins, and the spec adds a note saying recordings are unaffected. The disagreement is shown rather than hidden.
 - **[A false Mismatch on a slow device]** → It costs a re-record or a file upload. A missed mismatch costs a wrong number in the wood calculator, so leaning towards refusal is accepted.
 - **[A nested dialog on a phone]** → The Microphone Check is full-screen on narrow viewports, so two layers of modal never show at once.

@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
+import { measureTone } from "@gb/dsp";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   captureConstraints,
+  correctRate,
   decodeAudio,
   downloadWav,
   isMobileDevice,
@@ -144,6 +146,36 @@ describe("decoding and preparing audio", () => {
     expect(prepared.filtered).toHaveLength(2);
     expect(Math.abs(prepared.filtered[0]?.[4799] ?? 1)).toBeLessThan(0.01);
     expect(prepared.filtered[1]).toHaveLength(4800);
+  });
+});
+
+describe("correcting a capture to its true rate", () => {
+  const tone = (frequency: number, sampleRate: number, seconds = 3) =>
+    Float32Array.from(
+      { length: seconds * sampleRate },
+      (_, n) => 0.5 * Math.sin((2 * Math.PI * frequency * n) / sampleRate),
+    );
+  const heard = (channel: Float32Array | undefined) =>
+    measureTone({ samples: channel ?? new Float32Array(0), sampleRate: 48000 });
+
+  it("reads a 440 Hz tone from an input at 44,100 Hz labelled 48,000 Hz as 440 Hz", () => {
+    const decoded = { channels: [tone(440, 44100)], sampleRate: 48000 };
+    const corrected = correctRate(decoded, { statedRate: 48000, trueRate: 44100 });
+    expect(corrected.sampleRate).toBe(48000);
+    expect(corrected.channels[0]).toHaveLength(144000);
+    expect(heard(corrected.channels[0])).toMatchObject({ frequency: expect.closeTo(440, 0) });
+  });
+
+  it("corrects every channel", () => {
+    const decoded = { channels: [tone(440, 44100), tone(330, 44100)], sampleRate: 48000 };
+    const corrected = correctRate(decoded, { statedRate: 48000, trueRate: 44100 });
+    expect(heard(corrected.channels[1])).toMatchObject({ frequency: expect.closeTo(330, 0) });
+  });
+
+  it("corrects an input that runs faster than the browser states", () => {
+    const decoded = { channels: [tone((440 * 44100) / 48000, 48000)], sampleRate: 48000 };
+    const corrected = correctRate(decoded, { statedRate: 44100, trueRate: 48000 });
+    expect(heard(corrected.channels[0])).toMatchObject({ frequency: expect.closeTo(440, 0) });
   });
 });
 
