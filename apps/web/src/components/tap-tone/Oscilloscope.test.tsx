@@ -66,6 +66,25 @@ describe("Oscilloscope", () => {
     expect(frame.cancel).toHaveBeenCalled();
   });
 
+  it.each([
+    ["a full-scale sample", 0.999, 1],
+    ["a negative full-scale sample", -1, 1],
+    ["a sample just below full scale", 0.9989, 0],
+  ])("reports clipping for %s", (_, value, reports) => {
+    fakeCanvas();
+    const frame = frames();
+    const onClip = vi.fn();
+    const analyser = {
+      getFloatTimeDomainData: (target: Float32Array) => {
+        target.fill(0.2);
+        target[1500] = value;
+      },
+    };
+    render(<Oscilloscope analyser={analyser} onClip={onClip} />);
+    frame.next();
+    expect(onClip).toHaveBeenCalledTimes(reports);
+  });
+
   it("stays blank without an input", () => {
     const calls = fakeCanvas();
     const frame = frames();

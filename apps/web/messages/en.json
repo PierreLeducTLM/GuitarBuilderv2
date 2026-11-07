@@ -30,7 +30,9 @@
     "preferences": "Preferences",
     "language": "Language",
     "theme": "Theme",
-    "administration": "Administration"
+    "administration": "Administration",
+    "microphone": "Microphone",
+    "checkMicrophone": "Check microphone"
   },
   "shell": {
     "signedInAs": "Signed in as",
@@ -436,6 +438,7 @@
       "waveformLabel": "Recording of {seconds} s with {total} taps",
       "seconds": "{seconds} s",
       "clipped": "Clipped",
+      "clippedNotice": "{clipped} of {total} taps clipped. Tap more lightly or turn the input gain down.",
       "tooClose": "Too close to another tap",
       "cutOff": "Cut off by the end of the recording",
       "noneUsable": "None of the taps can be used"
@@ -503,7 +506,12 @@
       "upload": "Upload Audio File",
       "recording": "Recording...",
       "elapsed": "{elapsed}s / {max}s",
-      "analyzing": "Analyzing..."
+      "analyzing": "Analyzing...",
+      "corrected": "Corrected: this input runs at {trueRate, number} Hz, not the {statedRate, number} Hz the browser reports.",
+      "clipping": "Clipping",
+      "notChecked": "Not checked",
+      "checked": "Checked {date}: {verdict}",
+      "checkInput": "Check this input"
     },
     "actions": {
       "play": "Play",
@@ -515,6 +523,7 @@
     },
     "errors": {
       "microphone": "Unable to access microphone. Please check permissions.",
+      "captureRate": "This audio input does not deliver audio at a rate the app can correct, so the frequencies would be wrong. Set the interface to 48 kHz in your computer's audio settings (Audio MIDI Setup on a Mac), or record with another app and load the WAV file here.",
       "processing": "Error processing audio. Please try again.",
       "noTap": "No tap detected. Tap the part firmly and try again.",
       "unsupported": "Unsupported audio format. Supported formats: WAV, MP3, OGG",
@@ -561,6 +570,56 @@
       "sameAs": "Same peak as {role}",
       "detail": "{level} dB · {note} · {q}",
       "current": "Current value {frequency} Hz"
+    }
+  },
+  "microphoneCheck": {
+    "title": "Microphone Check",
+    "input": "Input device",
+    "unnamedInput": "Microphone {number}",
+    "start": "Start check",
+    "again": "Check again",
+    "instruction": "Tap a part 2 or 3 times while the check records",
+    "remaining": "{seconds} s left",
+    "analyzing": "Analyzing...",
+    "notChecked": "Not checked",
+    "lastCheck": "Last check: {date}. {verdict}",
+    "verdict": {
+      "accurate": "Accurate",
+      "corrected": "Corrected ({rate, number} Hz)",
+      "mismatch": "Mismatch"
+    },
+    "clock": {
+      "heading": "Clock",
+      "stated": "Stated {rate, number} Hz",
+      "measured": "Measured {rate, number} Hz",
+      "cents": "{cents} {count, plural, one {cent} other {cents}}",
+      "accurate": "Accurate: frequencies from this input are correct.",
+      "corrected": "Corrected: this input runs at {trueRate, number} Hz, not the {statedRate, number} Hz the browser reports. The app corrects its recordings automatically. To remove the correction, set the interface to 48 kHz in your computer's audio settings (Audio MIDI Setup on a Mac).",
+      "mismatch": "Mismatch: this input does not deliver audio at a rate the app can correct, so its frequencies would be wrong. Set the interface to 48 kHz in your computer's audio settings, or record with another app and load the WAV file."
+    },
+    "level": {
+      "heading": "Level",
+      "noiseFloor": "Noise floor {db} dBFS",
+      "peak": "Peak {db} dBFS",
+      "noTap": "No tap heard. Tap a part firmly during the check.",
+      "clipping": "Clipping: turn the input gain down or tap more lightly.",
+      "low": "Low: raise the input gain or move the microphone closer.",
+      "good": "Good level."
+    },
+    "errors": {
+      "microphone": "Unable to access microphone. Please check permissions.",
+      "processing": "Error processing audio. Please try again."
+    },
+    "tone": {
+      "button": "Play test tone",
+      "playing": "Playing a 440 Hz tone and listening",
+      "heard": "Heard {frequency} Hz ({cents} {count, plural, one {cent} other {cents}})",
+      "matches": "Matches",
+      "off": "Off by {cents} {count, plural, one {cent} other {cents}}",
+      "clockReference": "The clock check is the reference: recordings from this input are not affected. The speaker's own rate may be off.",
+      "correctedFrom": "Corrected from {frequency} Hz",
+      "notHeard": "Tone not heard. Turn the volume up or bring the microphone closer to the speaker.",
+      "note": "If the speaker and the microphone are on the same device, a rate error can go unnoticed here. The clock check is the reference."
     }
   },
   "wood": {

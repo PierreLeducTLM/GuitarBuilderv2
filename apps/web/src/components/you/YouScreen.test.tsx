@@ -26,6 +26,34 @@ function renderYou(role: "user" | "admin", locale: TestLocale = "en") {
   );
 }
 
+describe("YouScreen microphone", () => {
+  it("opens the Microphone Check from the Microphone group", async () => {
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      mediaDevices: {
+        enumerateDevices: async () => [],
+        getUserMedia: vi.fn(),
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      },
+    });
+    renderYou("user");
+    const group = screen.getByRole("region", { name: "Microphone" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await userEvent.click(within(group).getByRole("button", { name: "Check microphone" }));
+    const check = screen.getByRole("dialog", { name: "Microphone Check" });
+    await userEvent.click(within(check).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
+  it("is in French", () => {
+    renderYou("user", "fr");
+    const group = screen.getByRole("region", { name: "Micro" });
+    expect(within(group).getByRole("button", { name: "Vérifier le micro" })).toBeTruthy();
+  });
+});
+
 describe("YouScreen", () => {
   it("shows who is signed in, the preferences and Sign Out to a regular user", () => {
     renderYou("user");

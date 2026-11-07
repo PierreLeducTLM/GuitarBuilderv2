@@ -30,7 +30,9 @@
     "preferences": "Préférences",
     "language": "Langue",
     "theme": "Thème",
-    "administration": "Administration"
+    "administration": "Administration",
+    "microphone": "Micro",
+    "checkMicrophone": "Vérifier le micro"
   },
   "shell": {
     "signedInAs": "Connecté en tant que",
@@ -436,6 +438,7 @@
       "waveformLabel": "Enregistrement de {seconds} s avec {total} frappes",
       "seconds": "{seconds} s",
       "clipped": "Saturée",
+      "clippedNotice": "{clipped, plural, one {# tap sur {total} a saturé} other {# taps sur {total} ont saturé}}. Tapez plus doucement ou baissez le gain d'entrée.",
       "tooClose": "Trop proche d'une autre frappe",
       "cutOff": "Coupée par la fin de l'enregistrement",
       "noneUsable": "Aucune frappe n'est exploitable"
@@ -503,7 +506,12 @@
       "upload": "Importer un fichier audio",
       "recording": "Enregistrement...",
       "elapsed": "{elapsed} s / {max} s",
-      "analyzing": "Analyse..."
+      "analyzing": "Analyse...",
+      "corrected": "Corrigé : cette entrée fonctionne à {trueRate, number} Hz, et non aux {statedRate, number} Hz annoncés par le navigateur.",
+      "clipping": "Saturation",
+      "notChecked": "Non vérifié",
+      "checked": "Vérifié le {date} : {verdict}",
+      "checkInput": "Vérifier cette entrée"
     },
     "actions": {
       "play": "Écouter",
@@ -515,6 +523,7 @@
     },
     "errors": {
       "microphone": "Impossible d'accéder au microphone. Vérifiez les autorisations.",
+      "captureRate": "Cette entrée audio ne fournit pas le son à une fréquence que l'application peut corriger, les fréquences seraient donc fausses. Réglez l'interface sur 48 kHz dans les réglages audio de votre ordinateur (Configuration audio et MIDI sur Mac), ou enregistrez avec une autre application et chargez le fichier WAV ici.",
       "processing": "Erreur lors du traitement de l'audio. Veuillez réessayer.",
       "noTap": "Aucune frappe détectée. Frappez la pièce fermement et réessayez.",
       "unsupported": "Format audio non pris en charge. Formats acceptés : WAV, MP3, OGG",
@@ -561,6 +570,56 @@
       "sameAs": "Même pic que {role}",
       "detail": "{level} dB · {note} · {q}",
       "current": "Valeur actuelle {frequency} Hz"
+    }
+  },
+  "microphoneCheck": {
+    "title": "Vérification du micro",
+    "input": "Entrée audio",
+    "unnamedInput": "Microphone {number}",
+    "start": "Lancer la vérification",
+    "again": "Vérifier à nouveau",
+    "instruction": "Tapez une pièce 2 ou 3 fois pendant l'enregistrement",
+    "remaining": "encore {seconds} s",
+    "analyzing": "Analyse...",
+    "notChecked": "Non vérifié",
+    "lastCheck": "Dernière vérification : {date}. {verdict}",
+    "verdict": {
+      "accurate": "Exact",
+      "corrected": "Corrigé ({rate, number} Hz)",
+      "mismatch": "Écart"
+    },
+    "clock": {
+      "heading": "Horloge",
+      "stated": "Annoncé {rate, number} Hz",
+      "measured": "Mesuré {rate, number} Hz",
+      "cents": "{cents} {count, plural, one {cent} other {cents}}",
+      "accurate": "Exact : les fréquences de cette entrée sont justes.",
+      "corrected": "Corrigé : cette entrée fonctionne à {trueRate, number} Hz, et non aux {statedRate, number} Hz annoncés par le navigateur. L'application corrige ses enregistrements automatiquement. Pour supprimer la correction, réglez l'interface sur 48 kHz dans les réglages audio de votre ordinateur (Configuration audio et MIDI sur Mac).",
+      "mismatch": "Écart : cette entrée ne fournit pas le son à une fréquence que l'application peut corriger, ses fréquences seraient donc fausses. Réglez l'interface sur 48 kHz dans les réglages audio de votre ordinateur, ou enregistrez avec une autre application et chargez le fichier WAV."
+    },
+    "level": {
+      "heading": "Niveau",
+      "noiseFloor": "Bruit de fond {db} dBFS",
+      "peak": "Crête {db} dBFS",
+      "noTap": "Aucun tap entendu. Tapez fermement une pièce pendant la vérification.",
+      "clipping": "Saturation : baissez le gain d'entrée ou tapez plus doucement.",
+      "low": "Faible : montez le gain d'entrée ou rapprochez le micro.",
+      "good": "Bon niveau."
+    },
+    "errors": {
+      "microphone": "Impossible d'accéder au microphone. Vérifiez les autorisations.",
+      "processing": "Erreur lors du traitement de l'audio. Veuillez réessayer."
+    },
+    "tone": {
+      "button": "Jouer la tonalité de test",
+      "playing": "Lecture d'une tonalité de 440 Hz et écoute",
+      "heard": "Entendu {frequency} Hz ({cents} {count, plural, one {cent} other {cents}})",
+      "matches": "Concorde",
+      "off": "Écart de {cents} {count, plural, one {cent} other {cents}}",
+      "clockReference": "La vérification de l'horloge fait référence : les enregistrements de cette entrée ne sont pas touchés. C'est peut-être la fréquence du haut-parleur qui est décalée.",
+      "correctedFrom": "Corrigé depuis {frequency} Hz",
+      "notHeard": "Tonalité non entendue. Montez le volume ou rapprochez le micro du haut-parleur.",
+      "note": "Si le haut-parleur et le micro sont sur le même appareil, une erreur de fréquence peut passer inaperçue ici. La vérification de l'horloge fait référence."
     }
   },
   "wood": {

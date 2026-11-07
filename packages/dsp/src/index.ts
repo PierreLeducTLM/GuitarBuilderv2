@@ -4,6 +4,10 @@
  */
 export const DSP_PACKAGE_NAME = "@gb/dsp";
 export { applyBiquad, type BiquadCoefficients, biquadHighPass } from "./biquad.ts";
+export { type CheckLevel, type LevelVerdict, measureLevel } from "./capture/level.ts";
+export { type CaptureTiming, judgeRate, type RateVerdict } from "./capture/rate.ts";
+export { resample } from "./capture/resample.ts";
+export { measureTone, TEST_TONE_HZ, type ToneReading } from "./capture/tone.ts";
 export { type ComplexSignal, fft, inverseFft, realSpectrum } from "./fft.ts";
 export { type SpectralQ, spectralQ } from "./tapTone/bandwidthQ.ts";
 export {
@@ -12,6 +16,7 @@ export {
   identifyBodyResonances,
   reattachRole,
 } from "./tapTone/body.ts";
+export { CLIP_LEVEL } from "./tapTone/constants.ts";
 export type { DecayIsolation, DecayPeak, NeighbourPeak } from "./tapTone/decay/band.ts";
 export type { CombinedReason } from "./tapTone/decay/combine.ts";
 export type {

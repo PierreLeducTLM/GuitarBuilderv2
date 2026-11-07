@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { formats } from "@/i18n/config";
+import { rememberCheck } from "@/lib/microphone-check/memory";
+import { checkSignal, stubRecordingBrowser } from "@/test/recording-browser";
 import en from "../../../messages/en.json";
 import fr from "../../../messages/fr.json";
 import { forgetChosenInput } from "./hooks";
@@ -75,7 +77,10 @@ const stubBrowser = () => {
 
 afterEach(() => {
   forgetChosenInput();
+  localStorage.clear();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   decodes.length = 0;
 });
 
@@ -343,5 +348,308 @@ describe("TapToneDialog in Plate mode", () => {
       screen.getByText("Needs the recording; record the take again to measure it"),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Play" })).toBeNull();
+  }, 30000);
+});
+
+const stubRecording = (options: { stats?: boolean; inputLevel?: number } = {}) => {
+  stubBrowser();
+  const track: {
+    stop: () => void;
+    getSettings: () => { sampleRate: number };
+    stats?: { totalFrames: number; deliveredFrames: number };
+  } = {
+    stop: vi.fn(),
+    getSettings: () => ({ sampleRate: SAMPLE_RATE }),
+    ...(options.stats === false ? {} : { stats: { totalFrames: 0, deliveredFrames: 0 } }),
+  };
+  const stream = { getTracks: () => [track], getAudioTracks: () => [track] };
+  vi.stubGlobal("navigator", {
+    ...navigator,
+    mediaDevices: { ...navigator.mediaDevices, getUserMedia: vi.fn(async () => stream) },
+  });
+  vi.stubGlobal(
+    "MediaRecorder",
+    class {
+      static isTypeSupported = () => true;
+      readonly mimeType = "audio/webm;codecs=pcm";
+      ondataavailable: ((event: { data: Blob }) => void) | null = null;
+      onstart: (() => void) | null = null;
+      onstop: (() => void) | null = null;
+      start() {
+        this.ondataavailable?.({ data: new Blob(["pcm"]) });
+        this.onstart?.();
+      }
+      stop() {
+        this.onstop?.();
+      }
+    },
+  );
+  vi.stubGlobal(
+    "AudioContext",
+    class {
+      createAnalyser = () => ({
+        fftSize: 0,
+        getFloatTimeDomainData: (target: Float32Array) => target.fill(options.inputLevel ?? 0.2),
+      });
+      createMediaStreamSource = () => ({ connect: vi.fn() });
+      close = async () => undefined;
+    },
+  );
+  const context = {
+    clearRect: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    stroke: vi.fn(),
+    setLineDash: vi.fn(),
+  };
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(context as never);
+  const frames: FrameRequestCallback[] = [];
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
+  vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+  return { track, clock, nextFrame: () => frames.shift()?.(0) };
+};
+
+const ENGLISH_BUTTONS = { start: "Start Recording", stop: "Stop Recording" };
+
+const record = async (
+  browser: ReturnType<typeof stubRecording>,
+  take: { samples: Float32Array; seconds: number; delivered: number; dropped?: number },
+  buttons = ENGLISH_BUTTONS,
+) => {
+  decodes.push(take.samples);
+  const user = userEvent.setup();
+  const counted = browser.track.stats !== undefined;
+  browser.clock.mockReturnValue(0);
+  if (counted) browser.track.stats = { totalFrames: 0, deliveredFrames: 0 };
+  await user.click(screen.getByRole("button", { name: buttons.start }));
+  if (counted) {
+    browser.track.stats = {
+      totalFrames: take.delivered + (take.dropped ?? 0),
+      deliveredFrames: take.delivered,
+    };
+  }
+  browser.clock.mockReturnValue(take.seconds * 1000);
+  await user.click(await screen.findByRole("button", { name: buttons.stop }));
+};
+
+const plateDialog = (locale: "en" | "fr" = "en", onConfirm = vi.fn()) =>
+  withIntl(
+    <TapToneDialog open mode="plate" label="Plate" onConfirm={onConfirm} onCancel={vi.fn()} />,
+    locale,
+  );
+
+const correctedNote =
+  "Corrected: this input runs at 44,100 Hz, not the 48,000 Hz the browser reports.";
+const mismatchBanner =
+  "This audio input does not deliver audio at a rate the app can correct, so the frequencies would be wrong. Set the interface to 48 kHz in your computer's audio settings (Audio MIDI Setup on a Mac), or record with another app and load the WAV file here.";
+
+describe("TapToneDialog rate check", () => {
+  it("analyses an accurate recording as before, with no correction note", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: plate(181.8), seconds: 4, delivered: 192000 });
+    await screen.findByRole("img", { name: /Frequency spectrum/ }, { timeout: 10000 });
+    expect(screen.getByRole("region", { name: "Longitudinal (f_L)" }).textContent).toMatch(
+      /181\.\d/,
+    );
+    expect(screen.queryByText(/^Corrected:/)).toBeNull();
+  }, 30000);
+
+  it("corrects a recording from an input at 44,100 Hz labelled 48,000 Hz", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, {
+      samples: plate((181.8 * 48000) / 44100),
+      seconds: 192000 / 44100,
+      delivered: 192000,
+    });
+    await screen.findByRole("img", { name: /Frequency spectrum/ }, { timeout: 10000 });
+    expect(screen.getByRole("region", { name: "Longitudinal (f_L)" }).textContent).toMatch(
+      /181\.\d/,
+    );
+    expect(screen.getByText(correctedNote)).toBeTruthy();
+  }, 30000);
+
+  it("returns the usual 48 kHz record for a corrected take", async () => {
+    const browser = stubRecording();
+    const onConfirm = vi.fn();
+    plateDialog("en", onConfirm);
+    await record(browser, {
+      samples: plate((181.8 * 48000) / 44100),
+      seconds: 192000 / 44100,
+      delivered: 192000,
+    });
+    await screen.findByRole("img", { name: /Frequency spectrum/ }, { timeout: 10000 });
+    await userEvent.setup().click(screen.getByRole("button", { name: "Confirm" }));
+    const { spectrum } = onConfirm.mock.calls[0]?.[0].longitudinal ?? {};
+    expect(spectrum).toMatchObject({ sampleRate: 48000, fftSize: 32768, binWidth: 1.46484375 });
+    expect(spectrum.frequencies).toHaveLength(662);
+  }, 30000);
+
+  it("corrects from the recording's length when the browser reports no frame counts", async () => {
+    const browser = stubRecording({ stats: false });
+    plateDialog();
+    await record(browser, {
+      samples: plate((181.8 * 48000) / 44100),
+      seconds: 192000 / 44100,
+      delivered: 0,
+    });
+    await screen.findByRole("img", { name: /Frequency spectrum/ }, { timeout: 10000 });
+    expect(screen.getByText(correctedNote)).toBeTruthy();
+  }, 30000);
+
+  it("says the audio could not be processed when a recording holds no audio", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: new Float32Array(0), seconds: 4, delivered: 192000 });
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Error processing audio. Please try again.",
+    );
+  });
+
+  it("refuses a recording at a rate it cannot correct, without analysing it", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: plate(181.8), seconds: 5, delivered: 210000 });
+    expect((await screen.findByRole("alert")).textContent).toBe(mismatchBanner);
+    expect(screen.getByRole("button", { name: "Start Recording" })).toBeTruthy();
+    expect(screen.queryByRole("img", { name: /Frequency spectrum/ })).toBeNull();
+  });
+
+  it("refuses a recording that dropped too much audio", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: plate(181.8), seconds: 4, delivered: 188000, dropped: 4000 });
+    expect((await screen.findByRole("alert")).textContent).toBe(mismatchBanner);
+  });
+
+  it("clears the banner and analyses a loaded file without a rate check", async () => {
+    const browser = stubRecording();
+    plateDialog();
+    await record(browser, { samples: plate(181.8), seconds: 5, delivered: 210000 });
+    await screen.findByRole("alert");
+    await upload(plate(181.8));
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.queryByText(/^Corrected:/)).toBeNull();
+  }, 30000);
+
+  it("shows the correction note and the banner in French", async () => {
+    const browser = stubRecording();
+    plateDialog("fr");
+    const french = { start: "Démarrer l'enregistrement", stop: "Arrêter l'enregistrement" };
+    await record(browser, { samples: plate(181.8), seconds: 5, delivered: 210000 }, french);
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Cette entrée audio ne fournit pas le son à une fréquence que l'application peut corriger, les fréquences seraient donc fausses. Réglez l'interface sur 48 kHz dans les réglages audio de votre ordinateur (Configuration audio et MIDI sur Mac), ou enregistrez avec une autre application et chargez le fichier WAV ici.",
+    );
+    await record(
+      browser,
+      { samples: plate((181.8 * 48000) / 44100), seconds: 192000 / 44100, delivered: 192000 },
+      french,
+    );
+    await screen.findByRole("img", { name: /Spectre/ }, { timeout: 10000 });
+    expect(
+      screen.getByText(
+        /^Corrigé : cette entrée fonctionne à 44\s100 Hz, et non aux 48\s000 Hz annoncés par le navigateur\.$/,
+      ),
+    ).toBeTruthy();
+  }, 30000);
+});
+
+describe("TapToneDialog clipping warnings", () => {
+  const startRecording = async (inputLevel: number) => {
+    const browser = stubRecording({ inputLevel });
+    plateDialog();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Start Recording" }));
+    await screen.findByRole("button", { name: "Stop Recording" });
+    act(() => browser.nextFrame());
+    return screen.getByTestId("clip-indicator");
+  };
+
+  it("shows Clipping beside the oscilloscope when the input reaches full scale", async () => {
+    const indicator = await startRecording(1);
+    expect(indicator.textContent).toBe("Clipping");
+    expect(indicator.getAttribute("aria-live")).toBe("polite");
+  });
+
+  it("stays quiet below full scale", async () => {
+    expect((await startRecording(0.5)).textContent).toBe("");
+  });
+
+  it("counts the clipped taps of a loaded file", async () => {
+    stubBrowser();
+    plateDialog();
+    const clipped = plate(181.8).map((x, n) => (n === 24010 || n === 76810 ? 1 : x));
+    await upload(clipped);
+    expect(
+      screen.getByText("2 of 3 taps clipped. Tap more lightly or turn the input gain down."),
+    ).toBeTruthy();
+  }, 30000);
+});
+
+describe("TapToneDialog input check status", () => {
+  const accurate = {
+    checkedAt: "2026-11-07T14:00:00.000Z",
+    rate: "accurate" as const,
+    measuredRate: 48000,
+    level: "good" as const,
+  };
+
+  it("says an input has not been checked and offers to check it", async () => {
+    stubBrowser();
+    plateDialog();
+    expect(await screen.findByText("Not checked")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Check this input" })).toBeTruthy();
+  });
+
+  it("shows the selected input's last check", async () => {
+    stubBrowser();
+    rememberCheck(() => localStorage, { id: "default", label: null }, accurate);
+    plateDialog();
+    expect(await screen.findByText("Checked Nov 7, 2026: Accurate")).toBeTruthy();
+  });
+
+  it("opens the Microphone Check over the dialog and returns to the take unchanged", async () => {
+    stubBrowser();
+    plateDialog();
+    await upload(plate(181.8));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^Cross-grain/ }));
+    await user.click(screen.getByRole("button", { name: "Check this input" }));
+    expect(screen.getByRole("dialog", { name: "Microphone Check" })).toBeTruthy();
+    const check = screen.getByRole("dialog", { name: "Microphone Check" });
+    await user.click(within(check).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog", { name: "Microphone Check" })).toBeNull();
+    const takes = screen.getByRole("group", { name: "Plate mode" });
+    expect(within(takes).getByRole("button", { name: /^Longitudinal/ }).textContent).toContain(
+      "181.8",
+    );
+    expect(screen.getByRole("button", { name: "Start Recording" })).toBeTruthy();
+  }, 30000);
+
+  it("keeps the input chosen in the check and shows that check's result", async () => {
+    const browser = stubRecordingBrowser();
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "Date"] });
+    vi.setSystemTime(new Date("2026-11-07T14:00:00Z"));
+    plateDialog();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Check this input" }));
+    const check = screen.getByRole("dialog", { name: "Microphone Check" });
+    await user.selectOptions(await within(check).findByLabelText("Input device"), "builtin");
+    const finish = browser.prepare({
+      samples: checkSignal({ length: 5 * SAMPLE_RATE, tapAmplitude: 0.5 }),
+      seconds: 5,
+      delivered: 240000,
+    });
+    await user.click(within(check).getByRole("button", { name: "Start check" }));
+    finish();
+    act(() => vi.advanceTimersByTime(5000));
+    await within(check).findByText("Good level.");
+    await user.click(within(check).getByRole("button", { name: "Close" }));
+    await waitFor(() =>
+      expect((screen.getByLabelText("Input device") as HTMLSelectElement).value).toBe("builtin"),
+    );
+    expect(screen.getByText("Checked Nov 7, 2026: Accurate")).toBeTruthy();
   }, 30000);
 });
