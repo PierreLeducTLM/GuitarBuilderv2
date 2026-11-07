@@ -27,7 +27,9 @@ Production code is test-driven: write a failing test first, make it pass with th
   - equal levels only occur in silence, which is below the floor;
   - exactly −60.0 dB can't be produced in floating point;
   - the `?.` guard matters only when the band holds no point, which can't happen at 48 kHz.
-- [ ] 1.4 Export the three functions from `@gb/dsp`. Run Stryker on them (`rtk proxy`) and verify no surviving mutants, or justify each survivor in the task notes.
+- [x] 1.4 Export the three functions from `@gb/dsp`. Run Stryker on them (`rtk proxy`) and verify no surviving mutants, or justify each survivor in the task notes.
+
+  Notes: combined run over `src/capture/*.ts`: 124 killed, 7 survived (score 94.66%). All 7 are the equivalent mutants justified in 1.1 and 1.3.
 
 ## 2. Measuring and correcting captures (`apps/web`)
 
