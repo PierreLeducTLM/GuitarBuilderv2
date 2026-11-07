@@ -88,3 +88,44 @@ comment on function public.build_share_token(uuid) is
 
 revoke execute on function public.build_share_token(uuid) from public, anon;
 grant execute on function public.build_share_token(uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Variant applicability
+-- ---------------------------------------------------------------------------
+
+-- Whether a template step applies to a build's construction variant (build-sequence:
+-- Step Applicability by Variant). The same rule as stepApplies() in
+-- apps/web/src/lib/sequence/variant.ts: a BOBO-only step needs a BOBO neck, and a step
+-- of one guitar type is hidden only when the build is set to the other type. The key
+-- lists between the markers are checked against the app's step template by
+-- apps/web/src/lib/story/variantRulesSql.test.ts.
+create function public.step_applies(p_key text, p_guitar_type text, p_bobo boolean)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  -- step-variant-rules:begin
+  select not (
+    (not p_bobo and p_key = any (array[
+      'CLGlueBOBO1', 'CLCutBOBO', 'BOBOFitLoose', 'BOBONeckGroove', 'BOBOGlueLosen',
+      'MortiseHeelBolt', 'MakeBoltBar', 'RoutHeelMortise'
+    ]))
+    or (p_guitar_type is not distinct from 'classical' and p_key = any (array[
+      'SSCutBridge', 'SSShapeBridge', 'FabricateBridge', 'CutSideProfile2', 'DrillBridgePin',
+      'ShapeBridgeWings', 'ShapeTopBridge', 'CounterBore', 'PolishBridge', 'RadiusBottom',
+      'SSFitHeel', 'SSCutHeelTuners'
+    ]))
+    or (p_guitar_type is not distinct from 'steel_string' and p_key = any (array[
+      'CLGlueBOBO1', 'CLCutBOBO', 'FabricateCLBridge', 'DrillStringHoles', 'RoutChannels',
+      'GlueTieBlock', 'ShapeBridgeWings2', 'ProfilePolish', 'MachineCompensated',
+      'ShapeMarkString', 'CLFitHeadLaminate', 'CLDrillTuners'
+    ]))
+  );
+  -- step-variant-rules:end
+$$;
+
+comment on function public.step_applies(text, text, boolean) is
+  'Whether a template step applies to a construction variant (build-sequence).';
+
+revoke execute on function public.step_applies(text, text, boolean) from public, anon, authenticated;
