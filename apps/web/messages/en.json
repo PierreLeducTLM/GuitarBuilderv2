@@ -109,6 +109,24 @@
   "story": {
     "title": "Build Story",
     "loading": "Loading build story...",
+    "started": "Started {date}",
+    "progress": {
+      "title": "Build Progress",
+      "steps": "{completed} of {total} steps",
+      "percent": "{percent}% Complete"
+    },
+    "timeline": "Timeline",
+    "stepNumber": "Step {number}",
+    "empty": {
+      "justStarted": {
+        "title": "Build Just Started",
+        "message": "No steps have been completed yet. Check back soon to see the progress!"
+      },
+      "noDetails": {
+        "title": "No Details Shared Yet",
+        "message": "Work is in progress, but no specific steps have been documented with photos or notes yet."
+      }
+    },
     "notFound": {
       "title": "Story Not Found",
       "message": "Build not found or sharing has been disabled.",

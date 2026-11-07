@@ -109,6 +109,24 @@
   "story": {
     "title": "Histoire de la fabrication",
     "loading": "Chargement de l’histoire de la fabrication...",
+    "started": "Commencée le {date}",
+    "progress": {
+      "title": "Avancement de la fabrication",
+      "steps": "{completed, plural, one {# étape} other {# étapes}} sur {total}",
+      "percent": "{percent} % terminé"
+    },
+    "timeline": "Chronologie",
+    "stepNumber": "Étape {number}",
+    "empty": {
+      "justStarted": {
+        "title": "Fabrication tout juste commencée",
+        "message": "Aucune étape n’est encore terminée. Revenez bientôt pour voir l’avancement !"
+      },
+      "noDetails": {
+        "title": "Pas encore de détails partagés",
+        "message": "Le travail avance, mais aucune étape n’a encore été documentée avec des photos ou des notes."
+      }
+    },
     "notFound": {
       "title": "Histoire introuvable",
       "message": "Fabrication introuvable ou partage désactivé.",

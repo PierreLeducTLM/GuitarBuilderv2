@@ -1,4 +1,5 @@
 import { StoryNotFound } from "@/components/story/StoryNotFound";
+import { StoryScreen } from "@/components/story/StoryScreen";
 import { requestStory } from "@/lib/story/load";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,9 +11,5 @@ export default async function StoryPage({ params }: PageProps<"/story/[token]">)
     (await createClient()).rpc("get_build_story", { p_token: value }),
   );
   if (load.kind !== "story") return <StoryNotFound reason={load.kind} />;
-  return (
-    <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-6 px-4 py-10">
-      <h1 className="text-4xl font-semibold tracking-tight text-fg">{load.story.name}</h1>
-    </main>
-  );
+  return <StoryScreen token={token} initial={load.story} />;
 }
