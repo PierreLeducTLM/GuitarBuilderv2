@@ -48,7 +48,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
 ## 5. Share dialog (decision 5)
 
 - [x] 5.1 Add `lib/builds/sharing.ts` (`readShareToken`, `setSharing`, each returning `{ ok, token }`) over the browser client. Verify unit tests with a fake client for success, error and null-token results.
-- [ ] 5.2 Build `components/builds/ShareDialog.tsx` and enable "Share" in `BuildPageBar`. Verify component tests:
+- [x] 5.2 Build `components/builds/ShareDialog.tsx` and enable "Share" in `BuildPageBar`. Verify component tests:
   - the unshared state ("Only you can see this build", "Sharing is disabled", "Enable public access to generate a shareable link");
   - opening and closing makes no write;
   - the switch is disabled while loading and while toggling;

@@ -43,9 +43,7 @@ describe("setSharing", () => {
     const fake = fakeClient({ data: TOKEN, error: null });
     browser.client = fake.client;
     expect(await setSharing("build-1", true)).toEqual({ ok: true, token: TOKEN });
-    expect(fake.calls).toEqual([
-      ["set_build_sharing", { p_build_id: "build-1", p_enabled: true }],
-    ]);
+    expect(fake.calls).toEqual([["set_build_sharing", { p_build_id: "build-1", p_enabled: true }]]);
   });
 
   it("turns sharing off, leaving no token", async () => {

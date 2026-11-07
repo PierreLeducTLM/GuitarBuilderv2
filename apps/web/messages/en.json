@@ -144,6 +144,23 @@
       "boboNeck": "BOBO neck",
       "readOnly": "Read-only: this build belongs to another user."
     },
+    "share": {
+      "title": "Share Build Story",
+      "publicAccess": "Public Access",
+      "statusOn": "Anyone with the link can view",
+      "statusOff": "Only you can see this build",
+      "disabledTitle": "Sharing is disabled",
+      "disabledHint": "Enable public access to generate a shareable link",
+      "link": "Share Link",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "preview": "Preview Build Story",
+      "tip": "Share this link with your clients so they can follow along with your build progress. They'll see all completed steps, notes, and photos.",
+      "done": "Done",
+      "loadFailed": "Failed to load the sharing settings",
+      "enableFailed": "Failed to enable sharing",
+      "disableFailed": "Failed to disable sharing"
+    },
     "actions": {
       "more": "More actions",
       "changeConstruction": "Change construction"

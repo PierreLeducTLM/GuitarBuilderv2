@@ -144,6 +144,23 @@
       "boboNeck": "Manche BOBO",
       "readOnly": "Lecture seule : cette fabrication appartient à un autre utilisateur."
     },
+    "share": {
+      "title": "Partager l’histoire de la fabrication",
+      "publicAccess": "Accès public",
+      "statusOn": "Toute personne disposant du lien peut voir",
+      "statusOff": "Vous seul pouvez voir cette fabrication",
+      "disabledTitle": "Le partage est désactivé",
+      "disabledHint": "Activez l’accès public pour générer un lien de partage",
+      "link": "Lien de partage",
+      "copy": "Copier",
+      "copied": "Copié !",
+      "preview": "Aperçu de l’histoire de la fabrication",
+      "tip": "Partagez ce lien avec vos clients pour qu’ils suivent l’avancement de votre fabrication. Ils verront toutes les étapes terminées, les notes et les photos.",
+      "done": "Terminé",
+      "loadFailed": "Impossible de charger les paramètres de partage",
+      "enableFailed": "Impossible d’activer le partage",
+      "disableFailed": "Impossible de désactiver le partage"
+    },
     "actions": {
       "more": "Plus d’actions",
       "changeConstruction": "Modifier la construction"

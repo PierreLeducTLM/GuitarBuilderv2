@@ -9,7 +9,7 @@ import { BuildPageBar } from "./BuildPageBar";
 type Props = ComponentProps<typeof BuildPageBar>;
 
 function renderBar(props: Partial<Props> = {}, locale: TestLocale = "en") {
-  const handlers = { onDelete: vi.fn(), onChangeConstruction: vi.fn() };
+  const handlers = { onDelete: vi.fn(), onChangeConstruction: vi.fn(), onShare: vi.fn() };
   renderWithIntl(
     <BuildPageBar
       name="Build #1"
@@ -52,12 +52,11 @@ describe("BuildPageBar", () => {
     ]);
   });
 
-  it("keeps Share unavailable until build sharing exists", async () => {
-    renderBar();
+  it("opens sharing from the menu", async () => {
+    const handlers = renderBar();
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
-    expect(screen.getByRole("menuitem", { name: "Share" }).getAttribute("aria-disabled")).toBe(
-      "true",
-    );
+    await userEvent.click(screen.getByRole("menuitem", { name: "Share" }));
+    expect(handlers.onShare).toHaveBeenCalledOnce();
   });
 
   it("changes the construction and deletes the build from the menu", async () => {

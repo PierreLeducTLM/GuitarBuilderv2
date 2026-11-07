@@ -8,6 +8,7 @@ import { type ReactNode, useState } from "react";
 import { BuildPageBar } from "./BuildPageBar";
 import { useBuild } from "./BuildProvider";
 import { ConstructionDialog } from "./ConstructionDialog";
+import { ShareDialog } from "./ShareDialog";
 import { SummaryStrip } from "./SummaryStrip";
 import { useDeleteBuild } from "./useDeleteBuild";
 import { ViewSwitcher } from "./ViewSwitcher";
@@ -21,6 +22,7 @@ export function BuildFrame({ children }: { children: ReactNode }) {
   const onStep = pathname.startsWith(`/builds/${build.id}/steps/`);
   const { requestDelete, deleting } = useDeleteBuild(build.id);
   const [changingConstruction, setChangingConstruction] = useState(false);
+  const [sharing, setSharing] = useState(false);
   return (
     <div className="flex flex-col gap-6">
       <div className={cx("flex-col gap-6", onStep ? "hidden lg:flex" : "flex")}>
@@ -32,6 +34,13 @@ export function BuildFrame({ children }: { children: ReactNode }) {
           deleting={deleting}
           onDelete={requestDelete}
           onChangeConstruction={() => setChangingConstruction(true)}
+          onShare={() => setSharing(true)}
+        />
+        <ShareDialog
+          buildId={build.id}
+          buildName={build.name}
+          open={sharing}
+          onOpenChange={setSharing}
         />
         <ConstructionDialog
           buildId={build.id}
