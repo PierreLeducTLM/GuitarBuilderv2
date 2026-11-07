@@ -12,7 +12,7 @@ type Track = {
 export const stubRecordingBrowser = (
   options: {
     inputLevel?: number;
-    devices?: "named" | "unnamed" | "none";
+    devices?: "named" | "unnamed" | "none" | "hiddenUntilPermission";
     holdDecode?: boolean;
   } = {},
 ) => {
@@ -24,7 +24,11 @@ export const stubRecordingBrowser = (
     stats: { totalFrames: 0, deliveredFrames: 0 },
   };
   const stream = { getTracks: () => [track], getAudioTracks: () => [track] };
-  const getUserMedia = vi.fn(async (_constraints: unknown) => stream);
+  const permission = { granted: false };
+  const getUserMedia = vi.fn(async (_constraints: unknown) => {
+    permission.granted = true;
+    return stream;
+  });
   vi.stubGlobal(
     "OfflineAudioContext",
     class {
@@ -46,8 +50,11 @@ export const stubRecordingBrowser = (
     userAgent: "Mozilla/5.0 (Macintosh)",
     maxTouchPoints: 0,
     mediaDevices: {
-      enumerateDevices: async () =>
-        options.devices === "none"
+      enumerateDevices: async () => {
+        if (options.devices === "hiddenUntilPermission" && !permission.granted) {
+          return [{ deviceId: "", kind: "audioinput", label: "" }];
+        }
+        return options.devices === "none"
           ? []
           : [
               {
@@ -60,7 +67,8 @@ export const stubRecordingBrowser = (
                 kind: "audioinput",
                 label: options.devices === "unnamed" ? "" : "MacBook Pro Microphone",
               },
-            ],
+            ];
+      },
       getUserMedia,
       addEventListener: () => undefined,
       removeEventListener: () => undefined,

@@ -173,6 +173,14 @@ describe("Microphone Check", () => {
     expect(screen.getByRole("button", { name: "Check again" })).toBeTruthy();
   });
 
+  it("remembers the check under the input named once permission is granted", async () => {
+    const browser = stubRecordingBrowser({ devices: "hiddenUntilPermission" });
+    showCheck();
+    await runCheck(browser, { samples: fiveSeconds(0.5), delivered: 240000 });
+    expect(await screen.findByText("Last check: Nov 7, 2026. Accurate")).toBeTruthy();
+    expect(readCheck(() => localStorage, { id: "default", label: "FastTrack Pro" })).not.toBeNull();
+  });
+
   it("explains a rate it cannot correct", async () => {
     const browser = stubRecordingBrowser();
     showCheck();

@@ -10,7 +10,7 @@ import {
 import { Button, DialogFrame, SelectField } from "@gb/ui";
 import { LoaderCircle } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { readCheck, rememberCheck } from "@/lib/microphone-check/memory";
 import { decodeAudio, judgeRecording, prepareAudio } from "../tap-tone/audio";
 import { type Recording, useAudioInputs, useRecorder } from "../tap-tone/hooks";
@@ -49,6 +49,8 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
   const [error, setError] = useState<"microphone" | "processing" | null>(null);
   const input = inputs.inputs.find((candidate) => candidate.id === inputs.selected);
   const remembered = input ? readCheck(browserStorage, input) : null;
+  const latestInput = useRef(input);
+  latestInput.current = input;
 
   const decodeRecording = async (recording: Recording) => {
     setPhase("analyzing");
@@ -84,8 +86,9 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
       raw: audio.raw[0] ?? new Float32Array(0),
       filtered: audio.filtered[0] ?? new Float64Array(0),
     });
-    if (input) {
-      rememberCheck(browserStorage, input, {
+    const checked = latestInput.current;
+    if (checked) {
+      rememberCheck(browserStorage, checked, {
         checkedAt: new Date().toISOString(),
         rate: verdict.verdict,
         measuredRate: verdict.measuredRate,
