@@ -17,9 +17,16 @@ Production code is test-driven: write a failing test first, make it pass with th
   - E 5.0 s and D 4.95 s is Accurate.
 
   Notes: Stryker 62 killed; the only survivor is the equivalent tie-break noted in 1.1.
-- [ ] 1.3 Add `measureLevel` (noise floor and peak in dBFS, with the No tap heard / Clipping / Low / Good verdicts) and `measureTone` (centre 32768 samples, strongest refined point from 220 to 880 Hz, cents from 440 Hz, not heard below −60 dB). Verify unit tests with synthetic signals:
+- [x] 1.3 Add `measureLevel` (noise floor and peak in dBFS, with the No tap heard / Clipping / Low / Good verdicts) and `measureTone` (centre 32768 samples, strongest refined point from 220 to 880 Hz, cents from 440 Hz, not heard below −60 dB). Verify unit tests with synthetic signals:
   - a full-scale tap gives Clipping, a 0.03 peak gives Low, silence gives No tap heard;
   - a 440.2 Hz sine reads +1 cent, a 478.9 Hz sine reads about +147 cents, and a −70 dB sine is not heard.
+
+  Notes: `taps.ts` now exports `noiseFloor`, so the level check and tap detection share one definition. Stryker: level 28 killed, tone 33 killed. The survivors are equivalent:
+  - passing the raw signal to tap detection only affects clip rejection, while the level verdict counts every tap found;
+  - no bin falls exactly on 220 Hz or 880 Hz at 48 kHz (two band-edge comparisons);
+  - equal levels only occur in silence, which is below the floor;
+  - exactly −60.0 dB can't be produced in floating point;
+  - the `?.` guard matters only when the band holds no point, which can't happen at 48 kHz.
 - [ ] 1.4 Export the three functions from `@gb/dsp`. Run Stryker on them (`rtk proxy`) and verify no surviving mutants, or justify each survivor in the task notes.
 
 ## 2. Measuring and correcting captures (`apps/web`)
