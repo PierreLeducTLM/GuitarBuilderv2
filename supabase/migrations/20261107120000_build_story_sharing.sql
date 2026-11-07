@@ -129,3 +129,60 @@ comment on function public.step_applies(text, text, boolean) is
   'Whether a template step applies to a construction variant (build-sequence).';
 
 revoke execute on function public.step_applies(text, text, boolean) from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Story data
+-- ---------------------------------------------------------------------------
+
+-- The story of the build whose sharing is on and whose token is p_token, or null
+-- (build-story-sharing: Anonymous Story Access). Steps hidden by the build's variant are
+-- left out, an incomplete step is only its key and completion, and stored entries are
+-- read leniently, like update_build_step(): malformed fields read as empty. Nothing
+-- identifies the owner, the build or the token.
+create function public.get_build_story(p_token uuid)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+           'name', b.name,
+           'guitarType', b.guitar_type,
+           'boboNeck', b.bobo_neck,
+           'createdAt', b.created_at,
+           'steps', coalesce((
+             select jsonb_agg(
+                      case when s.completed
+                           then jsonb_build_object('key', s.key, 'completed', true,
+                                                   'notes', s.notes, 'photos', s.photos,
+                                                   'measurements', s.measurements)
+                           else jsonb_build_object('key', s.key, 'completed', false)
+                      end
+                      order by s.ord)
+               from (
+                 select e.ord,
+                        e.elem ->> 'key' as key,
+                        coalesce(case when jsonb_typeof(e.elem -> 'completed') = 'boolean'
+                                      then (e.elem -> 'completed')::boolean end, false) as completed,
+                        coalesce(case when jsonb_typeof(e.elem -> 'notes') = 'string'
+                                      then e.elem -> 'notes' end, '""'::jsonb) as notes,
+                        coalesce(case when jsonb_typeof(e.elem -> 'photos') = 'array'
+                                      then e.elem -> 'photos' end, '[]'::jsonb) as photos,
+                        coalesce(case when jsonb_typeof(e.elem -> 'measurements') = 'array'
+                                      then e.elem -> 'measurements' end, '[]'::jsonb) as measurements
+                   from jsonb_array_elements(b.sequence_state) with ordinality as e (elem, ord)
+                  where jsonb_typeof(e.elem -> 'key') = 'string'
+               ) s
+              where public.step_applies(s.key, b.guitar_type, b.bobo_neck)
+           ), '[]'::jsonb))
+    from public.builds b
+   where b.share_enabled
+     and b.share_token = p_token;
+$$;
+
+comment on function public.get_build_story(uuid) is
+  'The public story of the shared build that a token opens, or null (build-story-sharing).';
+
+revoke execute on function public.get_build_story(uuid) from public;
+grant execute on function public.get_build_story(uuid) to anon, authenticated;
