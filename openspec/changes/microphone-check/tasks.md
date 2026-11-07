@@ -70,7 +70,9 @@ Production code is test-driven: write a failing test first, make it pass with th
 
 ## 4. Microphone Check dialog
 
-- [ ] 4.1 Add remembered results in `localStorage` under `gb.microphoneChecks.v1`, validated by a schema on read, matched by device id with the label as fallback, and safe when storage throws (design D7). Verify unit tests: round trip, a corrupt value reads as empty, a throwing storage reads as empty and writes nothing, and a label match is used when the id differs.
+- [x] 4.1 Add remembered results in `localStorage` under `gb.microphoneChecks.v1`, validated by a schema on read, matched by device id with the label as fallback, and safe when storage throws (design D7). Verify unit tests: round trip, a corrupt value reads as empty, a throwing storage reads as empty and writes nothing, and a label match is used when the id differs.
+
+  Notes: the project has no schema library and the proposal adds no dependency, so the stored value is checked by a hand-written parser that narrows from `unknown` (`src/lib/microphone-check/memory.ts`). Invalid entries are dropped, and a corrupt value is replaced by the next check. Stryker: 123 killed, 3 equivalent survivors. In each one, the surrounding `catch` already turns the mutated path into "nothing remembered" (`?? "[]"`, the array guard, and `null` vs `undefined` for blocked storage).
 - [ ] 4.2 Build the `MicrophoneCheck` dialog: input selector sharing the page-wide choice, the remembered result, "Start check" recording 5.0 s with the oscilloscope and the tap instruction, then the Clock Result and Level Result (spec wording). Verify component tests with a fake recorder:
   - no permission prompt on opening;
   - the Accurate, Corrected and Mismatch texts;
