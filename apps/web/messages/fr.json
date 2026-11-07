@@ -506,7 +506,10 @@
       "elapsed": "{elapsed} s / {max} s",
       "analyzing": "Analyse...",
       "corrected": "Corrigé : cette entrée fonctionne à {trueRate, number} Hz, et non aux {statedRate, number} Hz annoncés par le navigateur.",
-      "clipping": "Saturation"
+      "clipping": "Saturation",
+      "notChecked": "Non vérifié",
+      "checked": "Vérifié le {date} : {verdict}",
+      "checkInput": "Vérifier cette entrée"
     },
     "actions": {
       "play": "Écouter",

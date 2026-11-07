@@ -12,6 +12,7 @@ import { Button, DialogFrame, IconButton, SelectField, Tooltip } from "@gb/ui";
 import { CircleHelp, LoaderCircle } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useId, useMemo, useReducer, useRef, useState } from "react";
+import { readCheck } from "@/lib/microphone-check/memory";
 import {
   canConfirm,
   createDialog,
@@ -28,6 +29,8 @@ import {
   selectedPeak,
   type TakeAudio,
 } from "@/lib/tap-tone/machine";
+import { MicrophoneCheck } from "../microphone-check/MicrophoneCheck";
+import { useCheckLabel } from "../microphone-check/useCheckLabel";
 import {
   type DecodedAudio,
   decodeAudio,
@@ -138,6 +141,10 @@ export function TapToneDialog(props: TapToneDialogProps) {
   const inputs = useAudioInputs();
   const playback = usePlayback();
   const clip = useClipFlag();
+  const [checking, setChecking] = useState(false);
+  const checkLabel = useCheckLabel();
+  const selectedInput = inputs.inputs.find((input) => input.id === inputs.selected);
+  const lastCheck = selectedInput ? readCheck(() => window.localStorage, selectedInput) : null;
 
   const analyseAudio = async (
     load: () => Promise<DecodedAudio>,
@@ -421,6 +428,21 @@ export function TapToneDialog(props: TapToneDialogProps) {
               ))}
             </SelectField>
           ) : null}
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-fg-dim">
+              {lastCheck ? t("capture.checked", checkLabel(lastCheck)) : t("capture.notChecked")}
+            </span>
+            <Button variant="ghost" onClick={() => setChecking(true)}>
+              {t("capture.checkInput")}
+            </Button>
+          </div>
+          <MicrophoneCheck
+            open={checking}
+            onClose={() => {
+              setChecking(false);
+              void inputs.refresh();
+            }}
+          />
           <div className="flex flex-wrap items-center gap-3">
             <Button
               onClick={async () => {

@@ -11,10 +11,11 @@ import { Button, DialogFrame, SelectField } from "@gb/ui";
 import { LoaderCircle } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
-import { type RememberedCheck, readCheck, rememberCheck } from "@/lib/microphone-check/memory";
+import { readCheck, rememberCheck } from "@/lib/microphone-check/memory";
 import { decodeAudio, judgeRecording, prepareAudio } from "../tap-tone/audio";
 import { type Recording, useAudioInputs, useRecorder } from "../tap-tone/hooks";
 import { Oscilloscope } from "../tap-tone/Oscilloscope";
+import { useCheckLabel } from "./useCheckLabel";
 import { TONE_SECONDS, useTestTone } from "./useTestTone";
 
 const CHECK_SECONDS = 5;
@@ -114,10 +115,7 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
   });
   const testTone = useTestTone();
 
-  const verdictLabel = (check: RememberedCheck) =>
-    check.rate === "corrected"
-      ? t("verdict.corrected", { rate: check.trueRate ?? check.measuredRate })
-      : t(`verdict.${check.rate}`);
+  const checkLabel = useCheckLabel();
 
   const signed = (value: number) => format.number(value, { signDisplay: "exceptZero" });
   const centsText = (key: "clock.cents" | "tone.heard" | "tone.off", value: number, extra = {}) => {
@@ -160,12 +158,7 @@ export function MicrophoneCheck({ open, onClose }: { open: boolean; onClose: () 
         </SelectField>
       ) : null}
       <p className="text-sm text-fg-dim">
-        {remembered
-          ? t("lastCheck", {
-              date: format.dateTime(new Date(remembered.checkedAt), "short"),
-              verdict: verdictLabel(remembered),
-            })
-          : t("notChecked")}
+        {remembered ? t("lastCheck", checkLabel(remembered)) : t("notChecked")}
       </p>
       {error ? (
         <p

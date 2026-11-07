@@ -5,6 +5,8 @@ import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { formats } from "@/i18n/config";
+import { rememberCheck } from "@/lib/microphone-check/memory";
+import { checkSignal, stubRecordingBrowser } from "@/test/recording-browser";
 import en from "../../../messages/en.json";
 import fr from "../../../messages/fr.json";
 import { forgetChosenInput } from "./hooks";
@@ -75,7 +77,10 @@ const stubBrowser = () => {
 
 afterEach(() => {
   forgetChosenInput();
+  localStorage.clear();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   decodes.length = 0;
 });
 
@@ -580,5 +585,71 @@ describe("TapToneDialog clipping warnings", () => {
     expect(
       screen.getByText("2 of 3 taps clipped. Tap more lightly or turn the input gain down."),
     ).toBeTruthy();
+  }, 30000);
+});
+
+describe("TapToneDialog input check status", () => {
+  const accurate = {
+    checkedAt: "2026-11-07T14:00:00.000Z",
+    rate: "accurate" as const,
+    measuredRate: 48000,
+    level: "good" as const,
+  };
+
+  it("says an input has not been checked and offers to check it", async () => {
+    stubBrowser();
+    plateDialog();
+    expect(await screen.findByText("Not checked")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Check this input" })).toBeTruthy();
+  });
+
+  it("shows the selected input's last check", async () => {
+    stubBrowser();
+    rememberCheck(() => localStorage, { id: "default", label: null }, accurate);
+    plateDialog();
+    expect(await screen.findByText("Checked Nov 7, 2026: Accurate")).toBeTruthy();
+  });
+
+  it("opens the Microphone Check over the dialog and returns to the take unchanged", async () => {
+    stubBrowser();
+    plateDialog();
+    await upload(plate(181.8));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /^Cross-grain/ }));
+    await user.click(screen.getByRole("button", { name: "Check this input" }));
+    expect(screen.getByRole("dialog", { name: "Microphone Check" })).toBeTruthy();
+    const check = screen.getByRole("dialog", { name: "Microphone Check" });
+    await user.click(within(check).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog", { name: "Microphone Check" })).toBeNull();
+    const takes = screen.getByRole("group", { name: "Plate mode" });
+    expect(within(takes).getByRole("button", { name: /^Longitudinal/ }).textContent).toContain(
+      "181.8",
+    );
+    expect(screen.getByRole("button", { name: "Start Recording" })).toBeTruthy();
+  }, 30000);
+
+  it("keeps the input chosen in the check and shows that check's result", async () => {
+    const browser = stubRecordingBrowser();
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "Date"] });
+    vi.setSystemTime(new Date("2026-11-07T14:00:00Z"));
+    plateDialog();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Check this input" }));
+    const check = screen.getByRole("dialog", { name: "Microphone Check" });
+    await user.selectOptions(await within(check).findByLabelText("Input device"), "builtin");
+    const finish = browser.prepare({
+      samples: checkSignal({ length: 5 * SAMPLE_RATE, tapAmplitude: 0.5 }),
+      seconds: 5,
+      delivered: 240000,
+    });
+    await user.click(within(check).getByRole("button", { name: "Start check" }));
+    finish();
+    act(() => vi.advanceTimersByTime(5000));
+    await within(check).findByText("Good level.");
+    await user.click(within(check).getByRole("button", { name: "Close" }));
+    await waitFor(() =>
+      expect((screen.getByLabelText("Input device") as HTMLSelectElement).value).toBe("builtin"),
+    );
+    expect(screen.getByText("Checked Nov 7, 2026: Accurate")).toBeTruthy();
   }, 30000);
 });

@@ -102,7 +102,9 @@ Production code is test-driven: write a failing test first, make it pass with th
 
 ## 5. Entry points
 
-- [ ] 5.1 Add the input check status ("Not checked" or "Checked <date>: <verdict>") and the "Check this input" link beside the Frequency Detector's selector. The link is disabled while recording, opens the Microphone Check over the dialog, and the status refreshes on close. Verify dialog tests: the status for unchecked and checked inputs, the take is unchanged after closing the check, and a choice made in the check shows in the selector.
+- [x] 5.1 Add the input check status ("Not checked" or "Checked <date>: <verdict>") and the "Check this input" link beside the Frequency Detector's selector. The link is disabled while recording, opens the Microphone Check over the dialog, and the status refreshes on close. Verify dialog tests: the status for unchecked and checked inputs, the take is unchanged after closing the check, and a choice made in the check shows in the selector.
+
+  Notes: the link appears only in the idle state, so it is never available while recording. The status is read from storage on each render, and closing the check refreshes the detector's input list, so a choice made in the check carries back. `useCheckLabel` formats a remembered check for both dialogs. Stryker: 26 killed, no survivors.
 - [ ] 5.2 Add the "Microphone" group with "Check microphone" to the You page. Verify page tests on wide and narrow viewports that it opens the Microphone Check.
 
 ## 6. Text and styling
