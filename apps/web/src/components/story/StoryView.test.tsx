@@ -81,10 +81,9 @@ describe("StoryView", () => {
     };
     renderWithIntl(<StoryView story={story({}, states)} />);
     const items = within(screen.getByRole("list", { name: "Timeline" })).getAllByRole("listitem");
-    expect(items.map((item) => within(item).getByRole("heading").textContent)).toEqual([
-      "Truss rod",
-      "Join panels",
-    ]);
+    expect(
+      items.map((item) => within(item).getByRole("heading", { level: 3 }).textContent),
+    ).toEqual(["Truss rod", "Join panels"]);
     expect(within(items[1] as HTMLElement).getByText("Step 2")).toBeTruthy();
     expect(screen.queryByText("Bend sides")).toBeNull();
     expect(screen.queryByRole("heading", { name: "No Details Shared Yet" })).toBeNull();

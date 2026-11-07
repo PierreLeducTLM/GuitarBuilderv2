@@ -84,7 +84,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
   - both empty states;
   - no owner name or email and no editing control;
   - a refresh that returns null switches to Story Not Found.
-- [ ] 7.4 Build `StoryStepCard`:
+- [x] 7.4 Build `StoryStepCard`:
   - teal check, label, "Step N";
   - "Notes" with line breaks kept;
   - "<n> Photo" / "<n> Photos" thumbnails;

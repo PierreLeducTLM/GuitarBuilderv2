@@ -117,6 +117,8 @@
     },
     "timeline": "Timeline",
     "stepNumber": "Step {number}",
+    "photoCount": "{count, plural, one {# Photo} other {# Photos}}",
+    "soundAnalysis": "Sound Analysis ({count})",
     "empty": {
       "justStarted": {
         "title": "Build Just Started",

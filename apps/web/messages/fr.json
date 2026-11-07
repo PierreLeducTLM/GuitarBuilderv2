@@ -117,6 +117,8 @@
     },
     "timeline": "Chronologie",
     "stepNumber": "Étape {number}",
+    "photoCount": "{count, plural, one {# photo} other {# photos}}",
+    "soundAnalysis": "Analyse sonore ({count})",
     "empty": {
       "justStarted": {
         "title": "Fabrication tout juste commencée",
