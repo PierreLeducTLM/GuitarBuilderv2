@@ -186,3 +186,70 @@ comment on function public.get_build_story(uuid) is
 
 revoke execute on function public.get_build_story(uuid) from public;
 grant execute on function public.get_build_story(uuid) to anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Live story updates
+-- ---------------------------------------------------------------------------
+
+-- Every change to a shared build, including turning its sharing off and deleting it,
+-- sends an empty "changed" broadcast on the private topic story:<token>, so open
+-- stories fetch themselves again (build-story-sharing: Live Story Updates). It runs as
+-- its owner: the caller may be a client, which cannot write broadcasts itself.
+create function public.signal_story_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform realtime.send('{}'::jsonb, 'changed', 'story:' || old.share_token::text, true);
+  return null;
+end;
+$$;
+
+revoke execute on function public.signal_story_change() from public, anon, authenticated, service_role;
+
+create trigger builds_signal_story_change
+  after update or delete on public.builds
+  for each row
+  when (old.share_enabled and old.share_token is not null)
+  execute function public.signal_story_change();
+
+-- Whether a Realtime topic is story:<token> for a build whose sharing is on.
+create function public.can_follow_story(p_topic text)
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if p_topic is null
+     or p_topic !~ '^story:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+    return false;
+  end if;
+  return exists (
+    select 1
+      from public.builds b
+     where b.share_enabled
+       and b.share_token = substr(p_topic, 7)::uuid
+  );
+end;
+$$;
+
+comment on function public.can_follow_story(text) is
+  'Whether a Realtime topic is the story topic of a build whose sharing is on.';
+
+revoke execute on function public.can_follow_story(text) from public;
+grant execute on function public.can_follow_story(text) to anon, authenticated;
+
+-- Story viewers, signed in or not, receive the broadcasts of the story they hold the
+-- token of, and nothing else. No policy lets a client send one.
+create policy "Story viewers receive their story's signals"
+  on realtime.messages
+  for select
+  to anon, authenticated
+  using (
+    realtime.messages.extension = 'broadcast'
+    and (select public.can_follow_story((select realtime.topic())))
+  );

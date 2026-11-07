@@ -33,7 +33,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
 
 ## 3. Database: live-update signal (decision 4)
 
-- [ ] 3.1 Write `16_story_realtime.test.sql`, then add the `after update or delete` trigger that sends `changed` on `story:<old token>`, `can_follow_story(topic)` and the `realtime.messages` select policy for `anon` and `authenticated`. Verify:
+- [x] 3.1 Write `16_story_realtime.test.sql`, then add the `after update or delete` trigger that sends `changed` on `story:<old token>`, `can_follow_story(topic)` and the `realtime.messages` select policy for `anon` and `authenticated`. Verify:
   - a step change on a shared build writes one message on its topic;
   - disabling writes one on the old topic;
   - deleting writes one;
