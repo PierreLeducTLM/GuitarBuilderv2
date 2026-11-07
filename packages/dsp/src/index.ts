@@ -4,6 +4,7 @@
  */
 export const DSP_PACKAGE_NAME = "@gb/dsp";
 export { applyBiquad, type BiquadCoefficients, biquadHighPass } from "./biquad.ts";
+export { type CaptureTiming, judgeRate, type RateVerdict } from "./capture/rate.ts";
 export { type ComplexSignal, fft, inverseFft, realSpectrum } from "./fft.ts";
 export { type SpectralQ, spectralQ } from "./tapTone/bandwidthQ.ts";
 export {

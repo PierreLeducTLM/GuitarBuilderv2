@@ -4,11 +4,13 @@ Production code is test-driven: write a failing test first, make it pass with th
 
 ## 1. Rate judge (`packages/dsp`)
 
-- [ ] 1.1 Add `judgeRate` with the frame-count rules (design D1). Verify unit tests for the spec's worked examples:
+- [x] 1.1 Add `judgeRate` with the frame-count rules (design D1). Verify unit tests for the spec's worked examples:
   - 220,500 frames in 5.0 s at 48 kHz is Corrected to 44,100 Hz, with r = 0.91875 and +147 cents;
   - 240,000 frames is Accurate;
   - 245,000 delivered with 5,000 dropped is Mismatch, reason "dropped";
   - 210,000 frames (42,000 Hz) is Mismatch, reason "rate".
+
+  Notes: the limits compare in Hz (|R - fs| <= 0.03 * fs, |R - S| <= 0.01 * S), the same formulas as the spec, because the ratio form misjudges the exact boundaries in floating point (|46560/48000 - 1| reads 0.030000000000000027). Stryker: 43 killed, 1 survivor, which is equivalent: the nearest-rate tie-break (`<` vs `<=`) only matters halfway between two standard rates, which is always a Mismatch that exposes no rate.
 - [ ] 1.2 Add the decoded-length fallback. Verify unit tests:
   - E 6.0 s and D 5.51 s is Corrected to 44,100 Hz (R = 44,080 Hz);
   - E 1.0 s and D 0.85 s is Accurate thanks to the 0.2 s floor;
