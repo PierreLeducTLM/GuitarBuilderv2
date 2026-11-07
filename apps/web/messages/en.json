@@ -30,7 +30,9 @@
     "preferences": "Preferences",
     "language": "Language",
     "theme": "Theme",
-    "administration": "Administration"
+    "administration": "Administration",
+    "microphone": "Microphone",
+    "checkMicrophone": "Check microphone"
   },
   "shell": {
     "signedInAs": "Signed in as",
