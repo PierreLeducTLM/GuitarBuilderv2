@@ -6,10 +6,11 @@ The application shell is the frame every signed-in user works in. It provides th
 ## Requirements
 
 ### Requirement: Authenticated Access Gate
-The system SHALL require a signed-in session for every URL except the public build-story URL, and SHALL show the sign-in screen (see user-auth) instead of the shell to a visitor without a session. The requested URL is kept while the visitor signs in; once signed in, the shell renders that URL, subject to the redirect and admin-only rules of this capability.
+The system SHALL require a signed-in session for every URL except the public build-story URL, and SHALL show the sign-in screen (see user-auth) instead of the shell to a visitor without a session. The requested URL is kept while the visitor signs in; once signed in, the shell renders that URL, subject to the redirect and admin-only rules of this capability. When a shared account is configured (see user-auth), the system SHALL instead sign such a visitor in to it on the server.
 
 #### Scenario: Visitor without a session opens a section URL
 - **GIVEN** no signed-in session exists in the browser
+- **AND** no shared account is configured
 - **WHEN** the visitor opens `/builds`
 - **THEN** the sign-in screen is shown
 - **AND** no navigation, header or section content of the shell is shown
@@ -18,6 +19,24 @@ The system SHALL require a signed-in session for every URL except the public bui
 - **GIVEN** the visitor opened `/chat` and was shown the sign-in screen
 - **WHEN** the visitor signs in successfully
 - **THEN** the Chat section is displayed at `/chat`
+
+#### Scenario: Shared account configured
+- **GIVEN** a shared account is configured
+- **AND** no signed-in session exists in the browser
+- **WHEN** the visitor opens `/builds`
+- **THEN** the visitor is signed in to the shared account
+- **AND** the Builds section is shown with the shared account's builds
+
+#### Scenario: Sign-in URL with a shared account
+- **GIVEN** a shared account is configured
+- **WHEN** the visitor opens `/sign-in`
+- **THEN** the sign-in screen is never shown, and the visitor is sent on to the requested URL, or to the Builds section at `/builds` when none was kept
+
+#### Scenario: Shared account sign-in fails
+- **GIVEN** a shared account is configured
+- **AND** signing in to it fails
+- **WHEN** a visitor without a session opens `/builds`
+- **THEN** the sign-in screen is shown
 
 ### Requirement: Session Restore Loading State
 The system SHALL show a full-screen loading indicator ("Loading...") while it determines on page load whether a stored session exists, instead of showing either the sign-in screen or the shell.
@@ -174,7 +193,7 @@ The system SHALL make the language switcher and the theme selector reachable on 
 - **THEN** the You page shows the EN/FR switcher and the theme selector
 
 ### Requirement: Sign Out From the Shell
-The system SHALL offer a "Sign Out" action on the You page and, on success, SHALL end the session and show the sign-in screen. If signing out fails, the system SHALL show the message "Failed to sign out" and the user remains signed in.
+The system SHALL offer a "Sign Out" action on the You page and, on success, SHALL end the session and show the sign-in screen. If signing out fails, the system SHALL show the message "Failed to sign out" and the user remains signed in. While a shared account is configured, the system SHALL NOT offer sign-out.
 
 #### Scenario: Successful sign-out
 - **WHEN** the user selects "Sign Out" on the You page
@@ -186,6 +205,11 @@ The system SHALL offer a "Sign Out" action on the You page and, on success, SHAL
 - **WHEN** the user selects "Sign Out"
 - **THEN** the message "Failed to sign out" is shown
 - **AND** the user stays in the shell
+
+#### Scenario: No sign-out with a shared account
+- **GIVEN** a shared account is configured
+- **WHEN** the user opens the You page
+- **THEN** no "Sign Out" action is shown
 
 ### Requirement: Theme Selection and Persistence
 The system SHALL let the user choose among Light, System and Dark themes with a three-option control (tooltips "Light Mode", "System Theme", "Dark Mode") that highlights the active option, apply the choice immediately, and persist it in the browser (per browser, not per account). When nothing is stored the theme is System.
