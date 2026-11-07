@@ -124,7 +124,7 @@ Every task is test-first: write the failing pgTAP, unit, component or Playwright
   - after navigating away and back, the dialog shows the same link.
 
   Verify `pnpm test:e2e` passes.
-- [ ] 9.2 Manual check on a local Supabase stack (scratch workdir with its own ports):
+- [x] 9.2 Manual check on a local Supabase stack (scratch workdir with its own ports):
   - with updates on in one browser, document a step from another; the story refreshes and shows "Update: <name>";
   - disable sharing; the open story turns into Story Not Found;
   - repeat with Android Chrome device emulation, or a phone on the LAN if available.
