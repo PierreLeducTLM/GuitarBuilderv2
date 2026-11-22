@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "dependencies": {
+    "software-factory": "git+https://github.com/PierreLeducTLM/software-factory.git#v0.2.3"
+  }
+}

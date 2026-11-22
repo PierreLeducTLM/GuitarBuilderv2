@@ -1,0 +1,75 @@
+schema: 1
+engine: 0.2.3
+main_branch: main
+states:
+  to_refine: Backlog
+  spec_review: Spec Review
+  ready_for_dev: Todo
+  in_development: In Progress
+  in_review: In Review
+  blocked: Blocked
+  done: Done
+labels:
+  auto: factory-auto
+  no_automerge: factory:no-automerge
+checks:
+  - id: test
+    station: quality
+    kind: script
+    source: local
+    blocking: true
+    timeout: 10m
+    run: pnpm run test
+  - id: lint
+    station: quality
+    kind: script
+    source: local
+    blocking: true
+    timeout: 5m
+    run: pnpm run lint
+  - id: typecheck
+    station: quality
+    kind: script
+    source: local
+    blocking: true
+    timeout: 5m
+    run: pnpm run typecheck
+  - id: build
+    station: quality
+    kind: script
+    source: local
+    blocking: true
+    timeout: 10m
+    run: pnpm run build
+  - id: test-e2e
+    station: review
+    kind: script
+    source: local
+    blocking: true
+    timeout: 15m
+    run: pnpm run test:e2e
+  - id: check-build-and-end-to-end-tests
+    station: review
+    kind: script
+    source: ci
+    blocking: true
+    timeout: 15m
+    job: Check, build and end-to-end tests
+  - id: database-policy-tests-pgtap
+    station: quality
+    kind: script
+    source: ci
+    blocking: true
+    timeout: 15m
+    job: Database policy tests (pgTAP)
+risk:
+  low:
+    merge: auto
+  medium:
+    merge: human
+    reviewers: 1
+  high:
+    merge: human
+    reviewers: 2
+  sensitive_paths: []
+  shadow: true
