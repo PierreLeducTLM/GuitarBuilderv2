@@ -1,0 +1,11 @@
+repository: PierreLeducTLM/GuitarBuilderv2
+ticket_providers:
+  - kind: linear
+    team: PIE
+    token_env: LINEAR_API_KEY
+source_control:
+  kind: github
+  repo: PierreLeducTLM/GuitarBuilderv2
+  token_env: GITHUB_TOKEN
+agent_runtime:
+  kind: orca
