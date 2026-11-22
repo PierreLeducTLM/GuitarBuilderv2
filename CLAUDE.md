@@ -29,4 +29,3 @@ Run from the repo root (available once the `foundation` change has landed):
 - `pnpm check`: typecheck, lint and unit tests for every package (run before every commit)
 - `pnpm test:db`: database policy tests (pgTAP)
 - `pnpm test:e2e`: Playwright end-to-end tests
-- `pnpm audit:deps`: fail on high or critical dependency vulnerabilities

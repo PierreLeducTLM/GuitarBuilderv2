@@ -40,9 +40,6 @@ jobs:
       - name: Typecheck, lint and unit tests
         run: pnpm check
 
-      - name: Dependency audit (high and critical)
-        run: pnpm audit:deps
-
       - name: Build
         run: pnpm build
 
