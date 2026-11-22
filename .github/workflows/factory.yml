@@ -1,0 +1,39 @@
+name: Factory
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: write
+  pull-requests: write
+env:
+  LINEAR_API_KEY: ${{ secrets.FACTORY_LINEAR_API_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  record-merge:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --global software-factory@0.1.0
+      - run: factory record-merge --commit ${{ github.sha }}
+  revert:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --global software-factory@0.1.0
+      - run: factory revert --commit ${{ github.event.workflow_run.head_sha }}
